@@ -1,0 +1,29 @@
+# Ambiente Virtual Python
+venv/
+env/
+.env
+*.env
+
+# Banco de Dados local (SQLite)
+*.db
+*.sqlite3
+instance/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Logs
+*.log
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db

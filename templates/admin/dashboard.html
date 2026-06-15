@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel de Controle - CJC Sementes{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 40px 0;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 30px;">
+        <h2 style="font-size: 1.8rem; color: var(--grafite-titanio);">Painel de Controle Administrativo</h2>
+        <span style="font-size: 0.9rem; color: var(--text-muted);">Bem-vindo, <strong>{{ current_user.username }}</strong></span>
+    </div>
+
+    <!-- Estatísticas Principais -->
+    <div class="admin-dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-card-info">
+                <h3>R$ {{ total_vendas|round(2)|string|replace('.', ',') }}</h3>
+                <p>Faturamento Bruto</p>
+            </div>
+            <div class="stat-card-icon vendas">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-info">
+                <h3>{{ num_pedidos }}</h3>
+                <p>Pedidos Registrados</p>
+            </div>
+            <div class="stat-card-icon pedidos">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-info">
+                <h3>{{ pedidos_pendentes }}</h3>
+                <p>Aguardando Pagamento</p>
+            </div>
+            <div class="stat-card-icon pendentes">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas de Estoque Baixo -->
+    {% if estoque_baixo %}
+        <div class="admin-section-card" style="border-left: 5px solid #E65100; background-color: #FFF3E0; padding: 20px;">
+            <h4 style="color: #E65100; margin-bottom: 10px;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Sementes com Estoque Crítico (< 200 unidades)
+            </h4>
+            <ul style="list-style: none; padding-left: 0; font-size: 0.9rem;">
+                {% for prod in estoque_baixo %}
+                    <li style="margin-bottom: 5px;">
+                        <i class="fa-solid fa-seedling"></i> <strong>{{ prod.nome }}</strong>: Apenas <strong>{{ prod.estoque|int }} {{ prod.unidade.upper() }}</strong> restantes.
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- Seção de Gestão de Pedidos -->
+    <div class="admin-section-card">
+        <h3 style="color: var(--grafite-titanio); font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <i class="fa-solid fa-list-check" style="color: var(--verde-safra); margin-right: 8px;"></i> Gestão de Pedidos
+        </h3>
+        
+        {% if pedidos %}
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Cliente</th>
+                            <th>Atividade</th>
+                            <th>Data</th>
+                            <th>Total</th>
+                            <th>Status Atual</th>
+                            <th style="width: 220px; text-align: center;">Alterar Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ped in pedidos %}
+                            <tr>
+                                <td><strong>#{{ ped.id }}</strong></td>
+                                <td>
+                                    <strong>{{ ped.cliente.nome }}</strong><br>
+                                    <small style="color: var(--text-muted);">{{ ped.cliente.email }} | {{ ped.cliente.telefone }}</small>
+                                </td>
+                                <td><span style="font-size: 0.8rem; background: var(--bg-main); padding: 2px 6px; border-radius: 4px;">{{ ped.cliente.atividade }}</span></td>
+                                <td>{{ ped.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td style="font-weight: bold; color: var(--laranja-brasa);">R$ {{ ped.total|round(2)|string|replace('.', ',') }}</td>
+                                <td>
+                                    <span class="status-badge {{ ped.status }}">{{ ped.status }}</span>
+                                </td>
+                                <td>
+                                    <!-- Ação de Atualizar Status -->
+                                    <form action="{{ url_for('admin_update_order_status', pedido_id=ped.id) }}" method="POST" style="display: flex; gap: 5px;">
+                                        <select name="status" class="form-input" style="padding: 5px; font-size: 0.8rem; height: 32px;">
+                                            <option value="Pendente" {% if ped.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                                            <option value="Pago" {% if ped.status == 'Pago' %}selected{% endif %}>Pago</option>
+                                            <option value="Enviado" {% if ped.status == 'Enviado' %}selected{% endif %}>Enviado</option>
+                                            <option value="Entregue" {% if ped.status == 'Entregue' %}selected{% endif %}>Entregue</option>
+                                            <option value="Cancelado" {% if ped.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; height: 32px;">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); padding: 20px 0; text-align: center;">Nenhum pedido realizado no sistema até o momento.</p>
+        {% endif %}
+    </div>
+
+    <!-- Seção de Gestão de Estoque -->
+    <div class="admin-section-card">
+        <h3 style="color: var(--grafite-titanio); font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <i class="fa-solid fa-boxes-stacked" style="color: var(--verde-safra); margin-right: 8px;"></i> Atualização e Gestão de Estoque
+        </h3>
+        
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Cód.</th>
+                        <th>Nome da Semente</th>
+                        <th>Categoria</th>
+                        <th>Preço / Unid.</th>
+                        <th style="width: 150px; text-align: center;">Estoque Atual</th>
+                        <th style="width: 250px; text-align: center;">Atualizar Estoque</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in produtos %}
+                        <tr>
+                            <td>#{{ prod.id }}</td>
+                            <td><strong>{{ prod.nome }}</strong></td>
+                            <td><span style="font-size: 0.75rem; background-color: var(--bg-main); padding: 4px 8px; border-radius: 4px;">{{ prod.categoria }}</span></td>
+                            <td>R$ {{ prod.preco_kg|round(2)|string|replace('.', ',') }} /{{ prod.unidade }}</td>
+                            <td style="text-align: center; font-weight: bold; color: {% if prod.estoque < 200 %}#E65100{% else %}var(--verde-safra){% endif %};">
+                                {{ prod.estoque|int }} {{ prod.unidade.upper() }}
+                            </td>
+                            <td>
+                                <!-- Ação de Atualizar Estoque -->
+                                <form action="{{ url_for('admin_update_stock', produto_id=prod.id) }}" method="POST" style="display: flex; gap: 8px; justify-content: center;">
+                                    <input type="number" name="estoque" class="form-input" value="{{ prod.estoque|int }}" min="0" style="padding: 5px; font-size: 0.85rem; width: 100px; height: 32px; text-align: center;">
+                                    <button type="submit" class="btn btn-primary" style="padding: 5px 12px; font-size: 0.8rem; height: 32px; border-radius: var(--radius-sm);">
+                                        Salvar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+{% endblock %}

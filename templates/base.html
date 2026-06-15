@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CJC Sementes - Venda direta de sementes de cobertura de alta performance. Adubação verde, pastagem e recuperação de solos em Pato Branco - PR.">
+    <title>{% block title %}CJC Sementes - Soluções em Cobertura Vegetal{% endblock %}</title>
+    
+    <!-- Custom Style CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- FontAwesome para Ícones Premium -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header Principal -->
+    <header class="main-header">
+        <div class="header-top">
+            <div class="container">
+                <span><i class="fa-solid fa-location-dot"></i> Bom Retiro, Pato Branco - PR</span>
+                <span><i class="fa-solid fa-envelope"></i> cjcsementes@gmail.com</span>
+                <span><i class="fa-brands fa-whatsapp"></i> <a href="https://wa.me/5546999062375" target="_blank">(46) 9 9906-2375</a></span>
+            </div>
+        </div>
+        
+        <div class="container header-main">
+            <!-- Logotipo CJC -->
+            <div class="logo-container">
+                <a href="{{ url_for('index') }}">
+                    <span class="logo-main">CJC <span style="color: var(--laranja-brasa);">SEMENTES</span></span>
+                    <span class="logo-sub">J Cassol Sementes</span>
+                </a>
+            </div>
+            
+            <!-- Links de Navegação -->
+            <nav>
+                <ul class="nav-links">
+                    <li class="{% if request.path == '/' %}active{% endif %}"><a href="{{ url_for('index') }}">Catálogo</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=Adubação Verde / Leguminosas">Adubação Verde</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=Gramíneas / Forrageiras">Gramíneas</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=Mixes e Customizados">Mix Customizado</a></li>
+                </ul>
+            </nav>
+            
+            <!-- Ações Rápidas (Carrinho e Admin) -->
+            <div class="header-actions">
+                <a href="{{ url_for('cart') }}" class="cart-icon-container" title="Visualizar Carrinho">
+                    <i class="fa-solid fa-basket-shopping" style="font-size: 1.2rem;"></i>
+                    {% if cart_count > 0 %}
+                        <span class="cart-badge">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+                
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
+                        <i class="fa-solid fa-chart-line"></i> Painel Admin
+                    </a>
+                    <a href="{{ url_for('admin_logout') }}" style="font-size: 0.9rem; color: #FFEBEE;" title="Sair do Painel">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('admin_login') }}" style="font-size: 1rem; opacity: 0.7; color: white;" title="Área do Administrador">
+                        <i class="fa-solid fa-lock"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Alertas Flash Dinâmicos -->
+    <div class="container alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="alert-close">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Conteúdo Principal Dinâmico -->
+    <main style="min-height: 70vh;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Rodapé Institucional -->
+    <footer class="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-about">
+                <h3>CJC SEMENTES</h3>
+                <p><strong>J CASSOL SEMENTES LTDA</strong></p>
+                <p>Especializada em sementes de cobertura de alto desempenho físico e fisiológico, focada na sustentabilidade e no aumento de produtividade das lavouras brasileiras.</p>
+                <p style="font-size: 0.8rem; color: var(--laranja-brasa); margin-top: 15px;">
+                    CNPJ: 60.626.704/0001-04
+                </p>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="{{ url_for('index') }}"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i> Início / Catálogo</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=Adubação Verde / Leguminosas"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i> Adubação Verde</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=Gramíneas / Forrageiras"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i> Gramíneas</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=Mixes e Customizados"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i> Mix Customizado</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h4>Contato & Endereço</h4>
+                <p><i class="fa-solid fa-phone"></i> (46) 9 9906-2375 (WhatsApp)</p>
+                <p><i class="fa-solid fa-envelope"></i> cjcsementes@gmail.com</p>
+                <p><i class="fa-solid fa-location-dot"></i> Rua Principal, Linha São Bráz, Zona Rural, S/Nº, Lote 01, Bom Retiro, Pato Branco – PR, CEP: 85.513-89</p>
+            </div>
+        </div>
+        
+        <div class="container footer-bottom">
+            <p>&copy; 2026 J CASSOL SEMENTES LTDA. Todos os direitos reservados. Desenvolvido com Flask e Alta Performance Agrícola.</p>
+        </div>
+    </footer>
+
+    <!-- Custom Scripts JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

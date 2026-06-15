@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ produto.nome }} - CJC Sementes{% endblock %}
+
+{% block content %}
+<section class="product-detail-section container">
+    <!-- Botão de Voltar -->
+    <a href="{{ url_for('index') }}" style="color: var(--verde-safra); font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px;">
+        <i class="fa-solid fa-arrow-left"></i> Voltar ao Catálogo
+    </a>
+    
+    <div class="product-detail-grid">
+        <!-- Lado Esquerdo: Imagem/SVG -->
+        <div class="product-detail-image-box">
+            <span class="product-card-badge" style="position: absolute; top: 20px; left: 20px; font-size: 0.8rem; padding: 6px 12px;">
+                {{ produto.categoria }}
+            </span>
+            
+            {% if 'Milho' in produto.nome %}
+                <svg viewBox="0 0 64 64" width="200" height="200">
+                    <path d="M32,4 C22,4 18,18 18,34 C18,46 24,54 32,54 C40,54 46,46 46,34 C46,18 42,4 32,4 Z" fill="#FBC02D"/>
+                    <path d="M26,16 A2,2 0 1,0 26,20 A2,2 0 1,0 26,16 Z M32,16 A2,2 0 1,0 32,20 A2,2 0 1,0 32,16 Z M38,16 A2,2 0 1,0 38,20 A2,2 0 1,0 38,16 Z" fill="#F57F17"/>
+                    <path d="M26,24 A2,2 0 1,0 26,28 A2,2 0 1,0 26,24 Z M32,24 A2,2 0 1,0 32,28 A2,2 0 1,0 32,24 Z M38,24 A2,2 0 1,0 38,28 A2,2 0 1,0 38,24 Z" fill="#F57F17"/>
+                    <path d="M26,32 A2,2 0 1,0 26,36 A2,2 0 1,0 26,32 Z M32,32 A2,2 0 1,0 32,36 A2,2 0 1,0 32,16 Z M38,32 A2,2 0 1,0 38,36 A2,2 0 1,0 38,32 Z" fill="#F57F17"/>
+                    <path d="M26,40 A2,2 0 1,0 26,44 A2,2 0 1,0 26,40 Z M32,40 A2,2 0 1,0 32,44 A2,2 0 1,0 32,44 Z M38,40 A2,2 0 1,0 38,44 A2,2 0 1,0 38,40 Z" fill="#F57F17"/>
+                    <path d="M12,48 C16,40 20,40 22,54 C16,56 12,52 12,48 Z" fill="#4CAF50"/>
+                    <path d="M52,48 C48,40 44,40 42,54 C48,56 52,52 52,48 Z" fill="#4CAF50"/>
+                </svg>
+            {% elif 'Girassol' in produto.nome %}
+                <svg viewBox="0 0 64 64" width="200" height="200">
+                    <circle cx="32" cy="32" r="14" fill="#3E2723"/>
+                    <path d="M32,4 C33,12 31,12 32,4 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M32,52 C33,60 31,60 32,52 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M4,32 C12,33 12,31 4,32 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M52,32 C60,33 60,31 52,32 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M12,12 C18,18 18,16 12,12 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M48,48 C54,54 54,52 48,48 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M12,48 C18,42 18,44 12,48 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M48,12 C54,18 54,16 48,12 Z" stroke="#FFEB3B" stroke-width="8" stroke-linecap="round"/>
+                </svg>
+            {% elif 'Gramíneas' in produto.categoria %}
+                <svg viewBox="0 0 64 64" width="200" height="200">
+                    <path d="M22,58 C22,40 28,24 38,10 C34,26 30,42 30,58 Z" fill="#81C784"/>
+                    <path d="M42,58 C42,44 45,34 50,22 C46,36 44,46 44,58 Z" fill="#4CAF50"/>
+                    <path d="M14,58 C18,48 22,44 26,32 C20,46 18,52 16,58 Z" fill="#C8E6C9"/>
+                </svg>
+            {% elif 'Mix' in produto.nome %}
+                <svg viewBox="0 0 64 64" width="200" height="200">
+                    <circle cx="24" cy="36" r="14" fill="rgba(76, 175, 80, 0.4)"/>
+                    <circle cx="40" cy="36" r="14" fill="rgba(204, 85, 0, 0.4)"/>
+                    <circle cx="32" cy="22" r="14" fill="rgba(245, 127, 23, 0.4)"/>
+                </svg>
+            {% else %}
+                <svg viewBox="0 0 64 64" width="200" height="200">
+                    <path d="M32,8 C22,18 20,32 32,56 C44,32 42,18 32,8 Z" fill="#66BB6A"/>
+                    <path d="M32,24 C28,30 28,36 32,46 C36,36 36,30 32,24 Z" fill="#2E7D32"/>
+                </svg>
+            {% endif %}
+        </div>
+        
+        <!-- Lado Direito: Informações -->
+        <div class="product-detail-info">
+            <span class="product-detail-cat">{{ produto.categoria }}</span>
+            <h1 class="product-detail-title">{{ produto.nome }}</h1>
+            
+            <div class="product-detail-price-box">
+                <span class="price-label">Preço por {{ produto.unidade.upper() }}</span>
+                <div class="product-detail-price" id="product-base-price" data-price="{{ produto.preco_kg }}">
+                    R$ {{ produto.preco_kg|round(2)|string|replace('.', ',') }}
+                    <span style="font-size: 1.2rem; color: var(--text-dark);">/{{ produto.unidade }}</span>
+                </div>
+                
+                <span class="product-detail-stock-badge">
+                    <i class="fa-solid fa-boxes-stacked"></i> Estoque Disponível: {{ produto.estoque|int }} {{ produto.unidade.upper() }}
+                </span>
+            </div>
+            
+            <p class="product-detail-desc">{{ produto.descricao }}</p>
+            
+            <!-- Tabela Técnica Auxiliar -->
+            <div class="product-detail-technical">
+                <h4><i class="fa-solid fa-circle-info"></i> Ficha Técnica e Recomendações</h4>
+                <table>
+                    <tr>
+                        <td>Profundidade Radicular</td>
+                        <td>
+                            {% if 'Crotalária' in produto.nome or 'Girassol' in produto.nome %}
+                                Profunda (até 2 metros, excelente descompactadora)
+                            {% elif 'Gramíneas' in produto.categoria or 'Milheto' in produto.nome %}
+                                Média/Fasciculada (reciclagem de nutrientes superficiais)
+                            {% else %}
+                                Média (melhoria estrutural geral)
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Fixação de Nitrogênio (FBN)</td>
+                        <td>
+                            {% if 'Adubação Verde' in produto.categoria %}
+                                Alta (Simbiose ativa com rizóbios)
+                            {% else %}
+                                Não fixa (Excelente recicladora e produtora de biomassa)
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Produção de Biomassa</td>
+                        <td>
+                            {% if 'Milheto' in produto.nome or 'Sorgo' in produto.nome or 'Feijão-de-Porco' in produto.nome %}
+                                Elevada (Mais de 10 a 15 toneladas de matéria seca/ha)
+                            {% else %}
+                                Moderada a Alta (Excelente cobertura protetora)
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Clima Recomendado</td>
+                        <td>Variável (Ótima tolerância a estresse hídrico)</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Compra e Quantidade -->
+            <form action="{{ url_for('add_to_cart', produto_id=produto.id) }}" method="POST" style="margin-top: auto;">
+                <div style="margin-bottom: 15px; font-weight: bold; font-size: 1.1rem;">
+                    Subtotal Estimado: <span id="product-total-price" style="color: var(--laranja-brasa);">R$ {{ produto.preco_kg|round(2)|string|replace('.', ',') }}</span>
+                </div>
+                
+                <div class="qty-buy-box">
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" id="qty-minus">-</button>
+                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="1" min="1" max="{{ produto.estoque|int }}">
+                        <button type="button" class="qty-btn" id="qty-plus">+</button>
+                    </div>
+                    
+                    <span style="font-weight: 600; color: var(--text-muted);">
+                        {{ produto.unidade.upper() }}
+                    </span>
+                    
+                    <button type="submit" class="btn btn-primary" style="flex: 1; height: 40px; border-radius: var(--radius-sm);">
+                        <i class="fa-solid fa-cart-plus" style="margin-right: 8px;"></i> Adicionar ao Carrinho
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Produtos Recomendados -->
+    {% if recomendados %}
+        <div style="margin-top: 80px;">
+            <h3 class="section-title" style="margin-bottom: 30px;">Sementes Semelhantes</h3>
+            <div class="products-grid">
+                {% for rec in recomendados %}
+                    <div class="product-card">
+                        <div class="product-card-img-wrapper" style="height: 140px;">
+                            {% if 'Gramíneas' in rec.categoria %}
+                                <svg class="product-card-img" viewBox="0 0 64 64" width="50" height="50">
+                                    <path d="M22,58 C22,40 28,24 38,10 C34,26 30,42 30,58 Z" fill="#81C784"/>
+                                    <path d="M42,58 C42,44 45,34 50,22 C46,36 44,46 44,58 Z" fill="#4CAF50"/>
+                                </svg>
+                            {% else %}
+                                <svg class="product-card-img" viewBox="0 0 64 64" width="50" height="50">
+                                    <path d="M32,8 C22,18 20,32 32,56 C44,32 42,18 32,8 Z" fill="#66BB6A"/>
+                                    <path d="M32,24 C28,30 28,36 32,46 C36,36 36,30 32,24 Z" fill="#2E7D32"/>
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <div class="product-card-content" style="padding: 15px;">
+                            <h4 class="product-card-title" style="font-size: 0.95rem;">{{ rec.nome }}</h4>
+                            <div class="product-card-footer" style="padding-top: 10px; margin-top: 10px;">
+                                <span class="price-value" style="font-size: 1.05rem;">R$ {{ rec.preco_kg|round(2)|string|replace('.', ',') }}</span>
+                                <a href="{{ url_for('product_detail', produto_id=rec.id) }}" class="btn btn-outline btn-card" style="padding: 5px 10px; font-size: 0.75rem;">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

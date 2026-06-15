@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedido #{{ pedido.id }} - CJC Sementes{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 40px 0; max-width: 800px;">
+    
+    <div style="text-align: center; margin-bottom: 40px;">
+        <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: var(--laranja-brasa); margin-bottom: 15px;"></i>
+        <h2 style="font-size: 2.2rem; color: var(--grafite-titanio);">Pedido Recebido!</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 5px;">
+            Obrigado por comprar na <strong>CJC Sementes</strong>. Seu pedido está registrado sob o número <strong>#{{ pedido.id }}</strong>.
+        </p>
+    </div>
+
+    <!-- Linha de Progresso Visual -->
+    <div class="cart-card" style="margin-bottom: 30px; padding: 25px;">
+        <h3 style="font-size: 1.1rem; color: var(--grafite-titanio); margin-bottom: 20px;"><i class="fa-solid fa-truck-ramp-box" style="color: var(--verde-safra); margin-right: 8px;"></i> Acompanhamento do Pedido</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; padding: 10px 0;">
+            <!-- Linha de fundo -->
+            <div style="position: absolute; top: 25px; left: 10%; right: 10%; height: 4px; background-color: var(--border-color); z-index: 1;"></div>
+            <!-- Linha preenchida com base no status -->
+            <div style="position: absolute; top: 25px; left: 10%; height: 4px; 
+                        width: {% if pedido.status == 'Pago' %}35%{% elif pedido.status == 'Enviado' %}70%{% elif pedido.status == 'Entregue' %}100%{% else %}0%{% endif %}; 
+                        background-color: var(--verde-safra); z-index: 2; transition: width 0.5s ease;"></div>
+            
+            <div style="z-index: 3; text-align: center; width: 20%;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; background-color: var(--verde-safra); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <span style="font-size: 0.75rem; font-weight: bold;">Registrado</span>
+            </div>
+            
+            <div style="z-index: 3; text-align: center; width: 20%;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; 
+                            background-color: {% if pedido.status in ['Pago', 'Enviado', 'Entregue'] %}var(--verde-safra){% else %}var(--border-color){% endif %}; 
+                            color: {% if pedido.status in ['Pago', 'Enviado', 'Entregue'] %}white{% else %}var(--text-muted){% endif %}; 
+                            display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+                <span style="font-size: 0.75rem; font-weight: bold;">Pago</span>
+            </div>
+            
+            <div style="z-index: 3; text-align: center; width: 20%;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; 
+                            background-color: {% if pedido.status in ['Enviado', 'Entregue'] %}var(--verde-safra){% else %}var(--border-color){% endif %}; 
+                            color: {% if pedido.status in ['Enviado', 'Entregue'] %}white{% else %}var(--text-muted){% endif %}; 
+                            display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <span style="font-size: 0.75rem; font-weight: bold;">Enviado</span>
+            </div>
+            
+            <div style="z-index: 3; text-align: center; width: 20%;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; 
+                            background-color: {% if pedido.status == 'Entregue' %}var(--verde-safra){% else %}var(--border-color){% endif %}; 
+                            color: {% if pedido.status == 'Entregue' %}white{% else %}var(--text-muted){% endif %}; 
+                            display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
+                    <i class="fa-solid fa-house-chimney-crack"></i>
+                </div>
+                <span style="font-size: 0.75rem; font-weight: bold;">Entregue</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de Pagamento Pendente -->
+    {% if pedido.status == 'Pendente' %}
+        <div class="cart-card" style="margin-bottom: 30px; border: 2px solid var(--laranja-brasa); padding: 30px;">
+            {% if pedido.metodo_pagamento == 'PIX' %}
+                <div style="text-align: center;">
+                    <h3 style="color: var(--laranja-brasa); font-size: 1.4rem; margin-bottom: 10px;">
+                        <i class="fa-brands fa-pix"></i> Pagamento via PIX
+                    </h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">
+                        Escaneie o QR Code abaixo com o aplicativo do seu banco ou utilize o código Copia e Cola para efetuar o pagamento.
+                    </p>
+                    
+                    <!-- QR Code Simulado em SVG Premium -->
+                    <div class="qr-code-box">
+                        <svg viewBox="0 0 100 100" width="160" height="160">
+                            <!-- Moldura e Padrões QR Fictícios -->
+                            <rect x="5" y="5" width="25" height="25" fill="#364F4F"/>
+                            <rect x="10" y="10" width="15" height="15" fill="white"/>
+                            <rect x="13" y="13" width="9" height="9" fill="#364F4F"/>
+                            
+                            <rect x="70" y="5" width="25" height="25" fill="#364F4F"/>
+                            <rect x="75" y="10" width="15" height="15" fill="white"/>
+                            <rect x="78" y="13" width="9" height="9" fill="#364F4F"/>
+                            
+                            <rect x="5" y="70" width="25" height="25" fill="#364F4F"/>
+                            <rect x="10" y="75" width="15" height="15" fill="white"/>
+                            <rect x="13" y="78" width="9" height="9" fill="#364F4F"/>
+                            
+                            <!-- Sprout no meio para branding e design -->
+                            <path d="M50,35 C42,42 42,52 50,65 C58,52 58,42 50,35 Z" fill="var(--verde-safra)"/>
+                            <path d="M48,42 C45,46 45,50 48,56 C51,50 51,46 48,42 Z" fill="#81C784"/>
+                            
+                            <!-- Pixels aleatórios do QR -->
+                            <rect x="35" y="10" width="6" height="6" fill="#364F4F"/>
+                            <rect x="45" y="5" width="8" height="4" fill="#364F4F"/>
+                            <rect x="60" y="15" width="5" height="8" fill="#364F4F"/>
+                            <rect x="35" y="60" width="8" height="5" fill="#364F4F"/>
+                            <rect x="40" y="80" width="12" height="6" fill="#364F4F"/>
+                            <rect x="70" y="60" width="6" height="10" fill="#364F4F"/>
+                            <rect x="80" y="85" width="10" height="5" fill="#364F4F"/>
+                        </svg>
+                    </div>
+                    
+                    <div style="max-width: 500px; margin: 0 auto 20px;">
+                        <label class="form-label" style="font-size: 0.8rem; text-align: left;">Código Pix Copia e Cola:</label>
+                        <textarea class="copia-cola-textarea" id="pix-copia-cola-text" readonly>{{ pix_copia_cola }}</textarea>
+                        <button type="button" id="btn-copiar-pix" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">
+                            Copiar Código
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 20px 0;">
+                    <h3 style="color: var(--laranja-brasa); font-size: 1.4rem; margin-bottom: 10px;">
+                        <i class="fa-solid fa-credit-card"></i> Pagamento por Cartão de Crédito
+                    </h3>
+                    <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 25px;">
+                        Estamos simulando o processamento do pagamento com o gateway integrado (Stripe/Mercado Pago).
+                    </p>
+                </div>
+            {% endif %}
+            
+            <!-- Simulador de Confirmação Rápida de Pagamento para fins demonstrativos -->
+            <div style="background-color: var(--bg-main); border-radius: var(--radius-sm); padding: 15px; margin-top: 30px; text-align: center; border: 1px solid var(--border-color);">
+                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 10px; font-weight: bold;">
+                    [ MODO DEMONSTRATIVO ]
+                </span>
+                <form action="{{ url_for('simulate_payment', pedido_id=pedido.id) }}" method="POST">
+                    <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 15px;">
+                        Simular Confirmação de Pagamento
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <div class="cart-card" style="margin-bottom: 30px; border-left: 5px solid var(--verde-safra); padding: 20px 25px; background-color: #EBF2F0;">
+            <p style="font-weight: bold; color: var(--verde-safra); font-size: 1.05rem;">
+                <i class="fa-solid fa-circle-check"></i> Pagamento Confirmado!
+            </p>
+            <p style="font-size: 0.9rem; color: var(--text-dark); margin-top: 5px;">
+                Seu pagamento foi confirmado com sucesso. O pedido agora está em fase de separação física em nossa unidade no Bom Retiro (Pato Branco - PR) para envio.
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- Detalhes do Pedido -->
+    <div class="cart-card" style="padding: 30px;">
+        <h3 style="font-size: 1.25rem; color: var(--grafite-titanio); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
+            Detalhamento do Pedido
+        </h3>
+        
+        <div class="summary-row">
+            <span>Cliente</span>
+            <strong>{{ pedido.cliente.nome }}</strong>
+        </div>
+        <div class="summary-row">
+            <span>CPF / CNPJ</span>
+            <strong>{{ pedido.cliente.cpf }}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Atividade do Cliente</span>
+            <strong>{{ pedido.cliente.atividade }}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Endereço de Entrega</span>
+            <strong style="text-align: right; max-width: 60%; font-size: 0.85rem;">{{ pedido.cliente.endereco_completo }}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Entrega Escolhida</span>
+            <strong>{{ pedido.metodo_pagamento }} - via transportadora</strong>
+        </div>
+        
+        <table class="admin-table" style="margin-top: 30px; font-size: 0.85rem;">
+            <thead>
+                <tr>
+                    <th>Semente Adquirida</th>
+                    <th style="text-align: center;">Quantidade</th>
+                    <th style="text-align: right;">Total Item</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in pedido.itens %}
+                    <tr>
+                        <td><strong>{{ item.produto.nome }}</strong></td>
+                        <td style="text-align: center;">{{ item.quantidade|int }} {{ item.produto.unidade.upper() }}</td>
+                        <td style="text-align: right; font-weight: bold; color: var(--laranja-brasa);">
+                            R$ {{ (item.quantidade * item.preco_unitario)|round(2)|string|replace('.', ',') }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+            <div class="summary-row">
+                <span>Subtotal Itens</span>
+                <strong>R$ {{ (pedido.total - pedido.valor_frete)|round(2)|string|replace('.', ',') }}</strong>
+            </div>
+            <div class="summary-row">
+                <span>Valor de Frete</span>
+                <strong>R$ {{ pedido.valor_frete|round(2)|string|replace('.', ',') }}</strong>
+            </div>
+            <div class="summary-row total" style="margin-top: 10px; padding-top: 10px;">
+                <span>Total Geral</span>
+                <span>R$ {{ pedido.total|round(2)|string|replace('.', ',') }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('index') }}" class="btn btn-outline">
+            Voltar para o Catálogo
+        </a>
+    </div>
+
+</section>
+{% endblock %}

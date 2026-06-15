@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Carrinho - CJC Sementes{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 40px 0;">
+    <h2 class="section-title">Carrinho de Compras</h2>
+    
+    {% if cart_items %}
+        <div class="cart-grid">
+            <!-- Tabela de Produtos (Esquerda) -->
+            <div class="cart-card">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Preço Unitário</th>
+                            <th style="width: 120px; text-align: center;">Quantidade</th>
+                            <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                            <tr>
+                                <td>
+                                    <div class="cart-item-info">
+                                        <div class="cart-item-avatar">
+                                            {% if 'Gramíneas' in item.produto.categoria %}
+                                                <svg viewBox="0 0 64 64" width="30" height="30">
+                                                    <path d="M22,58 C22,40 28,24 38,10 C34,26 30,42 30,58 Z" fill="#81C784"/>
+                                                    <path d="M42,58 C42,44 45,34 50,22 C46,36 44,46 44,58 Z" fill="#4CAF50"/>
+                                                </svg>
+                                            {% else %}
+                                                <svg viewBox="0 0 64 64" width="30" height="30">
+                                                    <path d="M32,8 C22,18 20,32 32,56 C44,32 42,18 32,8 Z" fill="#66BB6A"/>
+                                                    <path d="M32,24 C28,30 28,36 32,46 C36,36 36,30 32,24 Z" fill="#2E7D32"/>
+                                                </svg>
+                                            {% endif %}
+                                        </div>
+                                        <div class="cart-item-name">
+                                            <h4>{{ item.produto.nome }}</h4>
+                                            <span>{{ item.produto.categoria }}</span>
+                                            <div style="margin-top: 5px;">
+                                                <a href="{{ url_for('remove_from_cart', produto_id=item.produto.id) }}" class="cart-remove-link">
+                                                    <i class="fa-solid fa-trash-can"></i> Remover
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    R$ {{ item.produto.preco_kg|round(2)|string|replace('.', ',') }} /{{ item.produto.unidade }}
+                                </td>
+                                <td>
+                                    <!-- Formulário de Atualização Rápida -->
+                                    <form action="{{ url_for('update_cart', produto_id=item.produto.id) }}" method="POST" style="display:flex; justify-content:center; align-items:center; gap:5px;">
+                                        <input type="number" name="quantidade" class="form-input" value="{{ item.quantidade|int }}" min="1" max="{{ item.produto.estoque|int }}" style="width: 70px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);">
+                                        <button type="submit" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.8rem;" title="Atualizar quantidade">
+                                            <i class="fa-solid fa-rotate"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td style="text-align: right; font-weight: bold; font-family: var(--font-product); color: var(--laranja-brasa);">
+                                    R$ {{ item.total|round(2)|string|replace('.', ',') }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center;">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline" style="border-radius: var(--radius-sm);">
+                        <i class="fa-solid fa-cart-plus"></i> Continuar Comprando
+                    </a>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">
+                        Peso total estimado do frete: <strong>{{ peso_total_kg|round(1)|string|replace('.', ',') }} kg</strong>
+                        <!-- Input oculto com peso para o JS acessar -->
+                        <input type="hidden" id="cart-total-weight" value="{{ peso_total_kg }}">
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Resumo e Cálculo de Frete (Direita) -->
+            <div class="cart-summary-card">
+                <h3 class="summary-title">Resumo do Pedido</h3>
+                
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <strong style="color: var(--grafite-titanio);">
+                        R$ {{ subtotal|round(2)|string|replace('.', ',') }}
+                    </strong>
+                </div>
+                
+                <!-- Simulador de Frete -->
+                <div class="shipping-box">
+                    <span class="shipping-title"><i class="fa-solid fa-truck"></i> Simular Frete por CEP</span>
+                    <div class="shipping-input-group">
+                        <input type="text" id="cep-input" class="shipping-input" placeholder="00000-000">
+                        <button type="button" id="btn-calc-shipping" class="btn btn-secondary" style="padding: 8px 15px;">Calcular</button>
+                    </div>
+                    
+                    <!-- Destino dos resultados calculados por AJAX -->
+                    <div class="shipping-results" id="shipping-options-wrapper">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">Informe seu CEP para ver as opções e prazos de transportadoras parceiras.</p>
+                    </div>
+                </div>
+                
+                <div class="summary-row total" style="margin-top: 25px;">
+                    <span>Total de Produtos</span>
+                    <span>R$ {{ subtotal|round(2)|string|replace('.', ',') }}</span>
+                </div>
+                
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">
+                    O valor total final com frete será calculado na tela de finalização.
+                </p>
+                
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary" style="width: 100%; border-radius: var(--radius-sm); font-size: 1.1rem; padding: 12px 20px;">
+                    Prosseguir para Checkout <i class="fa-solid fa-circle-chevron-right" style="margin-left: 8px;"></i>
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px; background-color: white; border-radius: var(--radius-md); border: 1px solid var(--border-color); max-width: 600px; margin: 40px auto;">
+            <i class="fa-solid fa-basket-shopping" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+            <h3>Seu carrinho de compras está vazio</h3>
+            <p style="color: var(--text-muted); margin-top: 10px;">Adicione sementes de alta qualidade ao carrinho para prosseguir com o plantio.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-top: 25px;">Ver Produtos</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

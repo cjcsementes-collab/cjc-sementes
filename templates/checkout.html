@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - CJC Sementes{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 40px 0;">
+    <h2 class="section-title">Finalizar Pedido</h2>
+    
+    <form action="{{ url_for('checkout') }}" method="POST" id="checkout-form">
+        <!-- Campos ocultos para receberem dados calculados via JS -->
+        <input type="hidden" id="checkout-total-weight" value="{{ peso_total_kg }}">
+        <input type="hidden" id="checkout-subtotal-val" value="{{ subtotal }}">
+        <input type="hidden" name="valor_frete" id="input-valor-frete" value="0.0">
+        <input type="hidden" name="frete_opcao" id="input-frete-opcao" value="">
+        <input type="hidden" name="metodo_pagamento" id="input-metodo-pagamento" value="PIX">
+
+        <div class="checkout-grid">
+            <!-- Formulário de Qualificação e Endereço (Esquerda) -->
+            <div class="cart-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.25rem; color: var(--grafite-titanio); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                    <i class="fa-solid fa-address-card" style="color: var(--verde-safra); margin-right: 8px;"></i> 1. Qualificação do Cliente
+                </h3>
+                
+                <div class="form-group">
+                    <label class="form-label" for="nome">Nome Completo / Razão Social *</label>
+                    <input type="text" name="nome" id="nome" class="form-input" required value="{{ form_data.nome if form_data else '' }}">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="cpf">CPF / CNPJ *</label>
+                        <input type="text" name="cpf" id="cpf" class="form-input" placeholder="000.000.000-00" required value="{{ form_data.cpf if form_data else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="atividade">Atividade Profissional *</label>
+                        <select name="atividade" id="atividade" class="form-input" style="height: 45px; background: white;" required>
+                            <option value="Produtor Rural" {% if form_data and form_data.atividade == 'Produtor Rural' %}selected{% endif %}>Produtor Rural</option>
+                            <option value="Agrônomo / Consultor" {% if form_data and form_data.atividade == 'Agrônomo / Consultor' %}selected{% endif %}>Agrônomo / Consultor</option>
+                            <option value="Revenda / Cooperativa" {% if form_data and form_data.atividade == 'Revenda / Cooperativa' %}selected{% endif %}>Revenda / Cooperativa</option>
+                            <option value="Empresa Agrícola" {% if form_data and form_data.atividade == 'Empresa Agrícola' %}selected{% endif %}>Empresa Agrícola</option>
+                            <option value="Outro" {% if form_data and form_data.atividade == 'Outro' %}selected{% endif %}>Outro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="email">E-mail de Contato *</label>
+                        <input type="email" name="email" id="email" class="form-input" required value="{{ form_data.email if form_data else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="telefone">Telefone / WhatsApp *</label>
+                        <input type="text" name="telefone" id="telefone" class="form-input" placeholder="(00) 00000-0000" required value="{{ form_data.telefone if form_data else '' }}">
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 20px; font-size: 1.25rem; color: var(--grafite-titanio); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                    <i class="fa-solid fa-truck" style="color: var(--verde-safra); margin-right: 8px;"></i> 2. Endereço e Entrega
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label" for="checkout-cep">CEP de Destino * (digite para carregar opções de entrega)</label>
+                        <input type="text" id="checkout-cep" class="form-input" placeholder="00000-000" required style="max-width: 200px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="endereco">Endereço Completo de Entrega *</label>
+                    <textarea name="endereco" id="endereco" class="form-input" rows="3" placeholder="Rua, Número, Bairro, Zona Rural/Urbana, Cidade, Estado" required>{{ form_data.endereco if form_data else '' }}</textarea>
+                </div>
+
+                <!-- Destino das transportadoras parceiras via AJAX -->
+                <div class="form-group">
+                    <label class="form-label">Selecione o Serviço de Entrega *</label>
+                    <div id="checkout-shipping-options" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="font-size:0.85rem; color:var(--text-muted);">
+                            Informe um CEP válido acima para listar as opções de transportadoras parceiras da CJC Sementes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Escolha de Pagamento e Resumo (Direita) -->
+            <div>
+                <div class="cart-summary-card" style="margin-bottom: 30px;">
+                    <h3 class="summary-title" style="margin-bottom: 15px;"><i class="fa-solid fa-credit-card" style="color: var(--laranja-brasa); margin-right: 8px;"></i> 3. Pagamento</h3>
+                    
+                    <!-- Abas de Pagamento -->
+                    <div class="payment-methods">
+                        <div class="payment-method-card selected" id="payment-pix">
+                            <i class="fa-brands fa-pix payment-method-icon"></i>
+                            <div style="font-weight: bold; font-size: 0.9rem;">PIX</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Aprovação Imediata</div>
+                        </div>
+                        <div class="payment-method-card" id="payment-card">
+                            <i class="fa-solid fa-credit-card payment-method-icon"></i>
+                            <div style="font-weight: bold; font-size: 0.9rem;">Cartão</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Crédito em até 6x</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Conteúdo: PIX -->
+                    <div id="pix-info-box" class="pix-details-box">
+                        <i class="fa-brands fa-pix" style="font-size: 2.5rem; color: var(--laranja-brasa); margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.9rem; font-weight: 600;">Geração de QR Code dinâmico</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Ao clicar em "Confirmar Pedido", um QR Code exclusivo e o código Copia e Cola serão gerados para pagamento instantâneo.</p>
+                    </div>
+                    
+                    <!-- Conteúdo: Cartão -->
+                    <div id="card-info-box" class="card-details-box" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.8rem;">Número do Cartão</label>
+                            <input type="text" class="form-input" placeholder="4000 1234 5678 9010" style="padding: 8px 12px; font-size: 0.9rem;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.8rem;">Nome Impresso no Cartão</label>
+                            <input type="text" class="form-input" placeholder="JOÃO CASSOL" style="padding: 8px 12px; font-size: 0.9rem; text-transform: uppercase;">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 0.8rem;">Validade</label>
+                                <input type="text" class="form-input" placeholder="MM/AA" style="padding: 8px 12px; font-size: 0.9rem;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" style="font-size: 0.8rem;">CVV</label>
+                                <input type="password" class="form-input" placeholder="***" style="padding: 8px 12px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo dos Valores -->
+                <div class="cart-summary-card">
+                    <h3 class="summary-title" style="margin-bottom: 15px;">Resumo Financeiro</h3>
+                    
+                    <div class="summary-row">
+                        <span>Produtos ({{ cart_count }} itens)</span>
+                        <strong>R$ {{ subtotal|round(2)|string|replace('.', ',') }}</strong>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Valor do Frete</span>
+                        <strong id="text-valor-frete">Selecione o CEP</strong>
+                    </div>
+                    
+                    <div class="summary-row total" style="margin-top: 15px;">
+                        <span>Valor Total</span>
+                        <span id="text-valor-total">R$ {{ subtotal|round(2)|string|replace('.', ',') }}</span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: var(--radius-sm); font-size: 1.1rem; padding: 12px 20px; margin-top: 15px;">
+                        <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i> Confirmar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}
