@@ -20,7 +20,7 @@ def seed_database():
             db.session.commit()
             return
             
-        # Lista dos 27 produtos iniciais
+        # Lista dos produtos iniciais
         produtos_iniciais = [
             # Gramíneas / Forrageiras
             {
@@ -236,7 +236,59 @@ def seed_database():
                 "imagem_url": "/static/images/milho.svg"
             },
 
-            # Mixes e Customizados
+            # Mixes e Customizados - SYNERGIX INVERNO
+            {
+                "nome": "SYNERGIX 3130 - Inverno",
+                "preco_kg": 5.80,
+                "unidade": "kg",
+                "descricao": "Mix premium com Centeio IPR 89, Ervilhaca SS Ametista e Triticale BRS Saturno. 3 espécies, ciclo 120-140 dias.",
+                "categoria": "Mixes e Customizados",
+                "imagem_url": "/static/images/synergix.svg",
+                "linha": "SYNERGIX Inverno",
+                "composicao": "Centeio IPR 89 | Ervilhaca SS Ametista | Triticale BRS Saturno"
+            },
+            {
+                "nome": "SYNERGIX 4100 - Inverno",
+                "preco_kg": 6.80,
+                "unidade": "kg",
+                "descricao": "Mix com 4 espécies: Nabo Forrageiro IPR 116, Aveia Preta BRS 139, Centeio IPR 89 e Ervilha IPR 83. Ciclo 80-110 dias.",
+                "categoria": "Mixes e Customizados",
+                "imagem_url": "/static/images/synergix.svg",
+                "linha": "SYNERGIX Inverno",
+                "composicao": "Nabo Forrageiro IPR 116 | Aveia Preta BRS 139 | Centeio IPR 89 | Ervilha IPR 83"
+            },
+            {
+                "nome": "SYNERGIX 4110 - Inverno",
+                "preco_kg": 6.80,
+                "unidade": "kg",
+                "descricao": "Mix com 4 espécies: Nabo Forrageiro IPR 116, Ervilhaca SS Ametista, Aveia Preta BRS 139 e Centeio IPR 89. Ciclo 90-110 dias.",
+                "categoria": "Mixes e Customizados",
+                "imagem_url": "/static/images/synergix.svg",
+                "linha": "SYNERGIX Inverno",
+                "composicao": "Nabo Forrageiro IPR 116 | Ervilhaca SS Ametista | Aveia Preta BRS 139 | Centeio IPR 89"
+            },
+            {
+                "nome": "SYNERGIX 4130 - Inverno",
+                "preco_kg": 6.80,
+                "unidade": "kg",
+                "descricao": "Mix com 4 espécies: Nabo Forrageiro pé de pato, Ervilhaca SS Ametista, Triticale BRS Saturno e Centeio IPR 89. Ciclo 120-140 dias.",
+                "categoria": "Mixes e Customizados",
+                "imagem_url": "/static/images/synergix.svg",
+                "linha": "SYNERGIX Inverno",
+                "composicao": "Nabo Forrageiro pé de pato | Ervilhaca SS Ametista | Triticale BRS Saturno | Centeio IPR 89"
+            },
+            {
+                "nome": "SYNERGIX 8100 - Inverno",
+                "preco_kg": 6.80,
+                "unidade": "kg",
+                "descricao": "Mix premium com 8 espécies: Aveia Preta BRS 139, Centeio IPR 89, Triticale BRS Saturno, Ervilhaca comum, Tremoço Branco, Nabo Forrageiro, Trigo Mourisco IPR 92 Altar. Ciclo 90-120 dias.",
+                "categoria": "Mixes e Customizados",
+                "imagem_url": "/static/images/synergix.svg",
+                "linha": "SYNERGIX Inverno",
+                "composicao": "Aveia Preta BRS 139 | Centeio IPR 89 | Triticale BRS Saturno | Ervilhaca | Tremoço Branco | Nabo Forrageiro pé de pato | Trigo Mourisco IPR 92 Altar"
+            },
+
+            # Mix Customizado Original
             {
                 "nome": "Mix Customizado",
                 "preco_kg": 16.42,
