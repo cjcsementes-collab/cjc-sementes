@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Pasture grass: low spreading grass tuft -->
+  <!-- Ground line -->
+  <ellipse cx="50" cy="90" rx="30" ry="4" fill="#2C3E35" opacity="0.2"/>
+  <!-- Low grass blades - left side -->
+  <path d="M35 90 Q30 70 20 55" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M38 90 Q28 72 15 60" fill="none" stroke="#24903D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 90 Q33 72 28 58" fill="none" stroke="#1A7A3D" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- Center blades -->
+  <path d="M45 90 Q43 65 40 42" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M50 90 Q50 62 50 38" fill="none" stroke="#24903D" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M55 90 Q57 65 60 42" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Right side -->
+  <path d="M62 90 Q68 72 78 58" fill="none" stroke="#24903D" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M65 90 Q72 70 82 55" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M68 90 Q75 74 85 62" fill="none" stroke="#1A7A3D" stroke-width="2" stroke-linecap="round"/>
+  <!-- Small inner blades for density -->
+  <path d="M42 90 Q38 75 32 65" fill="none" stroke="#28A745" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M48 90 Q46 68 44 48" fill="none" stroke="#28A745" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M52 90 Q54 68 56 48" fill="none" stroke="#28A745" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M58 90 Q62 75 68 65" fill="none" stroke="#28A745" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

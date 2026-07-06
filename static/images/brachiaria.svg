@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Brachiaria: spreading grass with runners/stolons -->
+  <!-- Ground runners/stolons -->
+  <path d="M15 88 Q30 85 50 88 Q70 91 85 88" fill="none" stroke="#2C3E35" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M20 92 Q40 90 60 93 Q75 94 88 91" fill="none" stroke="#2C3E35" stroke-width="2" stroke-linecap="round"/>
+  <!-- Root nodes on stolons -->
+  <circle cx="30" cy="88" r="2" fill="#2C3E35"/>
+  <circle cx="50" cy="89" r="2" fill="#2C3E35"/>
+  <circle cx="70" cy="89" r="2" fill="#2C3E35"/>
+  <!-- Grass blades from nodes - left cluster -->
+  <path d="M30 88 Q28 65 22 45" fill="none" stroke="#1A7A3D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 88 Q25 60 18 40" fill="none" stroke="#24903D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M30 88 Q32 62 35 42" fill="none" stroke="#1A7A3D" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Center cluster -->
+  <path d="M50 89 Q48 60 42 30" fill="none" stroke="#1A7A3D" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M50 89 Q52 55 55 25" fill="none" stroke="#24903D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 89 Q45 58 38 28" fill="none" stroke="#1A7A3D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M50 89 Q55 62 62 32" fill="none" stroke="#24903D" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Right cluster -->
+  <path d="M70 89 Q72 65 78 45" fill="none" stroke="#1A7A3D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M70 89 Q68 62 65 42" fill="none" stroke="#24903D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M70 89 Q75 60 82 40" fill="none" stroke="#1A7A3D" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Small seed tips -->
+  <circle cx="22" cy="44" r="1.5" fill="#8B7D3C"/>
+  <circle cx="42" cy="29" r="1.5" fill="#8B7D3C"/>
+  <circle cx="55" cy="24" r="1.5" fill="#8B7D3C"/>
+  <circle cx="78" cy="44" r="1.5" fill="#8B7D3C"/>
+</svg>

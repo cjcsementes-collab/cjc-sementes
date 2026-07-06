@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Corn: yellow ear with kernels, green husk partially open -->
+  <!-- Husk leaves - back -->
+  <path d="M30 85 Q25 55 28 30 Q30 20 38 18 Q42 35 38 60 Q36 75 30 85" fill="#24903D"/>
+  <path d="M70 85 Q75 55 72 30 Q70 20 62 18 Q58 35 62 60 Q64 75 70 85" fill="#1A7A3D"/>
+  <!-- Husk leaves - peeled open sides -->
+  <path d="M25 70 Q18 50 20 35 Q22 25 28 22" fill="none" stroke="#24903D" stroke-width="3" stroke-linecap="round"/>
+  <path d="M75 70 Q82 50 80 35 Q78 25 72 22" fill="none" stroke="#1A7A3D" stroke-width="3" stroke-linecap="round"/>
+  <!-- Corn cob body -->
+  <rect x="36" y="25" width="28" height="55" rx="10" fill="#F5D030"/>
+  <!-- Kernel rows -->
+  <!-- Row 1 -->
+  <circle cx="42" cy="32" r="3" fill="#E8B820"/>
+  <circle cx="50" cy="32" r="3" fill="#EDCC30"/>
+  <circle cx="58" cy="32" r="3" fill="#E8B820"/>
+  <!-- Row 2 -->
+  <circle cx="42" cy="40" r="3" fill="#EDCC30"/>
+  <circle cx="50" cy="40" r="3" fill="#E8B820"/>
+  <circle cx="58" cy="40" r="3" fill="#EDCC30"/>
+  <!-- Row 3 -->
+  <circle cx="42" cy="48" r="3" fill="#E8B820"/>
+  <circle cx="50" cy="48" r="3" fill="#EDCC30"/>
+  <circle cx="58" cy="48" r="3" fill="#E8B820"/>
+  <!-- Row 4 -->
+  <circle cx="42" cy="56" r="3" fill="#EDCC30"/>
+  <circle cx="50" cy="56" r="3" fill="#E8B820"/>
+  <circle cx="58" cy="56" r="3" fill="#EDCC30"/>
+  <!-- Row 5 -->
+  <circle cx="42" cy="64" r="3" fill="#E8B820"/>
+  <circle cx="50" cy="64" r="3" fill="#EDCC30"/>
+  <circle cx="58" cy="64" r="3" fill="#E8B820"/>
+  <!-- Row 6 -->
+  <circle cx="46" cy="72" r="3" fill="#EDCC30"/>
+  <circle cx="54" cy="72" r="3" fill="#E8B820"/>
+  <!-- Silk at top -->
+  <path d="M45 25 Q42 15 38 8" fill="none" stroke="#C4A035" stroke-width="1" stroke-linecap="round"/>
+  <path d="M48 25 Q48 12 50 5" fill="none" stroke="#D4B040" stroke-width="1" stroke-linecap="round"/>
+  <path d="M52 25 Q54 14 58 6" fill="none" stroke="#C4A035" stroke-width="1" stroke-linecap="round"/>
+  <path d="M55 25 Q58 16 64 10" fill="none" stroke="#D4B040" stroke-width="1" stroke-linecap="round"/>
+  <path d="M42 25 Q38 18 32 12" fill="none" stroke="#D4B040" stroke-width="1" stroke-linecap="round"/>
+</svg>

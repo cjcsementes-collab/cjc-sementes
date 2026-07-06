@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Crotalaria: yellow flower on green stem with leaves -->
+  <!-- Main stem -->
+  <line x1="50" y1="95" x2="50" y2="35" stroke="#1A7A3D" stroke-width="3" stroke-linecap="round"/>
+  <!-- Compound leaves - trifoliate -->
+  <path d="M50 75 Q38 68 30 72" fill="none" stroke="#1A7A3D" stroke-width="1.5"/>
+  <ellipse cx="27" cy="72" rx="8" ry="4" fill="#1A7A3D" transform="rotate(-15 27 72)"/>
+  <path d="M50 65 Q62 58 70 62" fill="none" stroke="#1A7A3D" stroke-width="1.5"/>
+  <ellipse cx="73" cy="62" rx="8" ry="4" fill="#24903D" transform="rotate(15 73 62)"/>
+  <path d="M50 55 Q38 48 30 52" fill="none" stroke="#1A7A3D" stroke-width="1.5"/>
+  <ellipse cx="27" cy="52" rx="7" ry="3.5" fill="#1A7A3D" transform="rotate(-15 27 52)"/>
+  <!-- Yellow flower cluster at top -->
+  <!-- Flower 1 - center top -->
+  <path d="M50 18 Q45 12 50 8 Q55 12 50 18" fill="#FFD700"/>
+  <path d="M50 18 Q42 15 42 10 Q46 8 50 12" fill="#F0C500"/>
+  <path d="M50 18 Q58 15 58 10 Q54 8 50 12" fill="#F0C500"/>
+  <circle cx="50" cy="15" r="2.5" fill="#F0650C" opacity="0.6"/>
+  <!-- Flower 2 - left -->
+  <path d="M40 28 Q35 22 40 18 Q45 22 40 28" fill="#FFD700"/>
+  <path d="M40 28 Q32 25 33 20 Q37 18 40 22" fill="#F0C500"/>
+  <circle cx="40" cy="24" r="2" fill="#F0650C" opacity="0.6"/>
+  <!-- Flower 3 - right -->
+  <path d="M60 25 Q55 19 60 15 Q65 19 60 25" fill="#FFD700"/>
+  <path d="M60 25 Q68 22 67 17 Q63 15 60 19" fill="#F0C500"/>
+  <circle cx="60" cy="21" r="2" fill="#F0650C" opacity="0.6"/>
+  <!-- Small buds -->
+  <ellipse cx="48" cy="32" rx="3" ry="4" fill="#DDBA00" transform="rotate(-10 48 32)"/>
+  <ellipse cx="55" cy="34" rx="2.5" ry="3.5" fill="#DDBA00" transform="rotate(10 55 34)"/>
+</svg>

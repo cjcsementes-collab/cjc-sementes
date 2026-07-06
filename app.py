@@ -7,12 +7,23 @@ from werkzeug.security import check_password_hash
 
 from config import Config
 from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
+from inter_pix import inter_pix
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 # Inicializa o banco de dados com a aplicação
 db.init_app(app)
+
+# Força HTTPS em produção (Render)
+@app.before_request
+def force_https():
+    if request.headers.get('X-Forwarded-Proto') == 'http':
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
+
+# Inicializa o cliente Pix do Banco Inter
+inter_pix.init_app(app)
 
 # Configura o Flask-Login
 login_manager = LoginManager()
@@ -332,6 +343,15 @@ def checkout():
         # Salva o ID do último pedido na sessão para a página de status
         session['ultimo_pedido_id'] = pedido.id
         
+        # Cria cobrança Pix via API Inter (ou simulada se não configurado)
+        if metodo_pagamento == 'PIX':
+            pix_result = inter_pix.criar_cobranca_pix(pedido, cliente)
+            if pix_result:
+                pedido.pix_txid = pix_result.get('txid')
+                pedido.pix_copia_cola = pix_result.get('pix_copia_cola')
+                pedido.pix_location = pix_result.get('location')
+                db.session.commit()
+        
         return redirect(url_for('order_status', pedido_id=pedido.id))
         
     return render_template('checkout.html', subtotal=subtotal, peso_total_kg=peso_total_kg, form_data={})
@@ -340,12 +360,45 @@ def checkout():
 def order_status(pedido_id):
     pedido = Pedido.query.get_or_404(pedido_id)
     
-    # Gerar chaves Pix aleatórias para simular o QR Code de pagamento real
-    # Cria uma chave aleatória no padrão BR Code Pix
-    random_hex = ''.join(random.choices('0123456789ABCDEF', k=25))
-    pix_copia_cola = f"00020101021226830014br.gov.bcb.pix2561{random_hex}52040000530398654{len(str(round(pedido.total, 2))):02d}{round(pedido.total, 2)}5802BR5918CJC_SEMENTES6009BOM_RETIRO62070503***6304"
+    # Usa o Pix Copia e Cola real armazenado no pedido (gerado pela API Inter)
+    # Se não houver (pedido antigo ou erro), gera um simulado
+    pix_copia_cola = pedido.pix_copia_cola
+    if not pix_copia_cola and pedido.metodo_pagamento == 'PIX':
+        import random
+        random_hex = ''.join(random.choices('0123456789ABCDEF', k=25))
+        pix_copia_cola = (
+            f"00020101021226830014br.gov.bcb.pix2561{random_hex}"
+            f"52040000530398654{len(str(round(pedido.total, 2))):02d}"
+            f"{round(pedido.total, 2)}5802BR5925J CASSOL SEMENTES LTDA"
+            f"6014PATO BRANCO PR62070503***6304"
+        )
     
-    return render_template('order_status.html', pedido=pedido, pix_copia_cola=pix_copia_cola)
+    # Gera QR Code como imagem base64 para exibição no template
+    qr_code_base64 = None
+    if pix_copia_cola and pedido.status == 'Pendente':
+        try:
+            import qrcode
+            import io
+            import base64
+            qr = qrcode.QRCode(version=1, box_size=8, border=2)
+            qr.add_data(pix_copia_cola)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color='#2C3E35', back_color='white')
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        except Exception as e:
+            print(f'Erro ao gerar QR Code: {e}')
+    
+    is_inter_configured = inter_pix.configured
+    
+    return render_template(
+        'order_status.html',
+        pedido=pedido,
+        pix_copia_cola=pix_copia_cola,
+        qr_code_base64=qr_code_base64,
+        is_inter_configured=is_inter_configured
+    )
 
 @app.route('/pedido/<int:pedido_id>/simular-pagamento', methods=['POST'])
 def simulate_payment(pedido_id):
@@ -354,6 +407,55 @@ def simulate_payment(pedido_id):
     db.session.commit()
     flash('Pagamento simulado e confirmado com sucesso!', 'success')
     return redirect(url_for('order_status', pedido_id=pedido.id))
+
+@app.route('/pedido/<int:pedido_id>/verificar-pix', methods=['POST'])
+def verificar_pix(pedido_id):
+    """Verifica o status do pagamento Pix via API Inter (polling manual)."""
+    pedido = Pedido.query.get_or_404(pedido_id)
+    
+    if pedido.status != 'Pendente':
+        return jsonify({'status': pedido.status, 'pago': pedido.status == 'Pago'})
+    
+    if not pedido.pix_txid or not inter_pix.configured:
+        return jsonify({'status': 'SIMULADO', 'pago': False, 'mensagem': 'Integração Pix em validação. Use o botão de simulação.'})
+    
+    result = inter_pix.consultar_cobranca(pedido.pix_txid)
+    
+    if result.get('pago'):
+        pedido.status = 'Pago'
+        db.session.commit()
+        return jsonify({'status': 'CONCLUIDA', 'pago': True})
+    
+    return jsonify({'status': result.get('status', 'ATIVA'), 'pago': False})
+
+@app.route('/webhook/pix', methods=['POST'])
+def webhook_pix():
+    """Webhook para receber notificações de pagamento Pix do Banco Inter."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Payload vazio'}), 400
+        
+        # O Inter envia uma lista de pix recebidos
+        pix_list = data.get('pix', [])
+        
+        for pix in pix_list:
+            txid = pix.get('txid')
+            if not txid:
+                continue
+            
+            # Busca o pedido pelo txid
+            pedido = Pedido.query.filter_by(pix_txid=txid).first()
+            if pedido and pedido.status == 'Pendente':
+                pedido.status = 'Pago'
+                db.session.commit()
+                print(f'✅ Webhook Pix: Pedido #{pedido.id} marcado como Pago (txid: {txid})')
+        
+        return jsonify({'status': 'ok'}), 200
+        
+    except Exception as e:
+        print(f'❌ Erro no webhook Pix: {e}')
+        return jsonify({'error': str(e)}), 500
 
 # ----------------- ROTAS ADMINISTRATIVAS -----------------
 
@@ -453,7 +555,7 @@ def initialize_database():
         if not Admin.query.filter_by(username='admin').first():
             admin_user = Admin(
                 username='admin',
-                password_hash=generate_password_hash('cjc2024')
+                password_hash=generate_password_hash(os.environ.get('ADMIN_PASSWORD', 'cjc2024'))
             )
             db.session.add(admin_user)
             db.session.commit()

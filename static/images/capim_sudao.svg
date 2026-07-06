@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sudan grass: tall grass blades fanning out -->
+  <!-- Base/ground -->
+  <ellipse cx="50" cy="95" rx="15" ry="3" fill="#2C3E35" opacity="0.3"/>
+  <!-- Main stems -->
+  <line x1="50" y1="95" x2="50" y2="25" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="47" y1="95" x2="38" y2="20" stroke="#1A7A3D" stroke-width="2" stroke-linecap="round"/>
+  <line x1="53" y1="95" x2="62" y2="18" stroke="#1A7A3D" stroke-width="2" stroke-linecap="round"/>
+  <!-- Fanning grass blades -->
+  <path d="M50 25 Q45 10 30 5" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M50 25 Q55 10 70 5" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M38 20 Q28 8 18 8" fill="none" stroke="#24903D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M62 18 Q72 6 82 8" fill="none" stroke="#24903D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 30 Q42 18 25 15" fill="none" stroke="#1A7A3D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M50 30 Q58 18 75 15" fill="none" stroke="#1A7A3D" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Side leaves on stems -->
+  <path d="M45 60 Q30 50 22 52" fill="none" stroke="#24903D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M55 50 Q70 42 78 44" fill="none" stroke="#24903D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M48 75 Q35 68 28 72" fill="none" stroke="#1A7A3D" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M52 65 Q65 58 72 62" fill="none" stroke="#1A7A3D" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

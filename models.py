@@ -48,6 +48,9 @@ class Pedido(db.Model):
     total = db.Column(db.Float, nullable=False)
     metodo_pagamento = db.Column(db.String(50), nullable=False) # PIX, Cartão
     valor_frete = db.Column(db.Float, default=0.0)
+    pix_txid = db.Column(db.String(100), nullable=True)        # txid da cobrança Inter
+    pix_copia_cola = db.Column(db.Text, nullable=True)         # Código Pix Copia e Cola
+    pix_location = db.Column(db.String(500), nullable=True)    # URL location do QR Code
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

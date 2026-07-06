@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Seed mix: multiple different seeds scattered together -->
+  <!-- Background circle hint -->
+  <circle cx="50" cy="50" r="40" fill="#2C3E35" opacity="0.06"/>
+  <!-- Bean seed - reddish brown -->
+  <ellipse cx="28" cy="35" rx="8" ry="5" fill="#8B4513" transform="rotate(-20 28 35)"/>
+  <path d="M22 35 Q28 30 34 35" fill="none" stroke="#6B3410" stroke-width="0.8"/>
+  <!-- Corn kernel - yellow -->
+  <path d="M55 25 Q52 18 55 14 Q58 12 60 16 Q62 20 60 27 Q58 30 55 28 Z" fill="#E8C820" stroke="#D4A800" stroke-width="0.8"/>
+  <!-- Sunflower seed - black/dark striped -->
+  <ellipse cx="72" cy="40" rx="4" ry="8" fill="#333" transform="rotate(25 72 40)"/>
+  <line x1="70" y1="35" x2="74" y2="45" stroke="#555" stroke-width="0.8"/>
+  <!-- Small round millet seed - golden -->
+  <circle cx="40" cy="22" r="4" fill="#DAA520" stroke="#B8960C" stroke-width="0.8"/>
+  <!-- Green pea -->
+  <circle cx="65" cy="58" r="5" fill="#4A9B42" stroke="#3D8B37" stroke-width="0.8"/>
+  <!-- Sorghum grain - reddish -->
+  <circle cx="35" cy="55" r="4.5" fill="#A0522D" stroke="#8B4513" stroke-width="0.8"/>
+  <!-- Wheat-like seed -->
+  <ellipse cx="50" cy="45" rx="3" ry="7" fill="#C4A035" stroke="#A88A28" stroke-width="0.8" transform="rotate(15 50 45)"/>
+  <!-- Sesame tiny seeds -->
+  <ellipse cx="22" cy="55" rx="2" ry="3.5" fill="#F5E6CC" stroke="#D4C4A0" stroke-width="0.6"/>
+  <ellipse cx="18" cy="60" rx="1.8" ry="3" fill="#F0DEC0" stroke="#D4C4A0" stroke-width="0.6" transform="rotate(30 18 60)"/>
+  <!-- Buckwheat triangular seed -->
+  <polygon points="78,60 74,68 82,68" fill="#6B5740" stroke="#5C4830" stroke-width="0.8"/>
+  <!-- Crotalaria round seed -->
+  <circle cx="45" cy="70" r="3.5" fill="#2C3E35" stroke="#1A2A20" stroke-width="0.8"/>
+  <!-- Orange lentil-like seed -->
+  <ellipse cx="62" cy="72" rx="5" ry="3" fill="#F0650C" stroke="#D05A0A" stroke-width="0.8"/>
+  <!-- More scattered small seeds -->
+  <circle cx="30" cy="72" r="2.5" fill="#B89530" stroke="#A08020" stroke-width="0.6"/>
+  <circle cx="55" cy="78" r="2" fill="#8B7355" stroke="#6B5740" stroke-width="0.6"/>
+  <ellipse cx="75" cy="52" rx="3" ry="2" fill="#7A3B10" stroke="#5C2D0A" stroke-width="0.6" transform="rotate(-10 75 52)"/>
+  <circle cx="82" cy="28" r="3" fill="#1A7A3D" stroke="#146030" stroke-width="0.8"/>
+  <!-- Tiny accent seeds -->
+  <circle cx="42" cy="82" r="1.5" fill="#DAA520"/>
+  <circle cx="68" cy="82" r="1.5" fill="#A0522D"/>
+  <circle cx="25" cy="45" r="2" fill="#F0650C" opacity="0.8"/>
+</svg>

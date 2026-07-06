@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sorghum: thick stalk with large grain head -->
+  <!-- Main thick stalk -->
+  <line x1="50" y1="95" x2="50" y2="38" stroke="#1A7A3D" stroke-width="4" stroke-linecap="round"/>
+  <!-- Leaves -->
+  <path d="M50 75 Q32 65 20 68" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M50 60 Q68 50 80 53" fill="none" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M50 85 Q65 78 75 82" fill="none" stroke="#24903D" stroke-width="2" stroke-linecap="round"/>
+  <!-- Large grain head - reddish-brown -->
+  <ellipse cx="50" cy="24" rx="14" ry="18" fill="#8B4513"/>
+  <ellipse cx="50" cy="22" rx="12" ry="15" fill="#A0522D"/>
+  <!-- Grain texture dots -->
+  <circle cx="45" cy="15" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="55" cy="15" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="50" cy="12" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="43" cy="22" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="57" cy="22" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="50" cy="20" r="2.5" fill="#8B4513" opacity="0.6"/>
+  <circle cx="47" cy="28" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="53" cy="28" r="2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="50" cy="32" r="1.5" fill="#8B4513" opacity="0.7"/>
+</svg>

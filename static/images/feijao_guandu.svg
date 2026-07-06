@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Pigeon pea: pod with visible round peas inside -->
+  <!-- Stem -->
+  <line x1="50" y1="95" x2="50" y2="40" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Leaves - trifoliate compound -->
+  <ellipse cx="35" cy="38" rx="10" ry="5" fill="#1A7A3D" transform="rotate(-30 35 38)"/>
+  <ellipse cx="65" cy="38" rx="10" ry="5" fill="#24903D" transform="rotate(30 65 38)"/>
+  <ellipse cx="50" cy="30" rx="9" ry="5" fill="#1A7A3D" transform="rotate(0 50 30)"/>
+  <!-- Leaf veins -->
+  <line x1="28" y1="38" x2="42" y2="38" stroke="#2C3E35" stroke-width="0.5" opacity="0.5"/>
+  <line x1="58" y1="38" x2="72" y2="38" stroke="#2C3E35" stroke-width="0.5" opacity="0.5"/>
+  <!-- Pod - large with bumps showing peas -->
+  <path d="M30 58 Q28 52 35 48 Q50 44 65 48 Q72 52 70 58 Q68 68 55 72 Q42 76 32 68 Z" fill="#3D8B37" stroke="#2C6B30" stroke-width="1.5"/>
+  <!-- Pea bumps visible inside pod -->
+  <circle cx="40" cy="58" r="6" fill="#4A9B42" stroke="#3D8B37" stroke-width="1"/>
+  <circle cx="54" cy="56" r="6" fill="#4A9B42" stroke="#3D8B37" stroke-width="1"/>
+  <circle cx="66" cy="58" r="5" fill="#4A9B42" stroke="#3D8B37" stroke-width="1"/>
+  <!-- Pod seam line -->
+  <path d="M32 63 Q50 58 68 63" fill="none" stroke="#2C6B30" stroke-width="1" opacity="0.6"/>
+  <!-- Small stem to pod -->
+  <path d="M50 44 Q48 46 35 48" fill="none" stroke="#1A7A3D" stroke-width="1.5"/>
+</svg>

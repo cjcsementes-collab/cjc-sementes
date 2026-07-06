@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sesame: upright plant with bell-shaped flowers and seed capsules -->
+  <!-- Main stem -->
+  <line x1="50" y1="95" x2="50" y2="10" stroke="#1A7A3D" stroke-width="3" stroke-linecap="round"/>
+  <!-- Leaves -->
+  <path d="M50 80 Q35 74 26 78 Q24 82 34 84 Q42 85 50 80" fill="#1A7A3D"/>
+  <path d="M50 70 Q65 64 74 68 Q76 72 66 74 Q58 75 50 70" fill="#24903D"/>
+  <path d="M50 58 Q36 52 28 56 Q26 60 36 62 Q44 63 50 58" fill="#1A7A3D"/>
+  <!-- Seed capsules (elongated, upright along stem) -->
+  <rect x="46" y="42" width="8" height="14" rx="2" fill="#8B7D3C" stroke="#6B5D2C" stroke-width="1"/>
+  <line x1="50" y1="42" x2="50" y2="56" stroke="#6B5D2C" stroke-width="0.8"/>
+  <rect x="43" y="48" width="6" height="10" rx="1.5" fill="#9B8D4C" stroke="#7B6D3C" stroke-width="0.8" transform="rotate(-20 46 53)"/>
+  <rect x="51" y="46" width="6" height="10" rx="1.5" fill="#9B8D4C" stroke="#7B6D3C" stroke-width="0.8" transform="rotate(20 54 51)"/>
+  <!-- Bell-shaped flowers at top -->
+  <path d="M46 28 Q44 20 47 16 Q50 13 53 16 Q56 20 54 28 Z" fill="#F5E6CC" stroke="#D4C4A0" stroke-width="0.8"/>
+  <path d="M40 35 Q38 28 41 24 Q44 22 46 25 Q48 28 46 35 Z" fill="#F0DEC0" stroke="#D4C4A0" stroke-width="0.8" transform="rotate(-15 43 30)"/>
+  <path d="M54 33 Q52 26 55 22 Q58 20 60 23 Q62 26 60 33 Z" fill="#F5E6CC" stroke="#D4C4A0" stroke-width="0.8" transform="rotate(15 57 28)"/>
+  <!-- Flower stamens -->
+  <line x1="50" y1="18" x2="50" y2="14" stroke="#F0650C" stroke-width="1" stroke-linecap="round"/>
+  <circle cx="50" cy="13" r="1" fill="#F0650C"/>
+  <line x1="43" y1="26" x2="42" y2="22" stroke="#F0650C" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="57" y1="24" x2="58" y2="20" stroke="#F0650C" stroke-width="0.8" stroke-linecap="round"/>
+</svg>

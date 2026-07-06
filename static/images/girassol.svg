@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Sunflower: classic with yellow petals and brown center -->
+  <!-- Stem -->
+  <line x1="50" y1="95" x2="50" y2="55" stroke="#1A7A3D" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Leaves -->
+  <path d="M50 80 Q32 72 22 76 Q20 80 30 82 Q40 84 50 80" fill="#1A7A3D"/>
+  <path d="M50 70 Q68 62 78 66 Q80 70 70 72 Q60 74 50 70" fill="#24903D"/>
+  <!-- Petals - arranged in circle -->
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFD700" transform="rotate(0 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFC800" transform="rotate(30 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFD700" transform="rotate(60 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFCC00" transform="rotate(90 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFD700" transform="rotate(120 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFC800" transform="rotate(150 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFD700" transform="rotate(180 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFCC00" transform="rotate(210 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFD700" transform="rotate(240 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFC800" transform="rotate(270 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFD700" transform="rotate(300 50 38)"/>
+  <ellipse cx="50" cy="25" rx="4" ry="12" fill="#FFCC00" transform="rotate(330 50 38)"/>
+  <!-- Brown center disc -->
+  <circle cx="50" cy="38" r="11" fill="#5C3A1E"/>
+  <circle cx="50" cy="38" r="9" fill="#6B4226"/>
+  <!-- Center seed pattern -->
+  <circle cx="47" cy="35" r="1" fill="#4A2810"/>
+  <circle cx="53" cy="35" r="1" fill="#4A2810"/>
+  <circle cx="50" cy="32" r="1" fill="#4A2810"/>
+  <circle cx="50" cy="38" r="1" fill="#4A2810"/>
+  <circle cx="45" cy="38" r="1" fill="#4A2810"/>
+  <circle cx="55" cy="38" r="1" fill="#4A2810"/>
+  <circle cx="50" cy="42" r="1" fill="#4A2810"/>
+  <circle cx="47" cy="41" r="1" fill="#4A2810"/>
+  <circle cx="53" cy="41" r="1" fill="#4A2810"/>
+</svg>

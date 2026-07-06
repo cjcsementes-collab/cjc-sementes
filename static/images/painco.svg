@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Proso millet: drooping panicle with golden seeds -->
+  <!-- Stem -->
+  <line x1="50" y1="95" x2="50" y2="25" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Leaves -->
+  <path d="M50 70 Q35 62 25 66" fill="none" stroke="#1A7A3D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 55 Q65 48 73 52" fill="none" stroke="#24903D" stroke-width="2" stroke-linecap="round"/>
+  <!-- Drooping panicle branches with golden seeds -->
+  <path d="M50 25 Q45 20 35 22" fill="none" stroke="#B8960C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M50 25 Q55 18 60 22" fill="none" stroke="#B8960C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M50 28 Q42 25 30 30" fill="none" stroke="#B8960C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M50 28 Q58 24 65 30" fill="none" stroke="#B8960C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M50 32 Q40 30 32 36" fill="none" stroke="#B8960C" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M50 32 Q60 30 67 36" fill="none" stroke="#B8960C" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Golden seed dots on panicle -->
+  <circle cx="35" cy="22" r="2.5" fill="#DAA520"/>
+  <circle cx="60" cy="22" r="2.5" fill="#DAA520"/>
+  <circle cx="30" cy="30" r="2.5" fill="#D4A017"/>
+  <circle cx="65" cy="30" r="2.5" fill="#D4A017"/>
+  <circle cx="32" cy="36" r="2" fill="#DAA520"/>
+  <circle cx="67" cy="36" r="2" fill="#DAA520"/>
+  <circle cx="50" cy="22" r="2" fill="#D4A017"/>
+  <circle cx="45" cy="18" r="2" fill="#DAA520"/>
+  <circle cx="55" cy="16" r="2" fill="#DAA520"/>
+  <circle cx="40" cy="26" r="2" fill="#D4A017"/>
+  <circle cx="58" cy="26" r="2" fill="#D4A017"/>
+</svg>

@@ -76,35 +76,16 @@
                         Escaneie o QR Code abaixo com o aplicativo do seu banco ou utilize o código Copia e Cola para efetuar o pagamento.
                     </p>
                     
-                    <!-- QR Code Simulado em SVG Premium -->
-                    <div class="qr-code-box">
-                        <svg viewBox="0 0 100 100" width="160" height="160">
-                            <!-- Moldura e Padrões QR Fictícios -->
-                            <rect x="5" y="5" width="25" height="25" fill="#364F4F"/>
-                            <rect x="10" y="10" width="15" height="15" fill="white"/>
-                            <rect x="13" y="13" width="9" height="9" fill="#364F4F"/>
-                            
-                            <rect x="70" y="5" width="25" height="25" fill="#364F4F"/>
-                            <rect x="75" y="10" width="15" height="15" fill="white"/>
-                            <rect x="78" y="13" width="9" height="9" fill="#364F4F"/>
-                            
-                            <rect x="5" y="70" width="25" height="25" fill="#364F4F"/>
-                            <rect x="10" y="75" width="15" height="15" fill="white"/>
-                            <rect x="13" y="78" width="9" height="9" fill="#364F4F"/>
-                            
-                            <!-- Sprout no meio para branding e design -->
-                            <path d="M50,35 C42,42 42,52 50,65 C58,52 58,42 50,35 Z" fill="var(--verde-safra)"/>
-                            <path d="M48,42 C45,46 45,50 48,56 C51,50 51,46 48,42 Z" fill="#81C784"/>
-                            
-                            <!-- Pixels aleatórios do QR -->
-                            <rect x="35" y="10" width="6" height="6" fill="#364F4F"/>
-                            <rect x="45" y="5" width="8" height="4" fill="#364F4F"/>
-                            <rect x="60" y="15" width="5" height="8" fill="#364F4F"/>
-                            <rect x="35" y="60" width="8" height="5" fill="#364F4F"/>
-                            <rect x="40" y="80" width="12" height="6" fill="#364F4F"/>
-                            <rect x="70" y="60" width="6" height="10" fill="#364F4F"/>
-                            <rect x="80" y="85" width="10" height="5" fill="#364F4F"/>
-                        </svg>
+                    <!-- QR Code Pix -->
+                    <div class="qr-code-box" style="background-color: white; border: 3px solid var(--grafite-titanio);">
+                        {% if qr_code_base64 %}
+                            <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code Pix" style="width: 180px; height: 180px;">
+                        {% else %}
+                            <div style="text-align: center; padding: 20px;">
+                                <i class="fa-solid fa-qrcode" style="font-size: 3rem; color: var(--text-muted);"></i>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">QR Code indisponível.<br>Use o Copia e Cola abaixo.</p>
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div style="max-width: 500px; margin: 0 auto 20px;">
@@ -126,16 +107,26 @@
                 </div>
             {% endif %}
             
-            <!-- Simulador de Confirmação Rápida de Pagamento para fins demonstrativos -->
-            <div style="background-color: var(--bg-main); border-radius: var(--radius-sm); padding: 15px; margin-top: 30px; text-align: center; border: 1px solid var(--border-color);">
-                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 10px; font-weight: bold;">
-                    [ MODO DEMONSTRATIVO ]
-                </span>
-                <form action="{{ url_for('simulate_payment', pedido_id=pedido.id) }}" method="POST">
-                    <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 15px;">
-                        Simular Confirmação de Pagamento
+            <!-- Verificação de Pagamento -->
+            <div style="margin-top: 30px; text-align: center;">
+                {% if is_inter_configured %}
+                    <button type="button" id="btn-verificar-pix" class="btn btn-secondary" style="font-size: 0.9rem; padding: 10px 25px;">
+                        <i class="fa-solid fa-rotate"></i> Já Paguei — Verificar Pagamento
                     </button>
-                </form>
+                    <p id="pix-status-msg" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;"></p>
+                {% else %}
+                    <div style="background-color: var(--bg-main); border-radius: var(--radius-sm); padding: 15px; border: 1px solid var(--border-color);">
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+                            <i class="fa-solid fa-info-circle" style="color: var(--laranja-brasa);"></i>
+                            Integração Pix em validação pelo Banco Inter. Após aprovação, o QR Code será gerado automaticamente.
+                        </p>
+                        <form action="{{ url_for('simulate_payment', pedido_id=pedido.id) }}" method="POST" style="margin-top: 10px;">
+                            <button type="submit" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 15px;">
+                                <i class="fa-solid fa-play"></i> Simular Pagamento (Demonstração)
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
             </div>
         </div>
     {% else %}
@@ -220,4 +211,63 @@
     </div>
 
 </section>
+
+{% if pedido.status == 'Pendente' and pedido.metodo_pagamento == 'PIX' %}
+<script>
+(function() {
+    const btnVerificar = document.getElementById('btn-verificar-pix');
+    const statusMsg = document.getElementById('pix-status-msg');
+    let polling = null;
+    
+    function verificarPagamento() {
+        if (btnVerificar) {
+            btnVerificar.disabled = true;
+            btnVerificar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+        }
+        
+        fetch('{{ url_for("verificar_pix", pedido_id=pedido.id) }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.pago) {
+                if (statusMsg) statusMsg.innerHTML = '<span style="color: var(--verde-safra); font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Pagamento confirmado! Recarregando...</span>';
+                if (polling) clearInterval(polling);
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                if (btnVerificar) {
+                    btnVerificar.disabled = false;
+                    btnVerificar.innerHTML = '<i class="fa-solid fa-rotate"></i> Já Paguei — Verificar Pagamento';
+                }
+                if (statusMsg) {
+                    if (data.mensagem) {
+                        statusMsg.textContent = data.mensagem;
+                    } else {
+                        statusMsg.textContent = 'Pagamento ainda não identificado. Aguarde alguns instantes após pagar.';
+                    }
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (btnVerificar) {
+                btnVerificar.disabled = false;
+                btnVerificar.innerHTML = '<i class="fa-solid fa-rotate"></i> Já Paguei — Verificar Pagamento';
+            }
+        });
+    }
+    
+    // Click handler
+    if (btnVerificar) {
+        btnVerificar.addEventListener('click', verificarPagamento);
+    }
+    
+    // Auto-polling a cada 15 segundos
+    {% if is_inter_configured %}
+    polling = setInterval(verificarPagamento, 15000);
+    {% endif %}
+})();
+</script>
+{% endif %}
 {% endblock %}

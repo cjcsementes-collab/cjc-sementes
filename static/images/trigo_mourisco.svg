@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Buckwheat: small white/pink flowers in cluster on green stem -->
+  <!-- Main stem -->
+  <line x1="50" y1="95" x2="50" y2="30" stroke="#1A7A3D" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Branch stems -->
+  <line x1="50" y1="60" x2="35" y2="50" stroke="#1A7A3D" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="50" y1="50" x2="65" y2="42" stroke="#1A7A3D" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Leaves - heart/arrow shaped -->
+  <path d="M50 75 Q38 68 32 72 Q30 75 38 78 Q44 80 50 75" fill="#1A7A3D"/>
+  <path d="M50 65 Q62 58 68 62 Q70 65 62 68 Q56 70 50 65" fill="#24903D"/>
+  <!-- Flower cluster at top - white/pink small flowers -->
+  <!-- Center flowers -->
+  <circle cx="50" cy="22" r="3.5" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.8"/>
+  <circle cx="44" cy="18" r="3" fill="#FFF0F0" stroke="#FFC0C0" stroke-width="0.8"/>
+  <circle cx="56" cy="18" r="3" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.8"/>
+  <circle cx="50" cy="14" r="3" fill="#FFF5F5" stroke="#FFCCCC" stroke-width="0.8"/>
+  <circle cx="42" cy="24" r="2.8" fill="#FFF0F0" stroke="#FFC0C0" stroke-width="0.8"/>
+  <circle cx="58" cy="24" r="2.8" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.8"/>
+  <circle cx="47" cy="28" r="2.5" fill="#FFF5F5" stroke="#FFCCCC" stroke-width="0.8"/>
+  <circle cx="53" cy="28" r="2.5" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.8"/>
+  <!-- Flower centers -->
+  <circle cx="50" cy="22" r="1.2" fill="#E8A0A0"/>
+  <circle cx="44" cy="18" r="1" fill="#E8A0A0"/>
+  <circle cx="56" cy="18" r="1" fill="#E8A0A0"/>
+  <circle cx="50" cy="14" r="1" fill="#E8A0A0"/>
+  <!-- Side flower clusters -->
+  <circle cx="35" cy="47" r="2.5" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.6"/>
+  <circle cx="32" cy="50" r="2" fill="#FFF0F0" stroke="#FFC0C0" stroke-width="0.6"/>
+  <circle cx="38" cy="50" r="2" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.6"/>
+  <circle cx="65" cy="39" r="2.5" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.6"/>
+  <circle cx="62" cy="42" r="2" fill="#FFF0F0" stroke="#FFC0C0" stroke-width="0.6"/>
+  <circle cx="68" cy="42" r="2" fill="#FFE8E8" stroke="#FFB8B8" stroke-width="0.6"/>
+</svg>
