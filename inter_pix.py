@@ -114,7 +114,10 @@ class InterPixClient:
                 cert=self._get_cert_tuple(),
                 timeout=30
             )
-            response.raise_for_status()
+            
+            if response.status_code != 200:
+                print(f'❌ Token Inter falhou [{response.status_code}]: {response.text}')
+                response.raise_for_status()
             
             token_data = response.json()
             self._token = token_data['access_token']
@@ -122,11 +125,13 @@ class InterPixClient:
             expires_in = token_data.get('expires_in', 3600)
             self._token_expires_at = time.time() + expires_in - 300
             
-            logger.info('✅ Token Inter obtido com sucesso.')
+            print('✅ Token Inter obtido com sucesso.')
             return self._token
             
         except requests.exceptions.RequestException as e:
-            logger.error(f'❌ Erro ao obter token Inter: {e}')
+            print(f'❌ Erro ao obter token Inter: {e}')
+            if hasattr(e, 'response') and e.response is not None:
+                print(f'   Response body: {e.response.text}')
             raise
     
     def _generate_txid(self, pedido_id):
@@ -189,6 +194,8 @@ class InterPixClient:
                 k: v for k, v in payload['devedor'].items() if v is not None
             }
             
+            print(f'📤 Criando cobrança Pix: txid={txid}, valor={pedido.total}, chave={self.pix_key}')
+            
             response = requests.put(
                 url,
                 headers=headers,
@@ -196,20 +203,26 @@ class InterPixClient:
                 cert=self._get_cert_tuple(),
                 timeout=30
             )
-            response.raise_for_status()
+            
+            if response.status_code not in [200, 201]:
+                print(f'❌ Cobrança Pix falhou [{response.status_code}]: {response.text}')
+                response.raise_for_status()
             
             data = response.json()
-            logger.info(f'✅ Cobrança Pix criada: txid={txid}')
+            pix_copia_cola = data.get('pixCopiaECola', '')
+            print(f'✅ Cobrança Pix criada: txid={txid}, tem_pix_code={bool(pix_copia_cola)}')
             
             return {
                 'txid': txid,
-                'pix_copia_cola': data.get('pixCopiaECola', ''),
+                'pix_copia_cola': pix_copia_cola,
                 'location': data.get('location', ''),
                 'status': data.get('status', 'ATIVA')
             }
             
         except requests.exceptions.RequestException as e:
-            logger.error(f'❌ Erro ao criar cobrança Pix: {e}')
+            print(f'❌ Erro ao criar cobrança Pix: {e}')
+            if hasattr(e, 'response') and e.response is not None:
+                print(f'   Response [{e.response.status_code}]: {e.response.text}')
             # Fallback para simulação em caso de erro
             return self._criar_cobranca_simulada(pedido)
     
