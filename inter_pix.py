@@ -64,35 +64,75 @@ class InterPixClient:
     def _setup_certificates(self):
         """Decodifica certificados de base64 para arquivos temporários."""
         try:
-            # Certificado .crt/.pem
-            # Limpa whitespace extra do base64 (env vars podem ter espaços)
-            cert_b64_clean = self.cert_base64.strip()
-            key_b64_clean = self.key_base64.strip()
+            # Limpa whitespace extra do base64 (env vars podem ter espaços/newlines)
+            cert_b64_clean = ''.join(self.cert_base64.split())
+            key_b64_clean = ''.join(self.key_base64.split())
             
-            cert_bytes = base64.b64decode(cert_b64_clean)
-            # PEM requer line endings LF (não CRLF)
-            cert_content = cert_bytes.replace(b'\r\n', b'\n')
+            print(f'🔐 Inter cert base64 length: {len(cert_b64_clean)} chars')
+            print(f'🔐 Inter key base64 length: {len(key_b64_clean)} chars')
             
+            cert_content = base64.b64decode(cert_b64_clean)
+            key_content = base64.b64decode(key_b64_clean)
+            
+            # Normaliza line endings para LF (Linux/PEM padrão)
+            cert_content = cert_content.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+            key_content = key_content.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+            
+            # Validação: verifica se é PEM válido
+            cert_str = cert_content.decode('utf-8', errors='replace')
+            key_str = key_content.decode('utf-8', errors='replace')
+            
+            has_cert_begin = '-----BEGIN CERTIFICATE-----' in cert_str
+            has_cert_end = '-----END CERTIFICATE-----' in cert_str
+            has_key_begin = '-----BEGIN' in key_str and 'KEY-----' in key_str
+            has_key_end = '-----END' in key_str and 'KEY-----' in key_str
+            
+            print(f'🔐 Cert PEM válido: BEGIN={has_cert_begin}, END={has_cert_end}, size={len(cert_content)}B')
+            print(f'🔐 Key PEM válido: BEGIN={has_key_begin}, END={has_key_end}, size={len(key_content)}B')
+            
+            if not all([has_cert_begin, has_cert_end, has_key_begin, has_key_end]):
+                print('❌ ATENÇÃO: Certificado ou chave não parece estar em formato PEM válido!')
+                print(f'   Cert primeiros 60 chars: {cert_str[:60]}')
+                print(f'   Key primeiros 60 chars: {key_str[:60]}')
+            
+            # Salva em arquivos temporários com permissões restritas
             cert_path = os.path.join(tempfile.gettempdir(), 'inter_cert.pem')
+            key_path = os.path.join(tempfile.gettempdir(), 'inter_key.pem')
+            
             with open(cert_path, 'wb') as f:
                 f.write(cert_content)
-            self._cert_file = type('obj', (object,), {'name': cert_path})()
             
-            # Chave privada .key
-            key_bytes = base64.b64decode(key_b64_clean)
-            key_content = key_bytes.replace(b'\r\n', b'\n')
-            
-            key_path = os.path.join(tempfile.gettempdir(), 'inter_key.pem')
             with open(key_path, 'wb') as f:
                 f.write(key_content)
+            
+            # Tenta restringir permissões (Linux)
+            try:
+                os.chmod(cert_path, 0o600)
+                os.chmod(key_path, 0o600)
+            except Exception:
+                pass
+            
+            self._cert_file = type('obj', (object,), {'name': cert_path})()
             self._key_file = type('obj', (object,), {'name': key_path})()
             
-            # Debug: verifica se os arquivos foram escritos corretamente
-            print(f'✅ Certificados Inter salvos: cert={len(cert_content)}B, key={len(key_content)}B')
-            print(f'   Cert inicia com: {cert_content[:30]}')
-            print(f'   Key inicia com: {key_content[:30]}')
+            # Teste: tenta carregar o certificado com ssl para validar
+            try:
+                import ssl
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                ctx.load_cert_chain(cert_path, key_path)
+                print('✅ Certificados Inter validados com sucesso pelo OpenSSL!')
+            except ssl.SSLError as ssl_err:
+                print(f'❌ Erro OpenSSL ao validar certificados: {ssl_err}')
+                self.configured = False
+                return
+            except Exception as val_err:
+                print(f'⚠️ Não foi possível validar certificados (continuando): {val_err}')
+            
+            print('✅ Certificados Inter prontos para uso.')
         except Exception as e:
             print(f'❌ Erro ao decodificar certificados Inter: {e}')
+            import traceback
+            traceback.print_exc()
             self.configured = False
     
     def _get_cert_tuple(self):
