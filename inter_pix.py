@@ -65,26 +65,34 @@ class InterPixClient:
         """Decodifica certificados de base64 para arquivos temporários."""
         try:
             # Certificado .crt/.pem
-            cert_bytes = base64.b64decode(self.cert_base64)
-            self._cert_file = tempfile.NamedTemporaryFile(
-                suffix='.crt', delete=False, mode='wb'
-            )
-            self._cert_file.write(cert_bytes)
-            self._cert_file.flush()
-            self._cert_file.close()
+            # Limpa whitespace extra do base64 (env vars podem ter espaços)
+            cert_b64_clean = self.cert_base64.strip()
+            key_b64_clean = self.key_base64.strip()
+            
+            cert_bytes = base64.b64decode(cert_b64_clean)
+            # PEM requer line endings LF (não CRLF)
+            cert_content = cert_bytes.replace(b'\r\n', b'\n')
+            
+            cert_path = os.path.join(tempfile.gettempdir(), 'inter_cert.pem')
+            with open(cert_path, 'wb') as f:
+                f.write(cert_content)
+            self._cert_file = type('obj', (object,), {'name': cert_path})()
             
             # Chave privada .key
-            key_bytes = base64.b64decode(self.key_base64)
-            self._key_file = tempfile.NamedTemporaryFile(
-                suffix='.key', delete=False, mode='wb'
-            )
-            self._key_file.write(key_bytes)
-            self._key_file.flush()
-            self._key_file.close()
+            key_bytes = base64.b64decode(key_b64_clean)
+            key_content = key_bytes.replace(b'\r\n', b'\n')
             
-            logger.info('✅ Certificados Inter decodificados com sucesso.')
+            key_path = os.path.join(tempfile.gettempdir(), 'inter_key.pem')
+            with open(key_path, 'wb') as f:
+                f.write(key_content)
+            self._key_file = type('obj', (object,), {'name': key_path})()
+            
+            # Debug: verifica se os arquivos foram escritos corretamente
+            print(f'✅ Certificados Inter salvos: cert={len(cert_content)}B, key={len(key_content)}B')
+            print(f'   Cert inicia com: {cert_content[:30]}')
+            print(f'   Key inicia com: {key_content[:30]}')
         except Exception as e:
-            logger.error(f'❌ Erro ao decodificar certificados Inter: {e}')
+            print(f'❌ Erro ao decodificar certificados Inter: {e}')
             self.configured = False
     
     def _get_cert_tuple(self):
