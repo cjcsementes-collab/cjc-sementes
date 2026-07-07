@@ -49,14 +49,37 @@ class InterPixClient:
             self.configured = False
             return
         
-        # Tenta carregar certificados: primeiro de Secret Files, depois de base64
-        cert_file_path = '/etc/secrets/inter_cert.pem'
-        key_file_path = '/etc/secrets/inter_key.pem'
+        # Tenta carregar certificados de Secret Files (múltiplos caminhos possíveis)
+        secret_paths = [
+            ('/etc/secrets/inter_cert.pem', '/etc/secrets/inter_key.pem'),
+            ('inter_cert.pem', 'inter_key.pem'),  # Raiz do app
+            ('./inter_cert.pem', './inter_key.pem'),
+        ]
         
-        if os.path.exists(cert_file_path) and os.path.exists(key_file_path):
-            print('🔐 Usando certificados de Secret Files (arquivos diretos).')
-            self._cert_file = type('obj', (object,), {'name': cert_file_path})()
-            self._key_file = type('obj', (object,), {'name': key_file_path})()
+        # Debug: listar conteúdo de /etc/secrets/ se existir
+        secrets_dir = '/etc/secrets'
+        if os.path.exists(secrets_dir):
+            try:
+                files = os.listdir(secrets_dir)
+                print(f'🔐 Conteúdo de {secrets_dir}/: {files}')
+            except Exception as e:
+                print(f'🔐 Erro ao listar {secrets_dir}/: {e}')
+        else:
+            print(f'🔐 Diretório {secrets_dir}/ NÃO existe.')
+        
+        # Procura certificados nos caminhos possíveis
+        cert_found = None
+        key_found = None
+        for cert_path, key_path in secret_paths:
+            if os.path.exists(cert_path) and os.path.exists(key_path):
+                cert_found = cert_path
+                key_found = key_path
+                break
+        
+        if cert_found and key_found:
+            print(f'🔐 Usando certificados de Secret Files: cert={cert_found}, key={key_found}')
+            self._cert_file = type('obj', (object,), {'name': cert_found})()
+            self._key_file = type('obj', (object,), {'name': key_found})()
             self.configured = True
             self._validate_certificates()
         elif self.cert_base64 and self.key_base64:
