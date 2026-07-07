@@ -43,23 +43,65 @@ class InterPixClient:
         self.pix_key = app.config.get('INTER_PIX_KEY', '')
         self.sandbox = app.config.get('INTER_SANDBOX', False)
         
-        # Verifica se todas as credenciais estão configuradas
-        self.configured = all([
-            self.client_id,
-            self.client_secret,
-            self.cert_base64,
-            self.key_base64
-        ])
+        # Verifica se as credenciais básicas estão configuradas
+        if not self.client_id or not self.client_secret:
+            print('⚠️ Inter Pix API não configurada (sem client_id/secret). Modo simulado.')
+            self.configured = False
+            return
         
-        if self.configured:
-            logger.info('✅ Inter Pix API configurada com sucesso.')
+        # Tenta carregar certificados: primeiro de Secret Files, depois de base64
+        cert_file_path = '/etc/secrets/inter_cert.pem'
+        key_file_path = '/etc/secrets/inter_key.pem'
+        
+        if os.path.exists(cert_file_path) and os.path.exists(key_file_path):
+            print('🔐 Usando certificados de Secret Files (arquivos diretos).')
+            self._cert_file = type('obj', (object,), {'name': cert_file_path})()
+            self._key_file = type('obj', (object,), {'name': key_file_path})()
+            self.configured = True
+            self._validate_certificates()
+        elif self.cert_base64 and self.key_base64:
+            print('🔐 Usando certificados de variáveis de ambiente (base64).')
+            self.configured = True
             self._setup_certificates()
         else:
-            logger.warning('⚠️ Inter Pix API não configurada. Operando em modo simulado.')
+            print('⚠️ Inter Pix API: sem certificados. Modo simulado.')
+            self.configured = False
     
     @property
     def base_url(self):
         return self.SANDBOX_BASE_URL if self.sandbox else self.PROD_BASE_URL
+    
+    def _validate_certificates(self):
+        """Valida que os certificados (de Secret Files) são PEM válidos."""
+        try:
+            cert_path = self._cert_file.name
+            key_path = self._key_file.name
+            
+            # Verifica tamanho dos arquivos
+            cert_size = os.path.getsize(cert_path)
+            key_size = os.path.getsize(key_path)
+            print(f'🔐 Secret Files: cert={cert_size}B, key={key_size}B')
+            
+            # Verifica conteúdo PEM
+            with open(cert_path, 'r') as f:
+                cert_head = f.readline().strip()
+            with open(key_path, 'r') as f:
+                key_head = f.readline().strip()
+            print(f'🔐 Cert header: {cert_head}')
+            print(f'🔐 Key header: {key_head}')
+            
+            # Testa com OpenSSL
+            import ssl
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.load_cert_chain(cert_path, key_path)
+            print('✅ Certificados Inter (Secret Files) validados pelo OpenSSL!')
+        except ssl.SSLError as ssl_err:
+            print(f'❌ Erro OpenSSL ao validar certificados: {ssl_err}')
+            self.configured = False
+        except Exception as e:
+            print(f'⚠️ Erro ao validar certificados: {e}')
+            import traceback
+            traceback.print_exc()
     
     def _setup_certificates(self):
         """Decodifica certificados de base64 para arquivos temporários."""
