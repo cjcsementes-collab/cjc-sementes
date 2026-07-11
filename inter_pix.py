@@ -217,7 +217,7 @@ class InterPixClient:
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'grant_type': 'client_credentials',
-            'scope': 'cob.write cob.read pix.read webhook.write'
+            'scope': 'cob.write cob.read pix.write pix.read'
         }
         
         try:
