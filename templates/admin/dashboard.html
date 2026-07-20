@@ -82,10 +82,15 @@
                     <tbody>
                         {% for ped in pedidos %}
                             <tr>
-                                <td><strong>#{{ ped.id }}</strong></td>
+                                <td>
+                                    <strong>#{{ ped.id }}</strong>
+                                    {% if ped.status == 'Pendente' %}
+                                        <br><span style="font-size: 0.7rem; background-color: var(--laranja-brasa); color: white; padding: 2px 4px; border-radius: 3px;"><i class="fa-solid fa-fire"></i> LEAD (Carrinho Abandonado)</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <strong>{{ ped.cliente.nome }}</strong><br>
-                                    <small style="color: var(--text-muted);">{{ ped.cliente.email }} | {{ ped.cliente.telefone }}</small>
+                                    <small style="color: var(--text-muted); font-weight: bold;"><a href="mailto:{{ ped.cliente.email }}">{{ ped.cliente.email }}</a> | <a href="https://wa.me/55{{ ''.join(ped.cliente.telefone|select('in', '0123456789')) }}" target="_blank" style="color: #25D366;"><i class="fa-brands fa-whatsapp"></i> {{ ped.cliente.telefone }}</a></small>
                                 </td>
                                 <td><span style="font-size: 0.8rem; background: var(--bg-main); padding: 2px 6px; border-radius: 4px;">{{ ped.cliente.atividade }}</span></td>
                                 <td>{{ ped.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>

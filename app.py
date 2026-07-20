@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash
 from config import Config
 from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
 from inter_pix import inter_pix
+from email_service import enviar_email_confirmacao
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -274,14 +275,17 @@ def checkout():
         email = request.form.get('email')
         telefone = request.form.get('telefone')
         endereco = request.form.get('endereco')
+        cidade = request.form.get('cidade')
+        uf = request.form.get('uf')
+        cep = request.form.get('cep')
         atividade = request.form.get('atividade')
         
         # Frete selecionado
         frete_opcao = request.form.get('frete_opcao')
         valor_frete = float(request.form.get('valor_frete', 0.0))
-        metodo_pagamento = request.form.get('metodo_pagamento') # PIX ou Cartao
+        metodo_pagamento = request.form.get('metodo_pagamento', 'PIX_BOLETO')
         
-        if not all([nome, cpf, email, endereco, frete_opcao, metodo_pagamento]):
+        if not all([nome, cpf, email, endereco, cidade, uf, cep, frete_opcao]):
             flash('Por favor, preencha todos os campos obrigatórios.', 'danger')
             return render_template('checkout.html', subtotal=subtotal, peso_total_kg=peso_total_kg, form_data=request.form)
             
@@ -293,7 +297,11 @@ def checkout():
                 cpf=cpf,
                 email=email,
                 telefone=telefone,
-                endereco_completo=endereco,
+                endereco_completo=endereco, # kept for backward compat
+                endereco=endereco,
+                cidade=cidade,
+                uf=uf,
+                cep=cep,
                 atividade=atividade
             )
             db.session.add(cliente)
@@ -304,6 +312,10 @@ def checkout():
             cliente.email = email
             cliente.telefone = telefone
             cliente.endereco_completo = endereco
+            cliente.endereco = endereco
+            cliente.cidade = cidade
+            cliente.uf = uf
+            cliente.cep = cep
             cliente.atividade = atividade
             
         # 2. Cria o Pedido
@@ -343,14 +355,14 @@ def checkout():
         # Salva o ID do último pedido na sessão para a página de status
         session['ultimo_pedido_id'] = pedido.id
         
-        # Cria cobrança Pix via API Inter (ou simulada se não configurado)
-        if metodo_pagamento == 'PIX':
-            pix_result = inter_pix.criar_cobranca_pix(pedido, cliente)
-            if pix_result:
-                pedido.pix_txid = pix_result.get('txid')
-                pedido.pix_copia_cola = pix_result.get('pix_copia_cola')
-                pedido.pix_location = pix_result.get('location')
-                db.session.commit()
+        # Cria cobrança Boleto/Pix via API Inter (ou simulada se não configurado)
+        pix_result = inter_pix.criar_cobranca(pedido, cliente)
+        if pix_result:
+            pedido.pix_txid = pix_result.get('txid') # codigoSolicitacao
+            pedido.pix_copia_cola = pix_result.get('pix_copia_cola') # Inicialmente vazio na V3
+            pedido.pix_location = pix_result.get('location')
+            
+        db.session.commit()
         
         return redirect(url_for('order_status', pedido_id=pedido.id))
         
@@ -396,6 +408,7 @@ def order_status(pedido_id):
         'order_status.html',
         pedido=pedido,
         pix_copia_cola=pix_copia_cola,
+        linha_digitavel=pedido.pix_location if pedido.metodo_pagamento == 'PIX_BOLETO' else None,
         qr_code_base64=qr_code_base64,
         is_inter_configured=is_inter_configured
     )
@@ -410,23 +423,44 @@ def simulate_payment(pedido_id):
 
 @app.route('/pedido/<int:pedido_id>/verificar-pix', methods=['POST'])
 def verificar_pix(pedido_id):
-    """Verifica o status do pagamento Pix via API Inter (polling manual)."""
+    """Verifica o status do pagamento Pix/Boleto via API Inter (polling manual)."""
     pedido = Pedido.query.get_or_404(pedido_id)
     
     if pedido.status != 'Pendente':
-        return jsonify({'status': pedido.status, 'pago': pedido.status == 'Pago'})
+        return jsonify({'status': pedido.status, 'pago': pedido.status == 'Pago', 'pix_copia_cola': pedido.pix_copia_cola, 'linha_digitavel': pedido.pix_location})
     
     if not pedido.pix_txid or not inter_pix.configured:
-        return jsonify({'status': 'SIMULADO', 'pago': False, 'mensagem': 'Integração Pix em validação. Use o botão de simulação.'})
+        return jsonify({'status': 'SIMULADO', 'pago': False, 'mensagem': 'Integração em validação.'})
     
     result = inter_pix.consultar_cobranca(pedido.pix_txid)
     
-    if result.get('pago'):
-        pedido.status = 'Pago'
+    # Atualiza dados assíncronos que podem ter chegado agora
+    updated = False
+    if result.get('pix_copia_cola') and not pedido.pix_copia_cola:
+        pedido.pix_copia_cola = result.get('pix_copia_cola')
+        updated = True
+        
+    if result.get('linha_digitavel') and pedido.pix_location != result.get('linha_digitavel'):
+        pedido.pix_location = result.get('linha_digitavel') # Usamos location para a linha digitável
+        updated = True
+        
+    if updated:
         db.session.commit()
-        return jsonify({'status': 'CONCLUIDA', 'pago': True})
     
-    return jsonify({'status': result.get('status', 'ATIVA'), 'pago': False})
+    if result.get('pago'):
+        if pedido.status != 'Pago':
+            pedido.status = 'Pago'
+            db.session.commit()
+            # Envia o e-mail de confirmação
+            enviar_email_confirmacao(pedido)
+        return jsonify({'status': 'CONCLUIDA', 'pago': True, 'pix_copia_cola': pedido.pix_copia_cola, 'linha_digitavel': pedido.pix_location})
+    
+    return jsonify({
+        'status': result.get('status', 'PROCESSANDO'), 
+        'pago': False,
+        'pix_copia_cola': pedido.pix_copia_cola,
+        'linha_digitavel': pedido.pix_location
+    })
 
 @app.route('/webhook/pix', methods=['POST'])
 def webhook_pix():
@@ -450,6 +484,8 @@ def webhook_pix():
                 pedido.status = 'Pago'
                 db.session.commit()
                 print(f'✅ Webhook Pix: Pedido #{pedido.id} marcado como Pago (txid: {txid})')
+                # Envia o e-mail de confirmação
+                enviar_email_confirmacao(pedido)
         
         return jsonify({'status': 'ok'}), 200
         
@@ -516,8 +552,15 @@ def admin_update_order_status(pedido_id):
     novo_status = request.form.get('status')
     
     if novo_status in ['Pendente', 'Pago', 'Enviado', 'Entregue', 'Cancelado']:
+        status_anterior = pedido.status
         pedido.status = novo_status
         db.session.commit()
+        
+        # Se mudou de Pendente para Pago manualmente pelo painel admin
+        if status_anterior != 'Pago' and novo_status == 'Pago':
+            from email_service import enviar_email_confirmacao
+            enviar_email_confirmacao(pedido)
+            
         flash(f'Status do pedido #{pedido.id} atualizado para {novo_status}.', 'success')
     else:
         flash('Status de pedido inválido.', 'danger')

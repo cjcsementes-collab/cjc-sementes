@@ -67,33 +67,49 @@
     <!-- Área de Pagamento Pendente -->
     {% if pedido.status == 'Pendente' %}
         <div class="cart-card" style="margin-bottom: 30px; border: 2px solid var(--laranja-brasa); padding: 30px;">
-            {% if pedido.metodo_pagamento == 'PIX' %}
+            {% if 'PIX' in pedido.metodo_pagamento %}
                 <div style="text-align: center;">
                     <h3 style="color: var(--laranja-brasa); font-size: 1.4rem; margin-bottom: 10px;">
-                        <i class="fa-brands fa-pix"></i> Pagamento via PIX
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Boleto Híbrido (Pix ou Código de Barras)
                     </h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted);">
-                        Escaneie o QR Code abaixo com o aplicativo do seu banco ou utilize o código Copia e Cola para efetuar o pagamento.
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">
+                        Pague com Pix usando o QR Code abaixo (aprovado na hora) ou utilize a linha digitável do Boleto (compensação em até 1 dia útil).
                     </p>
                     
-                    <!-- QR Code Pix -->
-                    <div class="qr-code-box" style="background-color: white; border: 3px solid var(--grafite-titanio);">
-                        {% if qr_code_base64 %}
-                            <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code Pix" style="width: 180px; height: 180px;">
-                        {% else %}
-                            <div style="text-align: center; padding: 20px;">
-                                <i class="fa-solid fa-qrcode" style="font-size: 3rem; color: var(--text-muted);"></i>
-                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">QR Code indisponível.<br>Use o Copia e Cola abaixo.</p>
-                            </div>
-                        {% endif %}
+                    <div id="loading-pix" style="{% if pix_copia_cola %}display: none;{% endif %} margin: 30px 0;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: var(--verde-safra);"></i>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;">Gerando sua cobrança no Banco Inter...</p>
                     </div>
                     
-                    <div style="max-width: 500px; margin: 0 auto 20px;">
-                        <label class="form-label" style="font-size: 0.8rem; text-align: left;">Código Pix Copia e Cola:</label>
-                        <textarea class="copia-cola-textarea" id="pix-copia-cola-text" readonly>{{ pix_copia_cola }}</textarea>
-                        <button type="button" id="btn-copiar-pix" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">
-                            Copiar Código
-                        </button>
+                    <div id="pix-content" style="{% if not pix_copia_cola %}display: none;{% endif %}">
+                        <!-- QR Code Pix -->
+                        <div class="qr-code-box" style="background-color: white; border: 3px solid var(--grafite-titanio); display: inline-block; padding: 10px; border-radius: 8px;">
+                            {% if qr_code_base64 %}
+                                <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code Pix" style="width: 180px; height: 180px;" id="qr-code-img">
+                            {% else %}
+                                <div id="qr-fallback" style="text-align: center; padding: 20px; width: 180px;">
+                                    <i class="fa-solid fa-qrcode" style="font-size: 3rem; color: var(--text-muted);"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div style="max-width: 500px; margin: 20px auto;">
+                            <label class="form-label" style="font-size: 0.8rem; text-align: left;">Código Pix Copia e Cola:</label>
+                            <textarea class="copia-cola-textarea" id="pix-copia-cola-text" readonly>{{ pix_copia_cola }}</textarea>
+                            <button type="button" id="btn-copiar-pix" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">
+                                Copiar Copia e Cola
+                            </button>
+                        </div>
+                        
+                        <hr style="border-top: 1px dashed var(--border-color); margin: 20px 0;">
+                        
+                        <div style="max-width: 500px; margin: 20px auto;">
+                            <label class="form-label" style="font-size: 0.8rem; text-align: left;">Linha Digitável do Boleto:</label>
+                            <textarea class="copia-cola-textarea" id="boleto-linha-text" readonly style="height: 50px;">{{ linha_digitavel }}</textarea>
+                            <button type="button" id="btn-copiar-boleto" class="btn btn-secondary" style="padding: 8px 20px; font-size: 0.9rem;">
+                                Copiar Linha Digitável
+                            </button>
+                        </div>
                     </div>
                 </div>
             {% else %}
@@ -212,15 +228,19 @@
 
 </section>
 
-{% if pedido.status == 'Pendente' and pedido.metodo_pagamento == 'PIX' %}
+{% if pedido.status == 'Pendente' and 'PIX' in pedido.metodo_pagamento %}
 <script>
 (function() {
     const btnVerificar = document.getElementById('btn-verificar-pix');
     const statusMsg = document.getElementById('pix-status-msg');
-    let polling = null;
     
-    function verificarPagamento() {
-        if (btnVerificar) {
+    const temPixCopiaCola = "{{ pix_copia_cola|default('', true) }}" !== "";
+    
+    let polling = null;
+    let autoPolling = null;
+    
+    function verificarPagamento(isAuto = false) {
+        if (btnVerificar && !isAuto) {
             btnVerificar.disabled = true;
             btnVerificar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
         }
@@ -231,11 +251,24 @@
         })
         .then(res => res.json())
         .then(data => {
+            // Se foi pago
             if (data.pago) {
                 if (statusMsg) statusMsg.innerHTML = '<span style="color: var(--verde-safra); font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Pagamento confirmado! Recarregando...</span>';
                 if (polling) clearInterval(polling);
+                if (autoPolling) clearInterval(autoPolling);
                 setTimeout(() => window.location.reload(), 1500);
-            } else {
+                return;
+            } 
+            
+            // Se não tinha QR Code antes, mas agora a API retornou
+            if (!temPixCopiaCola && data.pix_copia_cola) {
+                if (autoPolling) clearInterval(autoPolling);
+                window.location.reload(); // Recarrega para gerar e mostrar o QR Code na tela
+                return;
+            }
+            
+            // Tratamento de botão para clique manual
+            if (!isAuto) {
                 if (btnVerificar) {
                     btnVerificar.disabled = false;
                     btnVerificar.innerHTML = '<i class="fa-solid fa-rotate"></i> Já Paguei — Verificar Pagamento';
@@ -251,22 +284,43 @@
         })
         .catch(err => {
             console.error(err);
-            if (btnVerificar) {
+            if (btnVerificar && !isAuto) {
                 btnVerificar.disabled = false;
                 btnVerificar.innerHTML = '<i class="fa-solid fa-rotate"></i> Já Paguei — Verificar Pagamento';
             }
         });
     }
     
-    // Click handler
     if (btnVerificar) {
-        btnVerificar.addEventListener('click', verificarPagamento);
+        btnVerificar.addEventListener('click', () => verificarPagamento(false));
     }
     
-    // Auto-polling a cada 15 segundos
-    {% if is_inter_configured %}
-    polling = setInterval(verificarPagamento, 15000);
-    {% endif %}
+    // Se ainda não gerou o Pix/Boleto, faz polling a cada 3 segundos
+    if (!temPixCopiaCola) {
+        autoPolling = setInterval(() => verificarPagamento(true), 3000);
+    }
+    
+    // Polling automático para pagamento (mesmo depois de gerar QR Code)
+    polling = setInterval(() => verificarPagamento(true), 15000); // 15 segundos
+    
+    // Funcionalidade de Copiar
+    const btnCopiarBoleto = document.getElementById('btn-copiar-boleto');
+    const textareaBoleto = document.getElementById('boleto-linha-text');
+    if (btnCopiarBoleto && textareaBoleto) {
+        btnCopiarBoleto.addEventListener('click', function() {
+            textareaBoleto.select();
+            document.execCommand('copy');
+            const originalText = this.innerText;
+            this.innerText = 'Copiado!';
+            this.style.backgroundColor = 'var(--verde-safra)';
+            this.style.color = 'white';
+            setTimeout(() => {
+                this.innerText = originalText;
+                this.style.backgroundColor = 'var(--border-color)';
+                this.style.color = 'var(--text-dark)';
+            }, 2000);
+        });
+    }
 })();
 </script>
 {% endif %}

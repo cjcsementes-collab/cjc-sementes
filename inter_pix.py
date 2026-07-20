@@ -217,7 +217,7 @@ class InterPixClient:
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'grant_type': 'client_credentials',
-            'scope': 'cob.write cob.read'
+            'scope': 'boleto-cobranca.write boleto-cobranca.read'
         }
         
         try:
@@ -258,15 +258,15 @@ class InterPixClient:
         # txid deve ter entre 26 e 35 caracteres alfanuméricos
         return txid[:35]
     
-    def criar_cobranca_pix(self, pedido, cliente):
-        """Cria uma cobrança Pix imediata na API Inter.
+    def criar_cobranca(self, pedido, cliente):
+        """Cria uma cobrança (Boleto + Pix) na API Inter V3.
         
         Args:
             pedido: Objeto Pedido com total e id
-            cliente: Objeto Cliente com cpf e nome
+            cliente: Objeto Cliente com cpf, nome, cep, endereco, cidade, uf
             
         Returns:
-            dict com 'txid', 'pix_copia_cola', 'location', 'status'
+            dict com 'txid' (codigoSolicitacao), 'status'
             ou None se não configurado / erro
         """
         if not self.configured:
@@ -275,9 +275,8 @@ class InterPixClient:
         
         try:
             token = self._get_access_token()
-            txid = self._generate_txid(pedido.id)
             
-            url = f'{self.base_url}/pix/v2/cob/{txid}'
+            url = f'{self.base_url}/cobranca/v3/cobrancas'
             headers = {
                 'Authorization': f'Bearer {token}',
                 'Content-Type': 'application/json'
@@ -285,31 +284,31 @@ class InterPixClient:
             
             # Remove formatação do CPF/CNPJ (só dígitos)
             cpf_cnpj = ''.join(filter(str.isdigit, cliente.cpf))
+            tipo_pessoa = "FISICA" if len(cpf_cnpj) <= 11 else "JURIDICA"
+            
+            # Vencimento em 3 dias
+            vencimento = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
             
             payload = {
-                'calendario': {
-                    'expiracao': 3600  # 1 hora para pagar
+                "seuNumero": f"CJC{pedido.id:06d}",
+                "valorNominal": pedido.total,
+                "dataVencimento": vencimento,
+                "numDiasAgenda": 0,
+                "pagador": {
+                    "cpfCnpj": cpf_cnpj,
+                    "tipoPessoa": tipo_pessoa,
+                    "nome": cliente.nome[:100],
+                    "endereco": (cliente.endereco or "Não Informado")[:90],
+                    "cidade": (cliente.cidade or "Pato Branco")[:60],
+                    "uf": (cliente.uf or "PR")[:2],
+                    "cep": ''.join(filter(str.isdigit, cliente.cep or "85500000"))[:8]
                 },
-                'devedor': {
-                    'cpf': cpf_cnpj if len(cpf_cnpj) == 11 else None,
-                    'cnpj': cpf_cnpj if len(cpf_cnpj) == 14 else None,
-                    'nome': cliente.nome[:200]
-                },
-                'valor': {
-                    'original': f'{pedido.total:.2f}'
-                },
-                'chave': self.pix_key,
-                'solicitacaoPagador': f'Pedido #{pedido.id} - CJC Sementes'
+                "formasRecebimento": ["BOLETO", "PIX"]
             }
             
-            # Remove campo None do devedor
-            payload['devedor'] = {
-                k: v for k, v in payload['devedor'].items() if v is not None
-            }
+            print(f'📤 Criando cobrança V3: seuNumero={payload["seuNumero"]}, valor={pedido.total}')
             
-            print(f'📤 Criando cobrança Pix: txid={txid}, valor={pedido.total}, chave={self.pix_key}')
-            
-            response = requests.put(
+            response = requests.post(
                 url,
                 headers=headers,
                 json=payload,
@@ -317,41 +316,42 @@ class InterPixClient:
                 timeout=30
             )
             
-            if response.status_code not in [200, 201]:
-                print(f'❌ Cobrança Pix falhou [{response.status_code}]: {response.text}')
+            if response.status_code not in [200, 201, 202]:
+                print(f'❌ Cobrança V3 falhou [{response.status_code}]: {response.text}')
                 response.raise_for_status()
             
             data = response.json()
-            pix_copia_cola = data.get('pixCopiaECola', '')
-            print(f'✅ Cobrança Pix criada: txid={txid}, tem_pix_code={bool(pix_copia_cola)}')
+            codigo_solicitacao = data.get('codigoSolicitacao', '')
+            print(f'✅ Cobrança V3 criada: codigoSolicitacao={codigo_solicitacao}')
             
             return {
-                'txid': txid,
-                'pix_copia_cola': pix_copia_cola,
-                'location': data.get('location', ''),
-                'status': data.get('status', 'ATIVA')
+                'txid': codigo_solicitacao, # Usamos o txid para guardar o codigoSolicitacao
+                'pix_copia_cola': '', # Vem depois de alguns segundos
+                'location': '',
+                'status': 'PROCESSANDO'
             }
             
         except requests.exceptions.RequestException as e:
-            print(f'❌ Erro ao criar cobrança Pix: {e}')
+            print(f'❌ Erro ao criar cobrança V3: {e}')
             if hasattr(e, 'response') and e.response is not None:
                 print(f'   Response [{e.response.status_code}]: {e.response.text}')
             # Fallback para simulação em caso de erro
             return self._criar_cobranca_simulada(pedido)
     
-    def consultar_cobranca(self, txid):
-        """Consulta o status de uma cobrança Pix pelo txid.
+    def consultar_cobranca(self, codigo_solicitacao):
+        """Consulta o status de uma cobrança V3 pelo codigoSolicitacao.
         
         Returns:
-            dict com 'status' (ATIVA, CONCLUIDA, REMOVIDA_PELO_USUARIO_RECEBEDOR, etc.)
-            e 'pago' (boolean)
+            dict com 'status' (ATIVA, CONCLUIDA, etc.),
+            'pago' (boolean),
+            'pix_copia_cola' e 'linha_digitavel'
         """
         if not self.configured:
             return {'status': 'SIMULADO', 'pago': False}
         
         try:
             token = self._get_access_token()
-            url = f'{self.base_url}/pix/v2/cob/{txid}'
+            url = f'{self.base_url}/cobranca/v3/cobrancas?codigoSolicitacao={codigo_solicitacao}'
             headers = {
                 'Authorization': f'Bearer {token}'
             }
@@ -364,18 +364,30 @@ class InterPixClient:
             )
             response.raise_for_status()
             
+            # O array content traz a lista de cobranças para essa solicitação
             data = response.json()
-            status = data.get('status', 'ATIVA')
-            pago = status == 'CONCLUIDA'
+            cobrancas = data.get('content', [])
+            
+            if not cobrancas:
+                return {'status': 'PROCESSANDO', 'pago': False}
+                
+            cobranca = cobrancas[0]
+            situacao = cobranca.get('situacao', 'EMISSAO_EM_PROCESSAMENTO')
+            pago = situacao in ['PAGO', 'LIQUIDADO']
+            
+            pix_copia_cola = cobranca.get('pixCopiaECola', '')
+            linha_digitavel = cobranca.get('linhaDigitavel', '')
             
             return {
-                'status': status,
+                'status': situacao,
                 'pago': pago,
-                'data': data
+                'pix_copia_cola': pix_copia_cola,
+                'linha_digitavel': linha_digitavel,
+                'data': cobranca
             }
             
         except requests.exceptions.RequestException as e:
-            logger.error(f'❌ Erro ao consultar cobrança Pix: {e}')
+            logger.error(f'❌ Erro ao consultar cobrança V3: {e}')
             return {'status': 'ERRO', 'pago': False}
     
     def _criar_cobranca_simulada(self, pedido):

@@ -61,9 +61,17 @@
                 </h3>
                 
                 <div class="form-row">
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label" for="checkout-cep">CEP de Destino * (digite para carregar opções de entrega)</label>
-                        <input type="text" id="checkout-cep" class="form-input" placeholder="00000-000" required style="max-width: 200px;">
+                    <div class="form-group">
+                        <label class="form-label" for="checkout-cep">CEP de Destino *</label>
+                        <input type="text" name="cep" id="checkout-cep" class="form-input" placeholder="00000-000" required value="{{ form_data.cep if form_data else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="cidade">Cidade *</label>
+                        <input type="text" name="cidade" id="cidade" class="form-input" placeholder="Sua Cidade" required value="{{ form_data.cidade if form_data else '' }}">
+                    </div>
+                    <div class="form-group" style="max-width: 100px;">
+                        <label class="form-label" for="uf">UF *</label>
+                        <input type="text" name="uf" id="uf" class="form-input" placeholder="PR" maxlength="2" required value="{{ form_data.uf if form_data else '' }}">
                     </div>
                 </div>
 
@@ -89,47 +97,23 @@
                     <h3 class="summary-title" style="margin-bottom: 15px;"><i class="fa-solid fa-credit-card" style="color: var(--laranja-brasa); margin-right: 8px;"></i> 3. Pagamento</h3>
                     
                     <!-- Abas de Pagamento -->
-                    <div class="payment-methods">
-                        <div class="payment-method-card selected" id="payment-pix">
+                    <div class="payment-methods" style="grid-template-columns: 1fr;">
+                        <div class="payment-method-card selected" id="payment-pix" style="background-color: var(--card-bg); border-color: var(--laranja-brasa);">
                             <i class="fa-brands fa-pix payment-method-icon"></i>
-                            <div style="font-weight: bold; font-size: 0.9rem;">PIX</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">Aprovação Imediata</div>
-                        </div>
-                        <div class="payment-method-card" id="payment-card">
-                            <i class="fa-solid fa-credit-card payment-method-icon"></i>
-                            <div style="font-weight: bold; font-size: 0.9rem;">Cartão</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">Crédito em até 6x</div>
+                            <div style="font-weight: bold; font-size: 0.9rem;">PIX ou Boleto</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Geração Imediata</div>
                         </div>
                     </div>
                     
-                    <!-- Conteúdo: PIX -->
+                    <!-- Conteúdo: PIX/Boleto -->
                     <div id="pix-info-box" class="pix-details-box">
-                        <i class="fa-brands fa-pix" style="font-size: 2.5rem; color: var(--laranja-brasa); margin-bottom: 10px;"></i>
-                        <p style="font-size: 0.9rem; font-weight: 600;">Geração de QR Code dinâmico</p>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Ao clicar em "Confirmar Pedido", um QR Code exclusivo e o código Copia e Cola serão gerados para pagamento instantâneo.</p>
+                        <i class="fa-solid fa-file-invoice-dollar" style="font-size: 2.5rem; color: var(--laranja-brasa); margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.9rem; font-weight: 600;">Geração de QR Code e Boleto</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Ao clicar em "Finalizar Pedido", nosso sistema gerará um Boleto com validade de 3 dias, que também possui um QR Code para pagamento via Pix.</p>
                     </div>
                     
-                    <!-- Conteúdo: Cartão -->
-                    <div id="card-info-box" class="card-details-box" style="display: none;">
-                        <div class="form-group">
-                            <label class="form-label" style="font-size: 0.8rem;">Número do Cartão</label>
-                            <input type="text" class="form-input" placeholder="4000 1234 5678 9010" style="padding: 8px 12px; font-size: 0.9rem;">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" style="font-size: 0.8rem;">Nome Impresso no Cartão</label>
-                            <input type="text" class="form-input" placeholder="JOÃO CASSOL" style="padding: 8px 12px; font-size: 0.9rem; text-transform: uppercase;">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" style="font-size: 0.8rem;">Validade</label>
-                                <input type="text" class="form-input" placeholder="MM/AA" style="padding: 8px 12px; font-size: 0.9rem;">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" style="font-size: 0.8rem;">CVV</label>
-                                <input type="password" class="form-input" placeholder="***" style="padding: 8px 12px; font-size: 0.9rem;">
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Hidden field to force PIX/Boleto as method -->
+                    <input type="hidden" name="metodo_pagamento" id="metodo_pagamento_input" value="PIX_BOLETO">
                 </div>
 
                 <!-- Resumo dos Valores -->

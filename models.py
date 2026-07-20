@@ -34,7 +34,11 @@ class Cliente(db.Model):
     cpf = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(20), nullable=True)
-    endereco_completo = db.Column(db.Text, nullable=False)
+    endereco_completo = db.Column(db.Text, nullable=False) # Mantido por compatibilidade
+    endereco = db.Column(db.String(255), nullable=True)
+    cidade = db.Column(db.String(100), nullable=True)
+    uf = db.Column(db.String(2), nullable=True)
+    cep = db.Column(db.String(20), nullable=True)
     atividade = db.Column(db.String(100), nullable=True) # Produtor Rural, Agrônomo, Empresa, Outro
 
     def __repr__(self):
