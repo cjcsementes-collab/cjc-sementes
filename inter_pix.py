@@ -367,15 +367,15 @@ class InterPixClient:
             
             data = response.json()
             
-            cobranca_info = data.get('cobranca', {})
+            cobranca_info = data.get('cobranca') or data
             situacao = cobranca_info.get('situacao', 'EMISSAO_EM_PROCESSAMENTO')
             pago = situacao in ['RECEBIDO', 'PAGO', 'LIQUIDADO', 'MARCADO_RECEBIDO']
             
-            pix_info = data.get('pix', {})
-            pix_copia_cola = pix_info.get('pixCopiaECola', '')
+            pix_info = data.get('pix') or data
+            pix_copia_cola = pix_info.get('pixCopiaECola') or pix_info.get('pix_copia_cola', '')
             
-            boleto_info = data.get('boleto', {})
-            linha_digitavel = boleto_info.get('linhaDigitavel', '')
+            boleto_info = data.get('boleto') or data
+            linha_digitavel = boleto_info.get('linhaDigitavel') or boleto_info.get('linha_digitavel', '')
             
             return {
                 'status': situacao,

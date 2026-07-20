@@ -373,17 +373,7 @@ def order_status(pedido_id):
     pedido = Pedido.query.get_or_404(pedido_id)
     
     # Usa o Pix Copia e Cola real armazenado no pedido (gerado pela API Inter)
-    # Se não houver (pedido antigo ou erro), gera um simulado
     pix_copia_cola = pedido.pix_copia_cola
-    if not pix_copia_cola and pedido.metodo_pagamento == 'PIX':
-        import random
-        random_hex = ''.join(random.choices('0123456789ABCDEF', k=25))
-        pix_copia_cola = (
-            f"00020101021226830014br.gov.bcb.pix2561{random_hex}"
-            f"52040000530398654{len(str(round(pedido.total, 2))):02d}"
-            f"{round(pedido.total, 2)}5802BR5925J CASSOL SEMENTES LTDA"
-            f"6014PATO BRANCO PR62070503***6304"
-        )
     
     # Gera QR Code como imagem base64 para exibição no template
     qr_code_base64 = None
