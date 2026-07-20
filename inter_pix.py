@@ -351,7 +351,8 @@ class InterPixClient:
         
         try:
             token = self._get_access_token()
-            url = f'{self.base_url}/cobranca/v3/cobrancas?codigoSolicitacao={codigo_solicitacao}'
+            # O endpoint correto para buscar por codigoSolicitacao é no path param
+            url = f'{self.base_url}/cobranca/v3/cobrancas/{codigo_solicitacao}'
             headers = {
                 'Authorization': f'Bearer {token}'
             }
@@ -364,30 +365,29 @@ class InterPixClient:
             )
             response.raise_for_status()
             
-            # O array content traz a lista de cobranças para essa solicitação
             data = response.json()
-            cobrancas = data.get('content', [])
             
-            if not cobrancas:
-                return {'status': 'PROCESSANDO', 'pago': False}
-                
-            cobranca = cobrancas[0]
-            situacao = cobranca.get('situacao', 'EMISSAO_EM_PROCESSAMENTO')
-            pago = situacao in ['PAGO', 'LIQUIDADO']
+            cobranca_info = data.get('cobranca', {})
+            situacao = cobranca_info.get('situacao', 'EMISSAO_EM_PROCESSAMENTO')
+            pago = situacao in ['RECEBIDO', 'PAGO', 'LIQUIDADO', 'MARCADO_RECEBIDO']
             
-            pix_copia_cola = cobranca.get('pixCopiaECola', '')
-            linha_digitavel = cobranca.get('linhaDigitavel', '')
+            pix_info = data.get('pix', {})
+            pix_copia_cola = pix_info.get('pixCopiaECola', '')
+            
+            boleto_info = data.get('boleto', {})
+            linha_digitavel = boleto_info.get('linhaDigitavel', '')
             
             return {
                 'status': situacao,
                 'pago': pago,
                 'pix_copia_cola': pix_copia_cola,
-                'linha_digitavel': linha_digitavel,
-                'data': cobranca
+                'linha_digitavel': linha_digitavel
             }
             
         except requests.exceptions.RequestException as e:
-            logger.error(f'❌ Erro ao consultar cobrança V3: {e}')
+            print(f'❌ Erro ao consultar cobrança V3: {e}')
+            if hasattr(e, 'response') and e.response is not None:
+                print(f'   Response [{e.response.status_code}]: {e.response.text}')
             return {'status': 'ERRO', 'pago': False}
     
     def _criar_cobranca_simulada(self, pedido):
