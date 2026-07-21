@@ -186,6 +186,13 @@ def remove_from_cart(produto_id):
         flash('Produto removido do carrinho.', 'info')
     return redirect(url_for('cart'))
 
+@app.route('/carrinho/limpar')
+def clear_cart():
+    session['cart'] = {}
+    session.modified = True
+    flash('Seu carrinho foi esvaziado.', 'info')
+    return redirect(url_for('cart'))
+
 @app.route('/carrinho/calcular-frete', methods=['POST'])
 def calculate_shipping():
     cep = request.form.get('cep', '').strip().replace('-', '')
