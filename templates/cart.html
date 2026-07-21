@@ -52,9 +52,8 @@
                                     R$ {{ item.produto.preco_kg|round(2)|string|replace('.', ',') }} /{{ item.produto.unidade }}
                                 </td>
                                 <td>
-                                    <!-- Formulário de Atualização Rápida -->
                                     <form action="{{ url_for('update_cart', produto_id=item.produto.id) }}" method="POST" style="display:flex; justify-content:center; align-items:center; gap:5px;">
-                                        <input type="number" name="quantidade" class="form-input" value="{{ item.quantidade|int }}" min="1" max="{{ item.produto.estoque|int }}" style="width: 70px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);">
+                                        <input type="number" name="quantidade" class="form-input" value="{{ item.quantidade|int if item.quantidade >= 100 else 100 }}" min="100" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="Pedido mínimo de 100 kg">
                                         <button type="submit" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.8rem;" title="Atualizar quantidade">
                                             <i class="fa-solid fa-rotate"></i>
                                         </button>
@@ -67,6 +66,16 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                
+                <div style="text-align: right; margin-top: 10px;">
+                    <a href="{{ url_for('clear_cart') }}" class="btn btn-outline" style="color: #F44336; border-color: #F44336;">
+                        <i class="fa-solid fa-trash-can"></i> Esvaziar Carrinho
+                    </a>
+                </div>
+                
+                <div style="margin-top: 20px; background-color: rgba(255, 87, 34, 0.1); color: var(--laranja-brasa); padding: 15px; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 600; text-align: center;">
+                    <i class="fa-solid fa-circle-exclamation"></i> Lembrete: O pedido mínimo para todas as sementes é de 100 kg.
+                </div>
                 
                 <div style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center;">
                     <a href="{{ url_for('index') }}" class="btn btn-outline" style="border-radius: var(--radius-sm);">

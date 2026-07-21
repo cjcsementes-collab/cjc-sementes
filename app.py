@@ -122,12 +122,13 @@ def cart():
 def add_to_cart(produto_id):
     produto = Produto.query.get_or_404(produto_id)
     try:
-        quantidade = float(request.form.get('quantidade', 1))
+        quantidade = float(request.form.get('quantidade', 100))
     except ValueError:
-        quantidade = 1.0
+        quantidade = 100.0
         
-    if quantidade <= 0:
-        quantidade = 1.0
+    if quantidade < 100.0:
+        quantidade = 100.0
+        flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
         
     # Limita ao estoque disponível
     if quantidade > produto.estoque:
@@ -155,12 +156,13 @@ def add_to_cart(produto_id):
 def update_cart(produto_id):
     produto = Produto.query.get_or_404(produto_id)
     try:
-        quantidade = float(request.form.get('quantidade', 1))
+        quantidade = float(request.form.get('quantidade', 100))
     except ValueError:
-        quantidade = 1.0
+        quantidade = 100.0
         
-    if quantidade <= 0:
-        return remove_from_cart(produto_id)
+    if quantidade < 100.0:
+        quantidade = 100.0
+        flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
         
     if quantidade > produto.estoque:
         quantidade = produto.estoque

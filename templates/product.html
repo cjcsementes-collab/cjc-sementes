@@ -73,6 +73,12 @@
                 <span class="product-detail-stock-badge">
                     <i class="fa-solid fa-boxes-stacked"></i> Estoque Disponível: {{ produto.estoque|int }} {{ produto.unidade.upper() }}
                 </span>
+                
+                <div style="margin-top: 10px;">
+                    <span style="background-color: rgba(255, 87, 34, 0.1); color: var(--laranja-brasa); padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600;">
+                        <i class="fa-solid fa-circle-exclamation"></i> Pedido Mínimo: 100 kg
+                    </span>
+                </div>
             </div>
             
             <p class="product-detail-desc">{{ produto.descricao }}</p>
@@ -129,7 +135,7 @@
                 <div class="qty-buy-box">
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" id="qty-minus">-</button>
-                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="1" min="1" max="{{ produto.estoque|int }}">
+                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="100" min="100" max="{{ produto.estoque|int }}">
                         <button type="button" class="qty-btn" id="qty-plus">+</button>
                     </div>
                     

@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         function updateDetailTotal() {
             let qty = parseFloat(qtyInput.value);
-            if (isNaN(qty) || qty <= 0) qty = 1;
+            let min = parseFloat(qtyInput.getAttribute('min')) || 1;
+            if (isNaN(qty) || qty < min) qty = min;
             const total = basePrice * qty;
             totalDetailPrice.innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
@@ -50,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (btnMinus) {
             btnMinus.addEventListener('click', () => {
                 let current = parseFloat(qtyInput.value);
-                if (current > 1) {
+                let min = parseFloat(qtyInput.getAttribute('min')) || 1;
+                if (current > min) {
                     qtyInput.value = current - 1;
                     updateDetailTotal();
                 }
