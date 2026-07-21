@@ -53,7 +53,7 @@
                                 </td>
                                 <td>
                                     <form action="{{ url_for('update_cart', produto_id=item.produto.id) }}" method="POST" style="display:flex; justify-content:center; align-items:center; gap:5px;">
-                                        <input type="number" name="quantidade" class="form-input" value="{{ item.quantidade|int if item.quantidade >= 100 else 100 }}" min="100" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="Pedido mínimo de 100 kg">
+                                        <input type="number" name="quantidade" class="form-input" value="{% if item.quantidade >= 100 %}{{ item.quantidade|int }}{% else %}100{% endif %}" min="100" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="Pedido mínimo de 100 kg">
                                         <button type="submit" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.8rem;" title="Atualizar quantidade">
                                             <i class="fa-solid fa-rotate"></i>
                                         </button>
