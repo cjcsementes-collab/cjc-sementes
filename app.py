@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash
 from config import Config
 from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
 from inter_pix import inter_pix
-from email_service import enviar_email_confirmacao
+from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -363,6 +363,9 @@ def checkout():
             pedido.pix_location = pix_result.get('location')
             
         db.session.commit()
+        
+        # Envia email de Novo Pedido (Aguardando Pagamento)
+        enviar_email_novo_pedido(pedido)
         
         return redirect(url_for('order_status', pedido_id=pedido.id))
         
