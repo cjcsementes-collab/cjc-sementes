@@ -9,7 +9,7 @@ from config import Config
 import smtplib
 from email.message import EmailMessage
 import threading
-from bling_service import gerar_tokens, enviar_pedido_venda, BLING_CLIENT_ID
+from bling_service import gerar_tokens, enviar_pedido_venda, sincronizar_produtos_bling, BLING_CLIENT_ID
 from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
 from inter_pix import inter_pix
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
@@ -553,6 +553,16 @@ def admin_bling_callback():
             flash("Erro ao autorizar o Bling. Verifique as credenciais ou tente novamente.", "danger")
     else:
         flash("Autorização cancelada ou código não recebido.", "warning")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/bling/sync')
+@login_required
+def admin_bling_sync():
+    sucesso, mensagem = sincronizar_produtos_bling()
+    if sucesso:
+        flash(mensagem, "success")
+    else:
+        flash(mensagem, "danger")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/api/webhooks/bling/estoque', methods=['POST'])

@@ -163,3 +163,68 @@ def enviar_pedido_venda(pedido_id):
     else:
         print(f"❌ Erro ao enviar pedido #{pedido.id} para o Bling: {response.text}")
         return False
+
+def sincronizar_produtos_bling():
+    """Busca os produtos do Bling e sincroniza com o banco da loja."""
+    token = get_valid_access_token()
+    if not token:
+        return False, "Bling não autorizado. Gere os tokens primeiro."
+        
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/json'
+    }
+    
+    try:
+        response = requests.get(f"{API_BASE_URL}/produtos?limite=100", headers=headers)
+        if response.status_code != 200:
+            return False, f"Erro na API do Bling: {response.text}"
+            
+        data = response.json().get('data', [])
+        if not data:
+            return True, "Nenhum produto encontrado no Bling."
+            
+        from models import Produto, db
+        
+        count_new = 0
+        count_updated = 0
+        
+        for item in data:
+            codigo = str(item.get('codigo', ''))
+            nome = item.get('nome', '')
+            preco = float(item.get('preco', 0))
+            
+            if not codigo or not nome:
+                continue
+                
+            # Tenta achar por código
+            produto = Produto.query.filter_by(codigo_bling=codigo).first()
+            
+            if not produto:
+                # Tenta achar por nome exato (ignorando maiúsculas)
+                produto = Produto.query.filter(Produto.nome.ilike(nome)).first()
+                
+            if produto:
+                produto.codigo_bling = codigo
+                # Opcional: Atualizar preço do Bling
+                if preco > 0:
+                    produto.preco_kg = preco
+                count_updated += 1
+            else:
+                # Cria novo produto
+                novo_produto = Produto(
+                    nome=nome,
+                    descricao="Produto importado do Bling",
+                    preco_kg=preco,
+                    unidade='kg',
+                    codigo_bling=codigo,
+                    categoria='Outros',
+                    estoque=0.0
+                )
+                db.session.add(novo_produto)
+                count_new += 1
+                
+        db.session.commit()
+        return True, f"Sincronização concluída! {count_new} novos criados e {count_updated} atualizados com os códigos corretos."
+    except Exception as e:
+        return False, f"Erro interno na sincronização: {e}"

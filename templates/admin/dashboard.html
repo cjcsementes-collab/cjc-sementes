@@ -11,9 +11,12 @@
             <p style="font-size: 0.95rem;">Bem-vindo(a) ao painel administrativo. Aqui você gerencia o estoque, pedidos e integrações do sistema.</p>
         </div>
         
-        <div style="margin-top: 15px;">
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
             <a href="{{ url_for('admin_bling_authorize') }}" class="btn btn-secondary" style="background-color: #00BFA5; color: white; border: none;">
                 <i class="fa-solid fa-link"></i> Conectar com Bling ERP
+            </a>
+            <a href="{{ url_for('admin_bling_sync') }}" class="btn btn-secondary" style="background-color: #4CAF50; color: white; border: none;">
+                <i class="fa-solid fa-arrows-rotate"></i> Importar/Sincronizar Produtos
             </a>
         </div>
     </div>
