@@ -176,11 +176,23 @@
         </div>
         <div class="summary-row">
             <span>Endereço de Entrega</span>
-            <strong style="text-align: right; max-width: 60%; font-size: 0.85rem;">{{ pedido.cliente.endereco_completo }}</strong>
+            <strong style="text-align: right; max-width: 60%; font-size: 0.85rem;">
+                {% if pedido.valor_frete == 0 %}
+                    Sede CJC Sementes: Rua Principal, Linha São Bráz, Zona Rural, S/Nº, Lote 01, Bom Retiro, Pato Branco – PR
+                {% else %}
+                    {{ pedido.cliente.endereco_completo }}
+                {% endif %}
+            </strong>
         </div>
         <div class="summary-row">
             <span>Entrega Escolhida</span>
-            <strong>{{ pedido.metodo_pagamento }} - via transportadora</strong>
+            <strong>
+                {% if pedido.valor_frete == 0 %}
+                    Retirada na Unidade
+                {% else %}
+                    {{ pedido.metodo_pagamento }} - via transportadora
+                {% endif %}
+            </strong>
         </div>
         
         <table class="admin-table" style="margin-top: 30px; font-size: 0.85rem;">
