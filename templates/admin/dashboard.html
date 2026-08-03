@@ -6,8 +6,16 @@
 <section class="container" style="padding: 40px 0;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 30px;">
-        <h2 style="font-size: 1.8rem; color: var(--grafite-titanio);">Painel de Controle Administrativo</h2>
-        <span style="font-size: 0.9rem; color: var(--text-muted);">Bem-vindo, <strong>{{ current_user.username }}</strong></span>
+        <div>
+            <h2 style="font-size: 1.8rem; color: var(--grafite-titanio);">Painel de Controle Administrativo</h2>
+            <p style="font-size: 0.95rem;">Bem-vindo(a) ao painel administrativo. Aqui você gerencia o estoque, pedidos e integrações do sistema.</p>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <a href="{{ url_for('admin_bling_authorize') }}" class="btn btn-secondary" style="background-color: #00BFA5; color: white; border: none;">
+                <i class="fa-solid fa-link"></i> Conectar com Bling ERP
+            </a>
+        </div>
     </div>
 
     <!-- Estatísticas Principais -->
@@ -152,7 +160,7 @@
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th style="width: 80px;">Cód.</th>
+                        <th style="width: 50px; text-align: center;">Cód. (SKU)</th>
                         <th>Nome da Semente</th>
                         <th>Categoria</th>
                         <th>Preço / Unid.</th>
@@ -163,8 +171,10 @@
                 <tbody>
                     {% for prod in produtos %}
                         <tr>
-                            <td>#{{ prod.id }}</td>
-                            <td><strong>{{ prod.nome }}</strong></td>
+                            <td style="text-align: center;">
+                            <input type="text" name="codigo_bling" class="form-input" value="{{ prod.codigo_bling or '' }}" placeholder="{{ prod.id }}" style="width: 70px; text-align: center; padding: 5px; font-size: 0.85rem;" title="Código/SKU no Bling">
+                        </td>
+                        <td><strong>{{ prod.nome }}</strong></td>
                             <td><span style="font-size: 0.75rem; background-color: var(--bg-main); padding: 4px 8px; border-radius: 4px;">{{ prod.categoria }}</span></td>
                             <td>R$ {{ prod.preco_kg|round(2)|string|replace('.', ',') }} /{{ prod.unidade }}</td>
                             <td style="text-align: center; font-weight: bold; color: {% if prod.estoque < 200 %}#E65100{% else %}var(--verde-safra){% endif %};">

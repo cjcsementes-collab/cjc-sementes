@@ -22,6 +22,7 @@ class Produto(db.Model):
     unidade = db.Column(db.String(10), default='kg') # 'kg' ou 'sc' (saca)
     imagem_url = db.Column(db.String(255), nullable=True)
     estoque = db.Column(db.Float, default=1000.0)
+    codigo_bling = db.Column(db.String(50), nullable=True) # SKU no Bling
     categoria = db.Column(db.String(100), nullable=False) # Leguminosas, Gramíneas, Outros, Mixes
 
     def __repr__(self):
@@ -76,3 +77,13 @@ class ItemPedido(db.Model):
 
     def __repr__(self):
         return f'<ItemPedido {self.quantidade}x {self.produto.nome if self.produto else "Produto ID " + str(self.produto_id)}>'
+
+class BlingConfig(db.Model):
+    __tablename__ = 'bling_config'
+    id = db.Column(db.Integer, primary_key=True)
+    access_token = db.Column(db.Text, nullable=True)
+    refresh_token = db.Column(db.Text, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return f'<BlingConfig {self.id}>'

@@ -6,6 +6,10 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import check_password_hash
 
 from config import Config
+import smtplib
+from email.message import EmailMessage
+import threading
+from bling_service import gerar_tokens, enviar_pedido_venda, BLING_CLIENT_ID
 from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
 from inter_pix import inter_pix
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
@@ -419,6 +423,7 @@ def order_status(pedido_id):
 def simulate_payment(pedido_id):
     pedido = Pedido.query.get_or_404(pedido_id)
     pedido.status = 'Pago'
+    threading.Thread(target=enviar_pedido_venda, args=(pedido.id,)).start()
     db.session.commit()
     flash('Pagamento simulado e confirmado com sucesso!', 'success')
     return redirect(url_for('order_status', pedido_id=pedido.id))
@@ -452,6 +457,7 @@ def verificar_pix(pedido_id):
     if result.get('pago'):
         if pedido.status != 'Pago':
             pedido.status = 'Pago'
+            threading.Thread(target=enviar_pedido_venda, args=(pedido.id,)).start()
             db.session.commit()
             # Envia o e-mail de confirmação
             enviar_email_confirmacao(pedido)
@@ -484,6 +490,7 @@ def webhook_pix():
             pedido = Pedido.query.filter_by(pix_txid=txid).first()
             if pedido and pedido.status == 'Pendente':
                 pedido.status = 'Pago'
+                threading.Thread(target=enviar_pedido_venda, args=(pedido.id,)).start()
                 db.session.commit()
                 print(f'✅ Webhook Pix: Pedido #{pedido.id} marcado como Pago (txid: {txid})')
                 # Envia o e-mail de confirmação
@@ -520,8 +527,65 @@ def admin_login():
 @login_required
 def admin_logout():
     logout_user()
-    flash('Sessão encerrada com sucesso.', 'info')
-    return redirect(url_for('index'))
+    flash('Você saiu do sistema.', 'success')
+    return redirect(url_for('admin_login'))
+
+# --- ROTAS DO BLING ERP ---
+@app.route('/admin/bling/authorize')
+@login_required
+def admin_bling_authorize():
+    if not BLING_CLIENT_ID:
+        flash("Client ID do Bling não configurado nas variáveis de ambiente.", "danger")
+        return redirect(url_for('admin_dashboard'))
+    state = "bling_auth_cjc"
+    redirect_uri = url_for('admin_bling_callback', _external=True)
+    auth_url = f"https://www.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id={BLING_CLIENT_ID}&state={state}&redirect_uri={redirect_uri}"
+    return redirect(auth_url)
+
+@app.route('/admin/bling/callback')
+@login_required
+def admin_bling_callback():
+    code = request.args.get('code')
+    if code:
+        if gerar_tokens(code):
+            flash("Bling autorizado com sucesso! Integração ativada.", "success")
+        else:
+            flash("Erro ao autorizar o Bling. Verifique as credenciais ou tente novamente.", "danger")
+    else:
+        flash("Autorização cancelada ou código não recebido.", "warning")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/api/webhooks/bling/estoque', methods=['POST'])
+def webhook_bling_estoque():
+    data = request.json
+    if not data:
+        return jsonify({'status': 'ok'}), 200
+    try:
+        if 'retorno' in data and 'estoques' in data['retorno']:
+            lista = data['retorno']['estoques']
+        elif 'data' in data and 'retorno' in data['data'] and 'estoques' in data['data']['retorno']:
+            lista = data['data']['retorno']['estoques']
+        else:
+            lista = []
+            
+        for item in lista:
+            est = item.get('estoque', {})
+            codigo = str(est.get('codigo', ''))
+            saldo = float(est.get('estoqueAtual', est.get('saldoFisicoTotal', 0)))
+            
+            if codigo:
+                produto = Produto.query.filter_by(codigo_bling=codigo).first()
+                if not produto and codigo.isdigit():
+                    produto = Produto.query.get(int(codigo))
+                    
+                if produto:
+                    produto.estoque = saldo
+                    db.session.commit()
+                    print(f"✅ Estoque atualizado via Webhook: {produto.nome} -> {saldo}")
+    except Exception as e:
+        print(f"Erro processando webhook Bling: {e}")
+    return jsonify({'status': 'ok'}), 200
+# --------------------------
 
 @app.route('/admin/dashboard')
 @login_required
@@ -581,6 +645,12 @@ def admin_update_stock(produto_id):
         
     if novo_estoque >= 0:
         produto.estoque = novo_estoque
+        
+        # Atualiza o código Bling, se fornecido
+        novo_codigo_bling = request.form.get('codigo_bling')
+        if novo_codigo_bling is not None:
+            produto.codigo_bling = novo_codigo_bling.strip() if novo_codigo_bling.strip() else None
+            
         db.session.commit()
         flash(f'Estoque de {produto.nome} atualizado para {int(novo_estoque)} {produto.unidade.upper()}.', 'success')
     else:
@@ -592,8 +662,19 @@ def admin_update_stock(produto_id):
 def initialize_database():
     """Inicializa o banco de dados e popula com dados iniciais se necessário."""
     with app.app_context():
+        # Cria as tabelas necessárias
         db.create_all()
-        # Importa e executa seed apenas se o banco estiver vazio
+        
+        # Adiciona a coluna codigo_bling na tabela produtos caso ainda não exista
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('ALTER TABLE produtos ADD COLUMN codigo_bling VARCHAR(50);'))
+            db.session.commit()
+            print("✅ Coluna 'codigo_bling' adicionada na tabela 'produtos'.")
+        except Exception:
+            db.session.rollback()
+
+        # Criação de usuário Admin Padrão, caso não exista
         from models import Admin, Produto
         from werkzeug.security import generate_password_hash
         
