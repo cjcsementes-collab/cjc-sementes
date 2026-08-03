@@ -1,9 +1,21 @@
 import os
 import smtplib
 import logging
+import threading
 from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
+
+def _send_async(msg, smtp_host, smtp_port, smtp_user, smtp_pass):
+    try:
+        server = smtplib.SMTP(smtp_host, int(smtp_port), timeout=10)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+        server.quit()
+        print(f"✅ E-mail enviado com sucesso para {msg['To']}")
+    except Exception as e:
+        print(f"❌ Erro ao enviar e-mail em background: {e}")
 
 def enviar_email_confirmacao(pedido):
     """
@@ -51,14 +63,12 @@ Equipe CJC Sementes
 """
         msg.set_content(corpo)
         
-        # Conecta e envia
-        server = smtplib.SMTP(smtp_host, int(smtp_port))
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
-        server.quit()
+        # Conecta e envia em background para não travar o site
+        threading.Thread(
+            target=_send_async, 
+            args=(msg, smtp_host, smtp_port, smtp_user, smtp_pass)
+        ).start()
         
-        print(f"✅ E-mail de confirmação enviado para {pedido.cliente.email}")
         return True
     except Exception as e:
         print(f"❌ Erro ao enviar e-mail: {e}")
@@ -109,13 +119,12 @@ Equipe CJC Sementes
 """
         msg.set_content(corpo)
         
-        server = smtplib.SMTP(smtp_host, int(smtp_port))
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
-        server.quit()
+        # Conecta e envia em background para não travar o site
+        threading.Thread(
+            target=_send_async, 
+            args=(msg, smtp_host, smtp_port, smtp_user, smtp_pass)
+        ).start()
         
-        print(f"✅ E-mail de novo pedido enviado para {pedido.cliente.email}")
         return True
     except Exception as e:
         print(f"❌ Erro ao enviar e-mail de novo pedido: {e}")
