@@ -75,9 +75,13 @@
                 </span>
                 
                 <div style="margin-top: 10px;">
-                    <span style="background-color: rgba(255, 87, 34, 0.1); color: var(--laranja-brasa); padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600;">
-                        <i class="fa-solid fa-circle-exclamation"></i> Pedido Mínimo: 100 kg
-                    </span>
+                    <div class="product-badge" style="background-color: var(--verde-safra); color: white; padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600; display: inline-block;">
+                        {% if produto.id == 1 %}
+                            <i class="fa-solid fa-flask"></i> Produto de Teste (Sem limite mínimo)
+                        {% else %}
+                            <i class="fa-solid fa-circle-exclamation"></i> Pedido Mínimo: 100 kg
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             
@@ -135,7 +139,7 @@
                 <div class="qty-buy-box">
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" id="qty-minus">-</button>
-                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="100" min="100" max="{{ produto.estoque|int }}">
+                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.id == 1 %}1{% else %}100{% endif %}" min="{% if produto.id == 1 %}1{% else %}100{% endif %}" max="{{ produto.estoque|int }}">
                         <button type="button" class="qty-btn" id="qty-plus">+</button>
                     </div>
                     

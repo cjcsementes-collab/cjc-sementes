@@ -126,7 +126,7 @@ def add_to_cart(produto_id):
     except ValueError:
         quantidade = 100.0
         
-    if quantidade < 100.0:
+    if produto_id != 1 and quantidade < 100.0:
         quantidade = 100.0
         flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
         
@@ -160,7 +160,7 @@ def update_cart(produto_id):
     except ValueError:
         quantidade = 100.0
         
-    if quantidade < 100.0:
+    if produto_id != 1 and quantidade < 100.0:
         quantidade = 100.0
         flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
         
