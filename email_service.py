@@ -44,7 +44,7 @@ O seu pedido entrará em fase de separação física em nossa unidade no Bom Ret
 
 Qualquer dúvida, estamos à disposição!
 WhatsApp: (46) 9 9906-2375
-Email: jcassolsementes@gmail.com
+Email: cjcsementes@gmail.com
 
 Atenciosamente,
 Equipe CJC Sementes
@@ -102,7 +102,7 @@ Caso já tenha pago, você receberá um novo e-mail confirmando o pagamento em b
 
 Qualquer dúvida, estamos à disposição!
 WhatsApp: (46) 9 9906-2375
-Email: jcassolsementes@gmail.com
+Email: cjcsementes@gmail.com
 
 Atenciosamente,
 Equipe CJC Sementes
