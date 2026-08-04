@@ -189,13 +189,37 @@ def sincronizar_produtos_bling():
         count_new = 0
         count_updated = 0
         
+        # Mapear IDs internos do Bling para Códigos (SKU)
+        map_id_codigo = {}
         for item in data:
+            if item.get('id') and item.get('codigo'):
+                map_id_codigo[item.get('id')] = str(item.get('codigo'))
+                
+        # Buscar saldos de estoque
+        saldos_dict = {}
+        try:
+            resp_estoque = requests.get(f"{API_BASE_URL}/estoques/saldos?limite=100", headers=headers)
+            if resp_estoque.status_code == 200:
+                saldos_data = resp_estoque.json().get('data', [])
+                for s in saldos_data:
+                    p_id = s.get('produto', {}).get('id')
+                    saldo = float(s.get('saldoFisicoTotal', 0))
+                    if p_id:
+                        saldos_dict[p_id] = saldo
+        except Exception as e:
+            print("Erro ao buscar saldos:", e)
+        
+        for item in data:
+            bling_id = item.get('id')
             codigo = str(item.get('codigo', ''))
             nome = item.get('nome', '')
             preco = float(item.get('preco', 0))
             
             if not codigo or not nome:
                 continue
+                
+            # Saldo do produto
+            estoque_atual = saldos_dict.get(bling_id, 0.0)
                 
             # Tenta achar por código
             produto = Produto.query.filter_by(codigo_bling=codigo).first()
@@ -209,6 +233,7 @@ def sincronizar_produtos_bling():
                 # Opcional: Atualizar preço do Bling
                 if preco > 0:
                     produto.preco_kg = preco
+                produto.estoque = estoque_atual
                 count_updated += 1
             else:
                 # Cria novo produto
@@ -219,12 +244,12 @@ def sincronizar_produtos_bling():
                     unidade='kg',
                     codigo_bling=codigo,
                     categoria='Outros',
-                    estoque=0.0
+                    estoque=estoque_atual
                 )
                 db.session.add(novo_produto)
                 count_new += 1
                 
         db.session.commit()
-        return True, f"Sincronização concluída! {count_new} novos criados e {count_updated} atualizados com os códigos corretos."
+        return True, f"Sincronização concluída! {count_new} novos criados e {count_updated} atualizados com os códigos e ESTOQUES corretos."
     except Exception as e:
         return False, f"Erro interno na sincronização: {e}"
