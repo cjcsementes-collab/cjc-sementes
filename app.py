@@ -74,7 +74,14 @@ def index():
     familias = []
     if categoria_selecionada == 'MIX CUSTOMIZADO':
         familias = ["Mix de Inverno", "Mix de Verão"]
-    elif categoria_selecionada in ['INVERNO', 'VERÃO']:
+    elif categoria_selecionada == 'INVERNO':
+        familias = [
+            "Poáceas (Gramíneas)",
+            "Fabáceas (Leguminosas)",
+            "Crucíferas (Brássicas)",
+            "Polygonáceas"
+        ]
+    elif categoria_selecionada == 'VERÃO':
         familias = [
             "Asteraceae",
             "Poáceas (Gramíneas)",
