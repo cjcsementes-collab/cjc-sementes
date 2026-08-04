@@ -37,10 +37,13 @@
             <!-- Links de Navegação -->
             <nav>
                 <ul class="nav-links">
-                    <li class="{% if request.path == '/' %}active{% endif %}"><a href="{{ url_for('index') }}">Catálogo</a></li>
-                    <li><a href="{{ url_for('index') }}?categoria=Adubação Verde / Leguminosas">Adubação Verde</a></li>
-                    <li><a href="{{ url_for('index') }}?categoria=Gramíneas / Forrageiras">Gramíneas</a></li>
-                    <li><a href="{{ url_for('index') }}?categoria=Mixes e Customizados">Mix Customizado</a></li>
+                    <li class="{% if request.path == '/' and not request.args.get('categoria') %}active{% endif %}"><a href="{{ url_for('index') }}">Catálogo</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=INVERNO">INVERNO</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=VERÃO">VERÃO</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=BIOLÓGICOS">BIOLÓGICOS</a></li>
+                    <li><a href="#">INFORMAÇÕES TÉCNICAS</a></li>
+                    <li><a href="#">APP CONFIGURAÇÃO MIX</a></li>
+                    <li><a href="{{ url_for('index') }}?categoria=MIX CUSTOMIZADO">MIX CUSTOMIZADO</a></li>
                 </ul>
             </nav>
             

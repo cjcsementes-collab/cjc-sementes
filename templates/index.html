@@ -47,28 +47,35 @@
         </form>
     </div>
     
-    <!-- Filtros de Categoria -->
+    <!-- Filtros de Família (Subcategorias) -->
     <div class="filter-bar">
-        <a href="{{ url_for('index') }}{% if busca %}?busca={{ busca }}{% endif %}" 
-           class="filter-btn {% if not categoria_selecionada %}active{% endif %}">
-            <i class="fa-solid fa-border-all"></i> Todas
-        </a>
-        
-        {% for cat in categorias %}
-            <a href="{{ url_for('index') }}?categoria={{ cat }}{% if busca %}&busca={{ busca }}{% endif %}" 
-               class="filter-btn {% if categoria_selecionada == cat %}active{% endif %}">
-                {% if 'Gramíneas' in cat %}
-                    <i class="fa-solid fa-wheat-awn"></i>
-                {% elif 'Adubação Verde' in cat %}
-                    <i class="fa-solid fa-leaf"></i>
-                {% elif 'Grãos' in cat %}
-                    <i class="fa-solid fa-sun"></i>
-                {% else %}
-                    <i class="fa-solid fa-cubes"></i>
-                {% endif %}
-                {{ cat }}
+        {% if categoria_selecionada %}
+            <a href="{{ url_for('index') }}?categoria={{ categoria_selecionada }}{% if busca %}&busca={{ busca }}{% endif %}" 
+               class="filter-btn {% if not familia_selecionada %}active{% endif %}">
+                <i class="fa-solid fa-border-all"></i> Todas de {{ categoria_selecionada }}
             </a>
-        {% endfor %}
+            
+            {% for fam in familias %}
+                <a href="{{ url_for('index') }}?categoria={{ categoria_selecionada }}&familia={{ fam }}{% if busca %}&busca={{ busca }}{% endif %}" 
+                   class="filter-btn {% if familia_selecionada == fam %}active{% endif %}">
+                    {% if 'Gramíneas' in fam or 'Poáceas' in fam %}
+                        <i class="fa-solid fa-wheat-awn"></i>
+                    {% elif 'Leguminosas' in fam or 'Fabáceas' in fam %}
+                        <i class="fa-solid fa-leaf"></i>
+                    {% elif 'Asteraceae' in fam or 'Brássicas' in fam or 'Polygonáceas' in fam %}
+                        <i class="fa-solid fa-sun"></i>
+                    {% else %}
+                        <i class="fa-solid fa-cubes"></i>
+                    {% endif %}
+                    {{ fam }}
+                </a>
+            {% endfor %}
+        {% else %}
+            <!-- Sem categoria selecionada, mostra as categorias principais ou nada -->
+            <a href="{{ url_for('index') }}" class="filter-btn active">
+                <i class="fa-solid fa-border-all"></i> Catálogo Completo
+            </a>
+        {% endif %}
     </div>
     
     <!-- Resultados da Busca / Filtro -->

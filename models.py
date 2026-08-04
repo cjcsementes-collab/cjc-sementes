@@ -23,7 +23,8 @@ class Produto(db.Model):
     imagem_url = db.Column(db.String(255), nullable=True)
     estoque = db.Column(db.Float, default=1000.0)
     codigo_bling = db.Column(db.String(50), nullable=True) # SKU no Bling
-    categoria = db.Column(db.String(100), nullable=False) # Leguminosas, Gramíneas, Outros, Mixes
+    categoria = db.Column(db.String(100), nullable=False) # Inverno, Verão, Biológicos, Mix Customizado
+    familia = db.Column(db.String(100), default='Outros') # Asteraceae, Mix De Sementes, Poáceas, Fabáceas, Crucíferas, Polygonáceas
 
     def __repr__(self):
         return f'<Produto {self.nome}>'

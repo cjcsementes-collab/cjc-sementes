@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
+from sqlalchemy import text
 
 from config import Config
 import smtplib
@@ -53,31 +54,41 @@ def inject_cart_count():
 @app.route('/')
 def index():
     categoria_selecionada = request.args.get('categoria', '')
+    familia_selecionada = request.args.get('familia', '')
     busca = request.args.get('busca', '').strip()
     
     query = Produto.query
     
     if categoria_selecionada:
         query = query.filter(Produto.categoria.like(f"%{categoria_selecionada}%"))
+        
+    if familia_selecionada:
+        query = query.filter(Produto.familia.like(f"%{familia_selecionada}%"))
     
     if busca:
         query = query.filter(Produto.nome.like(f"%{busca}%") | Produto.descricao.like(f"%{busca}%"))
         
     produtos = query.all()
     
-    # Lista de categorias exclusivas para exibição de filtros
-    categorias = [
-        "Gramíneas / Forrageiras",
-        "Adubação Verde / Leguminosas",
-        "Grãos / Oleaginosas",
-        "Mixes e Customizados"
-    ]
+    # Lista de famílias para exibição de filtros caso uma categoria esteja selecionada
+    familias = []
+    if categoria_selecionada == 'MIX CUSTOMIZADO':
+        familias = ["Mix de Inverno", "Mix de Verão"]
+    elif categoria_selecionada in ['INVERNO', 'VERÃO']:
+        familias = [
+            "Asteraceae",
+            "Poáceas (Gramíneas)",
+            "Fabáceas (Leguminosas)",
+            "Crucíferas (Brássicas)",
+            "Polygonáceas"
+        ]
     
     return render_template(
         'index.html', 
         produtos=produtos, 
-        categorias=categorias, 
         categoria_selecionada=categoria_selecionada,
+        familia_selecionada=familia_selecionada,
+        familias=familias,
         busca=busca
     )
 
@@ -574,6 +585,19 @@ def admin_excluir_produto(produto_id):
     flash(f'Produto {produto.nome} excluído com sucesso!', 'success')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/migrate_schema')
+@login_required
+def admin_migrate_schema():
+    try:
+        # Adiciona a coluna familia se não existir
+        db.session.execute(text("ALTER TABLE produtos ADD COLUMN familia VARCHAR(100) DEFAULT 'Outros'"))
+        db.session.commit()
+        flash('Banco de dados atualizado com sucesso! (coluna familia adicionada)', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao atualizar o banco de dados: (Pode já ter sido atualizado) {str(e)}', 'warning')
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/api/webhooks/bling/estoque', methods=['POST'])
 def webhook_bling_estoque():
     data = request.json
@@ -669,6 +693,16 @@ def admin_update_stock(produto_id):
         novo_codigo_bling = request.form.get('codigo_bling')
         if novo_codigo_bling is not None:
             produto.codigo_bling = novo_codigo_bling.strip() if novo_codigo_bling.strip() else None
+            
+        # Atualiza Categoria (Estação/Menu)
+        nova_categoria = request.form.get('categoria')
+        if nova_categoria:
+            produto.categoria = nova_categoria
+            
+        # Atualiza Família
+        nova_familia = request.form.get('familia')
+        if nova_familia:
+            produto.familia = nova_familia
             
         db.session.commit()
         flash(f'Estoque de {produto.nome} atualizado para {int(novo_estoque)} {produto.unidade.upper()}.', 'success')
