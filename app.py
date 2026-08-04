@@ -565,6 +565,15 @@ def admin_bling_sync():
         flash(mensagem, "danger")
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/produto/<int:produto_id>/excluir', methods=['GET', 'POST'])
+@login_required
+def admin_excluir_produto(produto_id):
+    produto = Produto.query.get_or_404(produto_id)
+    db.session.delete(produto)
+    db.session.commit()
+    flash(f'Produto {produto.nome} excluído com sucesso!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/api/webhooks/bling/estoque', methods=['POST'])
 def webhook_bling_estoque():
     data = request.json

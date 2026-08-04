@@ -199,19 +199,19 @@ def sincronizar_produtos_bling():
         saldos_dict = {}
         if map_id_codigo:
             try:
-                # Divide em lotes de 50 (limite comum em APIs)
+                # Divide em lotes de 20 para evitar limites da API
                 ids_list = list(map_id_codigo.keys())
-                for i in range(0, len(ids_list), 50):
-                    lote_ids = ids_list[i:i+50]
+                for i in range(0, len(ids_list), 20):
+                    lote_ids = ids_list[i:i+20]
                     query_params = "&".join([f"idsProdutos[]={pid}" for pid in lote_ids])
                     
                     resp_estoque = requests.get(f"{API_BASE_URL}/estoques/saldos?{query_params}", headers=headers)
                     if resp_estoque.status_code == 200:
                         saldos_data = resp_estoque.json().get('data', [])
                         for s in saldos_data:
-                            p_id = s.get('produto', {}).get('id')
+                            p_id = str(s.get('produto', {}).get('id'))
                             saldo = float(s.get('saldoFisicoTotal', 0))
-                            if p_id:
+                            if p_id != 'None':
                                 saldos_dict[p_id] = saldos_dict.get(p_id, 0.0) + saldo
                     else:
                         print("Erro ao buscar saldos:", resp_estoque.text)
@@ -219,7 +219,7 @@ def sincronizar_produtos_bling():
                 print("Erro Exception ao buscar saldos:", e)
         
         for item in data:
-            bling_id = item.get('id')
+            bling_id = str(item.get('id'))
             codigo = str(item.get('codigo', ''))
             nome = item.get('nome', '')
             preco = float(item.get('preco', 0))
