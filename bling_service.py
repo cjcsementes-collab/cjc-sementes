@@ -212,7 +212,7 @@ def sincronizar_produtos_bling():
                             p_id = s.get('produto', {}).get('id')
                             saldo = float(s.get('saldoFisicoTotal', 0))
                             if p_id:
-                                saldos_dict[p_id] = saldo
+                                saldos_dict[p_id] = saldos_dict.get(p_id, 0.0) + saldo
                     else:
                         print("Erro ao buscar saldos:", resp_estoque.text)
             except Exception as e:
