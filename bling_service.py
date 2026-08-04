@@ -238,6 +238,7 @@ def sincronizar_produtos_bling():
                 produto = Produto.query.filter(Produto.nome.ilike(nome)).first()
                 
             if produto:
+                produto.nome = nome  # Garante que o nome no site fique idêntico ao do Bling
                 produto.codigo_bling = codigo
                 # Opcional: Atualizar preço do Bling
                 if preco > 0:
