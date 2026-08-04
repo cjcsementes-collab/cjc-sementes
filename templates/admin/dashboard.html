@@ -183,14 +183,17 @@
                             <td style="text-align: center; font-weight: bold; color: {% if prod.estoque < 200 %}#E65100{% else %}var(--verde-safra){% endif %};">
                                 {{ prod.estoque|int }} {{ prod.unidade.upper() }}
                             </td>
-                            <td>
+                            <td style="display: flex; gap: 8px; justify-content: center;">
                                 <!-- Ação de Atualizar Estoque -->
-                                <form action="{{ url_for('admin_update_stock', produto_id=prod.id) }}" method="POST" style="display: flex; gap: 8px; justify-content: center;">
-                                    <input type="number" name="estoque" class="form-input" value="{{ prod.estoque|int }}" min="0" style="padding: 5px; font-size: 0.85rem; width: 100px; height: 32px; text-align: center;">
+                                <form action="{{ url_for('admin_update_stock', produto_id=prod.id) }}" method="POST" style="display: flex; gap: 8px;">
+                                    <input type="number" name="estoque" class="form-input" value="{{ prod.estoque|int }}" min="0" style="padding: 5px; font-size: 0.85rem; width: 80px; height: 32px; text-align: center;">
                                     <button type="submit" class="btn btn-primary" style="padding: 5px 12px; font-size: 0.8rem; height: 32px; border-radius: var(--radius-sm);">
                                         Salvar
                                     </button>
                                 </form>
+                                <a href="{{ url_for('admin_excluir_produto', produto_id=prod.id) }}" class="btn" style="background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8rem; height: 32px; text-decoration: none; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;" onclick="return confirm('Tem certeza que deseja excluir este produto?')">
+                                    <i class="fa-solid fa-trash"></i> Excluir
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
