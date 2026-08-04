@@ -197,17 +197,26 @@ def sincronizar_produtos_bling():
                 
         # Buscar saldos de estoque
         saldos_dict = {}
-        try:
-            resp_estoque = requests.get(f"{API_BASE_URL}/estoques/saldos?limite=100", headers=headers)
-            if resp_estoque.status_code == 200:
-                saldos_data = resp_estoque.json().get('data', [])
-                for s in saldos_data:
-                    p_id = s.get('produto', {}).get('id')
-                    saldo = float(s.get('saldoFisicoTotal', 0))
-                    if p_id:
-                        saldos_dict[p_id] = saldo
-        except Exception as e:
-            print("Erro ao buscar saldos:", e)
+        if map_id_codigo:
+            try:
+                # Divide em lotes de 50 (limite comum em APIs)
+                ids_list = list(map_id_codigo.keys())
+                for i in range(0, len(ids_list), 50):
+                    lote_ids = ids_list[i:i+50]
+                    query_params = "&".join([f"idsProdutos[]={pid}" for pid in lote_ids])
+                    
+                    resp_estoque = requests.get(f"{API_BASE_URL}/estoques/saldos?{query_params}", headers=headers)
+                    if resp_estoque.status_code == 200:
+                        saldos_data = resp_estoque.json().get('data', [])
+                        for s in saldos_data:
+                            p_id = s.get('produto', {}).get('id')
+                            saldo = float(s.get('saldoFisicoTotal', 0))
+                            if p_id:
+                                saldos_dict[p_id] = saldo
+                    else:
+                        print("Erro ao buscar saldos:", resp_estoque.text)
+            except Exception as e:
+                print("Erro Exception ao buscar saldos:", e)
         
         for item in data:
             bling_id = item.get('id')
