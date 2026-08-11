@@ -611,6 +611,52 @@ def temp_export(secret):
     produtos = Produto.query.all()
     return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "categoria": p.categoria, "familia": p.familia} for p in produtos]}
 
+@app.route('/admin/aplicar_classificacao')
+@login_required
+def admin_aplicar_classificacao():
+    mapa = {
+        1: ['VERÃO', 'Poáceas (Gramíneas)'],
+        2: ['VERÃO', 'Fabáceas (Leguminosas)'],
+        3: ['VERÃO', 'Fabáceas (Leguminosas)'],
+        4: ['VERÃO', 'Fabáceas (Leguminosas)'],
+        5: ['Outros', 'Outros'],
+        6: ['VERÃO', 'Poáceas (Gramíneas)'],
+        7: ['VERÃO', 'Poáceas (Gramíneas)'],
+        8: ['VERÃO', 'Poáceas (Gramíneas)'],
+        9: ['VERÃO', 'Poáceas (Gramíneas)'],
+        10: ['Outros', 'Outros'],
+        11: ['INVERNO', 'Fabáceas (Leguminosas)'],
+        12: ['INVERNO', 'Fabáceas (Leguminosas)'],
+        13: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        14: ['VERÃO', 'Poáceas (Gramíneas)'],
+        15: ['INVERNO', 'Crucíferas (Brássicas)'],
+        16: ['INVERNO', 'Poáceas (Gramíneas)'],
+        17: ['INVERNO', 'Poáceas (Gramíneas)'],
+        18: ['INVERNO', 'Fabáceas (Leguminosas)'],
+        19: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        20: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        21: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        22: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        23: ['INVERNO', 'Poáceas (Gramíneas)'],
+        24: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        25: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        26: ['VERÃO', 'Poáceas (Gramíneas)'],
+        27: ['MIX CUSTOMIZADO', 'Mix de Inverno'],
+        28: ['VERÃO', 'Poáceas (Gramíneas)'],
+        29: ['VERÃO', 'Fabáceas (Leguminosas)'],
+        30: ['VERÃO', 'Poáceas (Gramíneas)']
+    }
+    
+    for pid, vals in mapa.items():
+        p = Produto.query.get(pid)
+        if p:
+            p.categoria = vals[0]
+            p.familia = vals[1]
+            
+    db.session.commit()
+    flash('Todos os produtos foram classificados automaticamente com sucesso!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/migrate_schema')
 @login_required
 def admin_migrate_schema():
