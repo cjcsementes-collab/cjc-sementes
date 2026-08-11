@@ -176,12 +176,29 @@ def sincronizar_produtos_bling():
     }
     
     try:
-        response = requests.get(f"{API_BASE_URL}/produtos?limite=100", headers=headers)
-        if response.status_code != 200:
-            return False, f"Erro na API do Bling: {response.text}"
+        pagina = 1
+        todos_produtos = []
+        
+        while True:
+            response = requests.get(f"{API_BASE_URL}/produtos?limite=100&pagina={pagina}", headers=headers)
+            if response.status_code != 200:
+                if pagina == 1:
+                    return False, f"Erro na API do Bling: {response.text}"
+                else:
+                    break # Ignora erros em páginas subsequentes e usa o que já pegou
+                
+            data = response.json().get('data', [])
+            if not data:
+                break
+                
+            todos_produtos.extend(data)
             
-        data = response.json().get('data', [])
-        if not data:
+            if len(data) < 100:
+                break
+                
+            pagina += 1
+            
+        if not todos_produtos:
             return True, "Nenhum produto encontrado no Bling."
             
         from models import Produto, db
@@ -191,7 +208,7 @@ def sincronizar_produtos_bling():
         
         # Mapear IDs internos do Bling para Códigos (SKU)
         map_id_codigo = {}
-        for item in data:
+        for item in todos_produtos:
             if item.get('id') and item.get('codigo'):
                 map_id_codigo[item.get('id')] = str(item.get('codigo'))
                 
@@ -218,11 +235,13 @@ def sincronizar_produtos_bling():
             except Exception as e:
                 print("Erro Exception ao buscar saldos:", e)
         
-        for item in data:
-            bling_id = str(item.get('id'))
+        for item in todos_produtos:
             codigo = str(item.get('codigo', ''))
+            if not codigo or item.get('id') not in map_id_codigo:
+                continue
             nome = item.get('nome', '')
             preco = float(item.get('preco', 0))
+            bling_id = str(item.get('id'))
             
             if not codigo or not nome:
                 continue
