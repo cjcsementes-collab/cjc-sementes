@@ -4,6 +4,42 @@ import requests
 from datetime import datetime, timedelta
 from models import db, BlingConfig, Pedido, Cliente
 
+def get_classificacao_automatica(nome):
+    nome_lower = nome.lower()
+    
+    # MIX CUSTOMIZADO
+    if "synergix" in nome_lower or "mix customizado" in nome_lower:
+        if "inverno" in nome_lower: return "MIX CUSTOMIZADO", "Mix de Inverno"
+        if "verao" in nome_lower or "verão" in nome_lower: return "MIX CUSTOMIZADO", "Mix de Verão"
+        return "MIX CUSTOMIZADO", "Mix De Sementes"
+        
+    # OUTROS (Químicos)
+    if any(x in nome_lower for x in ["herbicida", "fertilizante", "filme agricola", "óleo"]):
+        return "Outros", "Outros"
+        
+    # Categorias Base
+    categoria = "Outros"
+    if any(x in nome_lower for x in ["trevo", "nabo", "azevem", "azevém", "aveia", "alfafa", "centeio", "triticale", "ervilhaca", "ervilha"]):
+        categoria = "INVERNO"
+    elif any(x in nome_lower for x in ["soja", "milho", "urochloa", "brachiaria", "feijao", "feijão", "milheto", "capim", "sorgo", "megathyrsus", "panicum", "crotalaria", "crotalária", "girassol", "mucuna", "guandu", "lab lab", "gergelim", "crambe", "amendoim", "painço", "trigo mourisco"]):
+        categoria = "VERÃO"
+        
+    # Famílias
+    familia = "Outros"
+    if any(x in nome_lower for x in ["milho", "urochloa", "brachiaria", "milheto", "capim", "sorgo", "megathyrsus", "panicum", "azevem", "azevém", "aveia", "centeio", "triticale", "painço"]):
+        familia = "Poáceas (Gramíneas)"
+    elif any(x in nome_lower for x in ["soja", "feijao", "feijão", "crotalaria", "crotalária", "mucuna", "guandu", "lab", "trevo", "alfafa", "ervilhaca", "ervilha", "amendoim"]):
+        familia = "Fabáceas (Leguminosas)"
+    elif any(x in nome_lower for x in ["nabo", "crambe"]):
+        familia = "Crucíferas (Brássicas)"
+    elif any(x in nome_lower for x in ["girassol"]):
+        familia = "Asteraceae"
+    elif any(x in nome_lower for x in ["trigo mourisco"]):
+        categoria = "VERÃO"
+        familia = "Polygonáceas"
+        
+    return categoria, familia
+
 BLING_CLIENT_ID = os.environ.get('BLING_CLIENT_ID')
 BLING_CLIENT_SECRET = os.environ.get('BLING_CLIENT_SECRET')
 
@@ -247,33 +283,34 @@ def sincronizar_produtos_bling():
                 continue
                 
             # Saldo do produto
-            estoque_atual = saldos_dict.get(bling_id, 0.0)
-                
-            # Tenta achar por código
-            produto = Produto.query.filter_by(codigo_bling=codigo).first()
+            estoque_total = saldos_dict.get(bling_id, 0.0)
+            categoria_auto, familia_auto = get_classificacao_automatica(nome)
             
-            if not produto:
-                # Tenta achar por nome exato (ignorando maiúsculas)
-                produto = Produto.query.filter(Produto.nome.ilike(nome)).first()
-                
+            # Se já existe, atualiza nome e estoque, mantém classificação caso o usuário tenha alterado, a não ser que estivesse como "Outros"
+            produto = Produto.query.filter_by(codigo_bling=codigo).first()
             if produto:
-                produto.nome = nome  # Garante que o nome no site fique idêntico ao do Bling
-                produto.codigo_bling = codigo
-                # Opcional: Atualizar preço do Bling
-                if preco > 0:
-                    produto.preco_kg = preco
-                produto.estoque = estoque_atual
+                produto.nome = nome
+                produto.preco_kg = preco
+                if estoque_total is not None:
+                    produto.estoque = estoque_total
+                    
+                if produto.categoria == 'Outros':
+                    produto.categoria = categoria_auto
+                if produto.familia == 'Outros':
+                    produto.familia = familia_auto
+                    
                 count_updated += 1
             else:
-                # Cria novo produto
                 novo_produto = Produto(
                     nome=nome,
-                    descricao="Produto importado do Bling",
-                    preco_kg=preco,
-                    unidade='kg',
                     codigo_bling=codigo,
-                    categoria='Outros',
-                    estoque=estoque_atual
+                    preco_kg=preco,
+                    estoque=estoque_total if estoque_total is not None else 0,
+                    unidade='kg',
+                    descricao=f"Produto importado do Bling. Código: {codigo}",
+                    categoria=categoria_auto,
+                    familia=familia_auto,
+                    imagem_url=""
                 )
                 db.session.add(novo_produto)
                 count_new += 1
