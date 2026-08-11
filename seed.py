@@ -20,299 +20,55 @@ def seed_database():
             db.session.commit()
             return
             
-        # Lista dos produtos iniciais
+        # Lista dos produtos iniciais (Sincronizado com os 30 do Bling + Classificações)
         produtos_iniciais = [
-            # Gramíneas / Forrageiras
-            {
-                "nome": "Milheto BRS 1501",
-                "preco_kg": 3.00,
-                "unidade": "kg",
-                "descricao": "Alta produção de biomassa e excelente cobertura de solo. Planta vigorosa com ótimo enraizamento.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/milheto.svg"
-            },
-            {
-                "nome": "Capim Sudão BRS Estribo",
-                "preco_kg": 4.00,
-                "unidade": "kg",
-                "descricao": "Forragem de rápido crescimento e alta produtividade. Ideal para pastejo direto e cobertura verde.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/capim_sudao.svg"
-            },
-            {
-                "nome": "Sorgo Forrageiro IAC Santa Elisa",
-                "preco_kg": 15.50,
-                "unidade": "kg",
-                "descricao": "Elevada produção de massa para silagem e pastejo. Alta tolerância à seca e excelente rebrote.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/sorgo.svg"
-            },
-            {
-                "nome": "Milheto IPA",
-                "preco_kg": 3.00,
-                "unidade": "kg",
-                "descricao": "Cobertura rápida de solo e eficiente descompactação de camadas profundas devido ao seu sistema radicular.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/milheto.svg"
-            },
-            {
-                "nome": "Brachiaria Ruziziensis",
-                "preco_kg": 15.00,
-                "unidade": "kg",
-                "descricao": "Excelente formação de palhada para plantio direto, ótima reciclagem de nutrientes e controle de plantas daninhas.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/brachiaria.svg"
-            },
-            {
-                "nome": "Painço",
-                "preco_kg": 7.00,
-                "unidade": "kg",
-                "descricao": "Rápido estabelecimento inicial, boa cobertura do solo e ótima produção de sementes para alimentação animal.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/painco.svg"
-            },
-            {
-                "nome": "Grama Pensacola",
-                "preco_kg": 30.00,
-                "unidade": "kg",
-                "descricao": "Formação de pastagem altamente resistente e duradoura, excelente tolerância ao pisoteio e geadas.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/grama.svg"
-            },
-            {
-                "nome": "Capim Coracana",
-                "preco_kg": 10.00,
-                "unidade": "kg",
-                "descricao": "Excelente opção para cobertura de solo, produção forrageira e controle de erosões em áreas declivosas.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/capim.svg"
-            },
-            {
-                "nome": "Sorgo Forrageiro BRS Ponta Negra",
-                "preco_kg": 12.00,
-                "unidade": "kg",
-                "descricao": "Alta produtividade para silagem de excelente qualidade e eficiente cobertura do solo pós-safra.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/sorgo.svg"
-            },
-            {
-                "nome": "Urochloa Brizantha Marandu Select",
-                "preco_kg": 26.00,
-                "unidade": "kg",
-                "descricao": "Pastagem de alta resistência, ótimo valor proteico e excelente desempenho para engorda de gado.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/brachiaria.svg"
-            },
-            {
-                "nome": "Urochloa Brizantha BRS Piatã Select",
-                "preco_kg": 21.00,
-                "unidade": "kg",
-                "descricao": "Forrageira de alta qualidade, excelente adaptabilidade a solos de média fertilidade e ótimo valor nutricional.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/brachiaria.svg"
-            },
-            {
-                "nome": "Megathyrsus Maximus Aruana Select",
-                "preco_kg": 27.00,
-                "unidade": "kg",
-                "descricao": "Pastagem de elevada produtividade, excelente para ovinos e caprinos, com manejo versátil e rápido rebrote.",
-                "categoria": "Gramíneas / Forrageiras",
-                "imagem_url": "/static/images/capim.svg"
-            },
-
-            # Adubação Verde / Leguminosas
-            {
-                "nome": "Feijão Guandu Anão IPR 43 Aratã",
-                "preco_kg": 12.00,
-                "unidade": "kg",
-                "descricao": "Excepcional fixação biológica de nitrogênio e ótima cobertura vegetal. Ideal para consorciação e recuperação de solos.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/feijao_guandu.svg"
-            },
-            {
-                "nome": "Feijão IAC VM211",
-                "preco_kg": 15.00,
-                "unidade": "kg",
-                "descricao": "Cultivar adaptada para cobertura verde e também produção de grãos comerciais de ótima qualidade.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/feijao.svg"
-            },
-            {
-                "nome": "Feijão-de-Porco",
-                "preco_kg": 14.00,
-                "unidade": "kg",
-                "descricao": "Adubação verde robusta com altíssima produção de biomassa e excelente supressão de ervas daninhas agressivas.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/feijao_porco.svg"
-            },
-            {
-                "nome": "Crotalária Juncea",
-                "preco_kg": 19.00,
-                "unidade": "kg",
-                "descricao": "Eficiente controle de nematoides fitoparasitos, crescimento rápido e excelente fixação biológica de nitrogênio.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/crotalaria.svg"
-            },
-            {
-                "nome": "Feijão (não transgênico)",
-                "preco_kg": 7.95,
-                "unidade": "kg",
-                "descricao": "Produção convencional não transgênica com alta adaptabilidade a diferentes tipos de solo e climas regionais.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/feijao.svg"
-            },
-            {
-                "nome": "Crotalária Spectabilis",
-                "preco_kg": 13.00,
-                "unidade": "kg",
-                "descricao": "Auxilia fortemente no manejo integrado de nematoides (principalmente das galhas) e melhora a estrutura física do solo.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/crotalaria.svg"
-            },
-            {
-                "nome": "Crotalária Ochroleuca",
-                "preco_kg": 13.00,
-                "unidade": "kg",
-                "descricao": "Excelente cobertura vegetal, boa fixação de nitrogênio e ótima resistência a períodos de estiagem.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/crotalaria.svg"
-            },
-            {
-                "nome": "Guandu Arbóreo Fava Larga",
-                "preco_kg": 16.00,
-                "unidade": "kg",
-                "descricao": "Grande produção de biomassa lenhosa e recuperação biológica de áreas degradadas ou compactadas.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/feijao_guandu.svg"
-            },
-            {
-                "nome": "Mucuna Cinza",
-                "preco_kg": 19.85,
-                "unidade": "kg",
-                "descricao": "Adubação verde vigorosa, excelente controle de erosão e supressão total de plantas daninhas pelo efeito alelopático.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/mucuna.svg"
-            },
-            {
-                "nome": "Guandu Forrageiro Super N",
-                "preco_kg": 14.00,
-                "unidade": "kg",
-                "descricao": "Alto potencial de fixação de nitrogênio, alta palatabilidade para o gado e ótima resistência à seca.",
-                "categoria": "Adubação Verde / Leguminosas",
-                "imagem_url": "/static/images/feijao_guandu.svg"
-            },
-
-            # Grãos / Oleaginosas
-            {
-                "nome": "Trigo Mourisco IPR 92 Altar",
-                "preco_kg": 2.80,
-                "unidade": "kg",
-                "descricao": "Excelente opção para rotação de culturas na entressafra, reciclagem de fósforo e forte atração de polinizadores benéficos.",
-                "categoria": "Grãos / Oleaginosas",
-                "imagem_url": "/static/images/trigo_mourisco.svg"
-            },
-            {
-                "nome": "Girassol",
-                "preco_kg": 24.00,
-                "unidade": "kg",
-                "descricao": "Raiz pivotante profunda que quebra camadas compactadas do solo e excelente capacidade de reciclagem de nutrientes profundos.",
-                "categoria": "Grãos / Oleaginosas",
-                "imagem_url": "/static/images/girassol.svg"
-            },
-            {
-                "nome": "Gergelim",
-                "preco_kg": 30.00,
-                "unidade": "kg",
-                "descricao": "Cultura secundária rentável, altamente resistente ao calor e adaptada a condições de estresse hídrico.",
-                "categoria": "Grãos / Oleaginosas",
-                "imagem_url": "/static/images/gergelim.svg"
-            },
-            {
-                "nome": "Milho MG 540 PWU",
-                "preco_kg": 1200.00,
-                "unidade": "sc",
-                "descricao": "Híbrido de alto potencial produtivo com excelente qualidade de colmo e grãos pesados. Unidade comercializada em saca (sc).",
-                "categoria": "Grãos / Oleaginosas",
-                "imagem_url": "/static/images/milho.svg"
-            },
-
-            # Mixes e Customizados - SYNERGIX INVERNO
-            {
-                "nome": "SYNERGIX 3130 - Inverno",
-                "preco_kg": 5.80,
-                "unidade": "kg",
-                "descricao": "Mix premium com Centeio IPR 89, Ervilhaca SS Ametista e Triticale BRS Saturno. 3 espécies, ciclo 120-140 dias.",
-                "categoria": "Mixes e Customizados",
-                "imagem_url": "/static/images/synergix.svg",
-                "linha": "SYNERGIX Inverno",
-                "composicao": "Centeio IPR 89 | Ervilhaca SS Ametista | Triticale BRS Saturno"
-            },
-            {
-                "nome": "SYNERGIX 4100 - Inverno",
-                "preco_kg": 6.80,
-                "unidade": "kg",
-                "descricao": "Mix com 4 espécies: Nabo Forrageiro IPR 116, Aveia Preta BRS 139, Centeio IPR 89 e Ervilha IPR 83. Ciclo 80-110 dias.",
-                "categoria": "Mixes e Customizados",
-                "imagem_url": "/static/images/synergix.svg",
-                "linha": "SYNERGIX Inverno",
-                "composicao": "Nabo Forrageiro IPR 116 | Aveia Preta BRS 139 | Centeio IPR 89 | Ervilha IPR 83"
-            },
-            {
-                "nome": "SYNERGIX 4110 - Inverno",
-                "preco_kg": 6.80,
-                "unidade": "kg",
-                "descricao": "Mix com 4 espécies: Nabo Forrageiro IPR 116, Ervilhaca SS Ametista, Aveia Preta BRS 139 e Centeio IPR 89. Ciclo 90-110 dias.",
-                "categoria": "Mixes e Customizados",
-                "imagem_url": "/static/images/synergix.svg",
-                "linha": "SYNERGIX Inverno",
-                "composicao": "Nabo Forrageiro IPR 116 | Ervilhaca SS Ametista | Aveia Preta BRS 139 | Centeio IPR 89"
-            },
-            {
-                "nome": "SYNERGIX 4130 - Inverno",
-                "preco_kg": 6.80,
-                "unidade": "kg",
-                "descricao": "Mix com 4 espécies: Nabo Forrageiro pé de pato, Ervilhaca SS Ametista, Triticale BRS Saturno e Centeio IPR 89. Ciclo 120-140 dias.",
-                "categoria": "Mixes e Customizados",
-                "imagem_url": "/static/images/synergix.svg",
-                "linha": "SYNERGIX Inverno",
-                "composicao": "Nabo Forrageiro pé de pato | Ervilhaca SS Ametista | Triticale BRS Saturno | Centeio IPR 89"
-            },
-            {
-                "nome": "SYNERGIX 8100 - Inverno",
-                "preco_kg": 6.80,
-                "unidade": "kg",
-                "descricao": "Mix premium com 8 espécies: Aveia Preta BRS 139, Centeio IPR 89, Triticale BRS Saturno, Ervilhaca comum, Tremoço Branco, Nabo Forrageiro, Trigo Mourisco IPR 92 Altar. Ciclo 90-120 dias.",
-                "categoria": "Mixes e Customizados",
-                "imagem_url": "/static/images/synergix.svg",
-                "linha": "SYNERGIX Inverno",
-                "composicao": "Aveia Preta BRS 139 | Centeio IPR 89 | Triticale BRS Saturno | Ervilhaca | Tremoço Branco | Nabo Forrageiro pé de pato | Trigo Mourisco IPR 92 Altar"
-            },
-
-            # Mix Customizado Original
-            {
-                "nome": "Mix Customizado",
-                "preco_kg": 16.42,
-                "unidade": "kg",
-                "descricao": "Combinação balanceada de espécies de cobertura (gramíneas e leguminosas) formulada sob medida para as necessidades do seu solo.",
-                "categoria": "Mixes e Customizados",
-                "imagem_url": "/static/images/mix.svg"
-            }
+            {"nome": "SEMENTES DE UROCHLOA HUMIDICOLA CV LLANERO SELECT", "codigo_bling": "PRDT00090", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "Semente de Soja DM56i59 - SC 125 mil sementes", "codigo_bling": "PRDT00089", "categoria": "VERÃO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "Semente de soja BMX Titanium TF I2X. SC 125 mil sementes", "codigo_bling": "PRDT00088", "categoria": "VERÃO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "Semente de Soja BMX Zeus IPRO - SC 125 mil sementes", "codigo_bling": "PRDT00087", "categoria": "VERÃO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "HERBICIDA XTENDICAM SL - BOMBONA DE 10 LITROS (ACOMPANHA 10 LITROS DE OLEO)", "codigo_bling": "PRDT00086", "categoria": "Outros", "familia": "Outros"},
+            {"nome": "Semente Milho B2801 PWU", "codigo_bling": "PRDT00085", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "Semente Milho MG616 VIP3", "codigo_bling": "PRDT00083", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "SEMENTE DE MILHO HIBRIDO CULTIVAR GREENBULL + TRATAMENTO INDUSTRIAL: CLOTIANIDINA", "codigo_bling": "PRDT00082", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "SEMENTE DE MILHO HIBRIDO CULTIVAR 10W30 (MAXGREEN) + TRATAMENTO INDUSTRIAL: CLOTIANIDINA", "codigo_bling": "PRDT00081", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "FERTILIZANTE ORGANICO COMPOSTO CLASSE A REG PRODUTO PR002524-0.000001 - LOTE 01-26 - VALIDADE 01-2027", "codigo_bling": "PRDT00079", "categoria": "Outros", "familia": "Outros"},
+            {"nome": "Semente Trevo Vermelho", "codigo_bling": "PRDT00078", "categoria": "INVERNO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "Semente Trevo Branco", "codigo_bling": "PRDT00077", "categoria": "INVERNO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "SEMENTE SYNERGIX 4100-1", "codigo_bling": "PRDT00076", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "Semente De Milho Hibrido Cultivar Greenbull Lote 25Wgr2 - Safra 2025/2025 - Val. 10/2026 - Pen 24 M", "codigo_bling": "PRDT0070", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "SEMENTES RAPHANUS SATIVUS (NABO FORRAGEIRO) IPR 116 CAT. S1 S. 23/23 - Lotes:2730-04", "codigo_bling": "PRDT00080", "categoria": "INVERNO", "familia": "Crucíferas (Brássicas)"},
+            {"nome": "SEMENTE IMP AZEVEM ANUAL CV ESTELAR 25 KG CAT S2", "codigo_bling": "PRDT00075", "categoria": "INVERNO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "Semente Aveia Branca Ucraniana AF1340", "codigo_bling": "PRDT00074", "categoria": "INVERNO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "Semente Alfafa Crioula", "codigo_bling": "PRDT00073", "categoria": "INVERNO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "SEMENTE SYNERGIX 4130", "codigo_bling": "PRDT00069", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "SEMENTE SYNERGIX 4100", "codigo_bling": "PRDT00068", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "SEMENTE SYNERGIX 3130", "codigo_bling": "PRDT00067", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "SEMENTE SYNERGIX PASTEJO 2150 INVERNO", "codigo_bling": "PRDT00066", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "Semente Azevém BRS Ponteio", "codigo_bling": "PRDT00065", "categoria": "INVERNO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "SEMENTE SYNERGIX 8100", "codigo_bling": "PRDT00064", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "SEMENTE SYNERGIX 260", "codigo_bling": "PRDT00063", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "UROCHLOA BRIZANTHA CV MARANDU VC 36 NUA", "codigo_bling": "PRDT00062", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "SEMENTE SYNERGIX 4120", "codigo_bling": "PRDT00060", "categoria": "MIX CUSTOMIZADO", "familia": "Mix de Inverno"},
+            {"nome": "UROCHLOA BRIZANTHA CV MARANDU VC 50 NUA", "codigo_bling": "PRDT00061", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"},
+            {"nome": "SEMENTE FEIJAO BRS ESTILO", "codigo_bling": "PRDT00058", "categoria": "VERÃO", "familia": "Fabáceas (Leguminosas)"},
+            {"nome": "Semente Milho AL Bandeirante", "codigo_bling": "PRDT00057", "categoria": "VERÃO", "familia": "Poáceas (Gramíneas)"}
         ]
         
         for p_data in produtos_iniciais:
-            produto = Produto(
+            novo_prod = Produto(
                 nome=p_data["nome"],
-                preco_kg=p_data["preco_kg"],
-                unidade=p_data["unidade"],
-                descricao=p_data["descricao"],
+                codigo_bling=p_data["codigo_bling"],
                 categoria=p_data["categoria"],
-                imagem_url=p_data["imagem_url"],
-                estoque=1000.0
+                familia=p_data["familia"],
+                preco_kg=0.0,
+                estoque=0.0,
+                unidade="kg",
+                descricao="Produto Bling"
             )
-            db.session.add(produto)
+            db.session.add(novo_prod)
             
         db.session.commit()
-        print(f"Banco de dados populado com {len(produtos_iniciais)} produtos com sucesso!")
+        print("Banco de dados semeado com os produtos oficiais do Bling!")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     seed_database()
