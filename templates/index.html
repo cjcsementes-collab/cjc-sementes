@@ -96,14 +96,10 @@
                     <div class="product-card-img-wrapper">
                         <!-- Badges de Categoria -->
                         <span class="product-card-badge">
-                            {% if 'Gramíneas' in produto.categoria %}
-                                Gramínea
-                            {% elif 'Adubação Verde' in produto.categoria %}
-                                Adubação Verde
-                            {% elif 'Grãos' in produto.categoria %}
-                                Grãos / Outros
+                            {% if produto.categoria == 'MIX CUSTOMIZADO' %}
+                                MIX
                             {% else %}
-                                Mix
+                                {{ produto.categoria }}
                             {% endif %}
                         </span>
                         
@@ -152,7 +148,6 @@
                     
                     <div class="product-card-content">
                         <h3 class="product-card-title">{{ produto.nome }}</h3>
-                        <p class="product-card-desc">{{ produto.descricao }}</p>
                         
                         <div class="product-card-footer">
                             <div class="product-card-price">
