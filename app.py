@@ -592,6 +592,18 @@ def admin_excluir_produto(produto_id):
     flash(f'Produto {produto.nome} excluído com sucesso!', 'success')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/limpar_tudo')
+@login_required
+def admin_limpar_tudo():
+    try:
+        Produto.query.delete()
+        db.session.commit()
+        flash('Todos os produtos foram apagados com sucesso!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao apagar produtos: {str(e)}', 'danger')
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/migrate_schema')
 @login_required
 def admin_migrate_schema():
