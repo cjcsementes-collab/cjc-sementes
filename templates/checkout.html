@@ -59,8 +59,19 @@
                     </div>
                     
                     <div class="form-group">
+                        <label class="form-label" for="email_nf">E-mail para envio da NF <span style="font-size: 0.8em; color: #777;">(opcional)</span></label>
+                        <input type="email" name="email_nf" id="email_nf" class="form-input" value="{{ form_data.email_nf if form_data else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label class="form-label" for="telefone">Telefone / WhatsApp *</label>
                         <input type="text" name="telefone" id="telefone" class="form-input" placeholder="(00) 00000-0000" required value="{{ form_data.telefone if form_data else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <!-- Espaço vazio para manter layout -->
                     </div>
                 </div>
 
@@ -73,19 +84,40 @@
                         <label class="form-label" for="checkout-cep">CEP de Destino *</label>
                         <input type="text" name="cep" id="checkout-cep" class="form-input" placeholder="00000-000" required value="{{ form_data.cep if form_data else '' }}">
                     </div>
+                    
                     <div class="form-group">
-                        <label class="form-label" for="cidade">Cidade *</label>
-                        <input type="text" name="cidade" id="cidade" class="form-input" placeholder="Sua Cidade" required value="{{ form_data.cidade if form_data else '' }}">
-                    </div>
-                    <div class="form-group" style="max-width: 100px;">
                         <label class="form-label" for="uf">UF *</label>
-                        <input type="text" name="uf" id="uf" class="form-input" placeholder="PR" maxlength="2" required value="{{ form_data.uf if form_data else '' }}">
+                        <input type="text" name="uf" id="uf" class="form-input" maxlength="2" placeholder="PR" required value="{{ form_data.uf if form_data else '' }}">
                     </div>
                 </div>
-
+                
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label" for="cidade">Cidade *</label>
+                        <input type="text" name="cidade" id="cidade" class="form-input" required value="{{ form_data.cidade if form_data else '' }}">
+                    </div>
+                    
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label" for="bairro">Bairro *</label>
+                        <input type="text" name="bairro" id="bairro" class="form-input" required value="{{ form_data.bairro if form_data else '' }}">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group" style="flex: 3;">
+                        <label class="form-label" for="endereco">Endereço (Rua) *</label>
+                        <input type="text" name="endereco" id="endereco" class="form-input" required value="{{ form_data.endereco if form_data else '' }}">
+                    </div>
+                    
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" for="numero">Número *</label>
+                        <input type="text" name="numero" id="numero" class="form-input" required value="{{ form_data.numero if form_data else '' }}">
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label class="form-label" for="endereco">Endereço Completo de Entrega *</label>
-                    <textarea name="endereco" id="endereco" class="form-input" rows="3" placeholder="Rua, Número, Bairro, Zona Rural/Urbana, Cidade, Estado" required>{{ form_data.endereco if form_data else '' }}</textarea>
+                    <label class="form-label" for="complemento">Complemento <span style="font-size: 0.8em; color: #777;">(opcional)</span></label>
+                    <input type="text" name="complemento" id="complemento" class="form-input" value="{{ form_data.complemento if form_data else '' }}">
                 </div>
 
                 <!-- Destino das transportadoras parceiras via AJAX -->

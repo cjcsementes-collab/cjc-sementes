@@ -175,14 +175,27 @@ def enviar_pedido_venda(pedido_id):
             "nome": cliente.nome,
             "tipoPessoa": "J" if len(cpf_cnpj) > 11 else "F",
             "numeroDocumento": cpf_cnpj,
+            "ie": cliente.inscricao_estadual if cliente.inscricao_estadual else "",
             "email": cliente.email,
-            "celular": ''.join(filter(str.isdigit, cliente.telefone)) if cliente.telefone else ''
+            "celular": ''.join(filter(str.isdigit, cliente.telefone)) if cliente.telefone else '',
+            "endereco": {
+                "geral": {
+                    "endereco": cliente.endereco or "",
+                    "numero": cliente.numero or "",
+                    "complemento": cliente.complemento or "",
+                    "bairro": cliente.bairro or "",
+                    "municipio": cliente.cidade or "",
+                    "uf": cliente.uf or "",
+                    "cep": cep
+                }
+            }
         },
         "itens": itens,
         "transporte": {
             "fretePorConta": 0 if pedido.valor_frete > 0 else 9, # 0 = CIF, 9 = Sem frete (Retirada)
             "valorFrete": float(pedido.valor_frete)
-        }
+        },
+        "observacoes": f"E-mail para envio da NF: {cliente.email_nf}" if cliente.email_nf else ""
     }
     
     headers = {

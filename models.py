@@ -36,9 +36,13 @@ class Cliente(db.Model):
     cpf = db.Column(db.String(20), nullable=False)
     inscricao_estadual = db.Column(db.String(50), nullable=True)
     email = db.Column(db.String(100), nullable=False)
+    email_nf = db.Column(db.String(100), nullable=True)
     telefone = db.Column(db.String(20), nullable=True)
     endereco_completo = db.Column(db.Text, nullable=False) # Mantido por compatibilidade
     endereco = db.Column(db.String(255), nullable=True)
+    numero = db.Column(db.String(20), nullable=True)
+    complemento = db.Column(db.String(100), nullable=True)
+    bairro = db.Column(db.String(100), nullable=True)
     cidade = db.Column(db.String(100), nullable=True)
     uf = db.Column(db.String(2), nullable=True)
     cep = db.Column(db.String(20), nullable=True)
