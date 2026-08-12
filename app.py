@@ -303,6 +303,7 @@ def checkout():
         # Captura de dados do formulário de qualificação
         nome = request.form.get('nome')
         cpf = request.form.get('cpf')
+        inscricao_estadual = request.form.get('inscricao_estadual')
         email = request.form.get('email')
         telefone = request.form.get('telefone')
         endereco = request.form.get('endereco')
@@ -326,6 +327,7 @@ def checkout():
             cliente = Cliente(
                 nome=nome,
                 cpf=cpf,
+                inscricao_estadual=inscricao_estadual,
                 email=email,
                 telefone=telefone,
                 endereco_completo=endereco, # kept for backward compat
@@ -340,6 +342,7 @@ def checkout():
         else:
             # Atualiza dados caso tenham mudado
             cliente.nome = nome
+            cliente.inscricao_estadual = inscricao_estadual
             cliente.email = email
             cliente.telefone = telefone
             cliente.endereco_completo = endereco
