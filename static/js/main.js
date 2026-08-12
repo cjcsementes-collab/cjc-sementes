@@ -173,6 +173,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const cep = checkoutCep.value.trim().replace('-', '');
             if (cep.length !== 8) return;
 
+            // Busca Endereço via ViaCEP
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.erro) {
+                        const enderecoInput = document.getElementById('endereco');
+                        const bairroInput = document.getElementById('bairro');
+                        const cidadeInput = document.getElementById('cidade');
+                        const ufInput = document.getElementById('uf');
+                        
+                        if (enderecoInput && data.logradouro) enderecoInput.value = data.logradouro;
+                        if (bairroInput && data.bairro) bairroInput.value = data.bairro;
+                        if (cidadeInput && data.localidade) cidadeInput.value = data.localidade;
+                        if (ufInput && data.uf) ufInput.value = data.uf;
+                        
+                        // Foca no número se tiver autocompletado
+                        const numeroInput = document.getElementById('numero');
+                        if (numeroInput && data.logradouro) numeroInput.focus();
+                    }
+                })
+                .catch(err => console.error('Erro ao buscar CEP', err));
+
             checkoutShippingOpts.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted)">Buscando transportadoras parceiras...</p>';
 
             const formData = new FormData();
