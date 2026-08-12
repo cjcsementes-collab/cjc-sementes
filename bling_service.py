@@ -271,10 +271,21 @@ def sincronizar_produtos_bling():
             except Exception as e:
                 print("Erro Exception ao buscar saldos:", e)
         
+        # Produtos que não devem ser importados nem exibidos
+        EXCLUDED_SKUS = {
+            "PRDT00089", "PRDT00088", "PRDT00087", "PRDT00086", 
+            "PRDT00085", "PRDT00083", "PRDT00082", "PRDT00081", 
+            "PRDT0070", "PRDT00051", "PRDT48", "PRDT00031"
+        }
+        
         for item in todos_produtos:
             codigo = str(item.get('codigo', ''))
             if not codigo or item.get('id') not in map_id_codigo:
                 continue
+                
+            if codigo in EXCLUDED_SKUS:
+                continue
+                
             nome = item.get('nome', '')
             preco = float(item.get('preco', 0))
             bling_id = str(item.get('id'))
