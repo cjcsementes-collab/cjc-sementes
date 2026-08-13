@@ -112,13 +112,13 @@
                         </div>
                     </div>
                 </div>
-            {% else %}
-                <div style="text-align: center; padding: 20px 0;">
+            {% elif pedido.metodo_pagamento == 'Cartão' %}
+                <div style="text-align: center;">
                     <h3 style="color: var(--laranja-brasa); font-size: 1.4rem; margin-bottom: 10px;">
-                        <i class="fa-solid fa-credit-card"></i> Pagamento por Cartão de Crédito
+                        <i class="fa-solid fa-credit-card"></i> Pagamento em Análise
                     </h3>
-                    <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 25px;">
-                        Estamos simulando o processamento do pagamento com o gateway integrado (Stripe/Mercado Pago).
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">
+                        Seu pagamento via Cartão de Crédito está sendo processado. Atualize esta página em alguns instantes.
                     </p>
                 </div>
             {% endif %}

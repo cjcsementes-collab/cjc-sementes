@@ -13,6 +13,7 @@ import threading
 from bling_service import gerar_tokens, enviar_pedido_venda, sincronizar_produtos_bling, BLING_CLIENT_ID
 from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
 from inter_pix import inter_pix
+from asaas_service import get_or_create_customer, criar_cobranca_cartao
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
 
 app = Flask(__name__)
@@ -392,7 +393,77 @@ def checkout():
                 # Desconta o estoque
                 produto.estoque = max(0.0, produto.estoque - qty)
                 
-        db.session.commit()
+        # ==========================================
+        # 5. Processamento do Pagamento e Pedido
+        # ==========================================
+        try:
+            db.session.commit() # Salva o cliente e itens base
+            
+            if metodo_pagamento == 'Cartão':
+                # Preparar dados do cartão
+                cc_info = {
+                    'holderName': request.form.get('cc_holder'),
+                    'number': request.form.get('cc_number'),
+                    'expiryMonth': request.form.get('cc_month'),
+                    'expiryYear': request.form.get('cc_year'),
+                    'ccv': request.form.get('cc_cvv'),
+                    'parcelas': request.form.get('cc_parcelas', 1),
+                    'email': cliente.email,
+                    'cpfCnpj': ''.join(filter(str.isdigit, cliente.cpf)),
+                    'postalCode': ''.join(filter(str.isdigit, cliente.cep)) if cliente.cep else '',
+                    'addressNumber': cliente.numero or 'SN',
+                    'phone': ''.join(filter(str.isdigit, cliente.telefone)) if cliente.telefone else ''
+                }
+                
+                # 1. Cria ou pega ID do cliente no Asaas
+                asaas_cust_id = get_or_create_customer(cliente)
+                if asaas_cust_id:
+                    cliente.asaas_customer_id = asaas_cust_id
+                    db.session.commit()
+                
+                    # 2. Processar cobrança
+                    sucesso, asaas_resp = criar_cobranca_cartao(asaas_cust_id, total_pedido, pedido.id, cc_info)
+                    
+                    if sucesso:
+                        pedido.asaas_payment_id = asaas_resp.get('id')
+                        pedido.status_pagamento = asaas_resp.get('status') # Ex: CONFIRMED
+                        pedido.parcelas = int(cc_info['parcelas'])
+                        
+                        if pedido.status_pagamento == 'CONFIRMED':
+                            pedido.status = 'Pago'
+                            
+                        db.session.commit()
+                        
+                        flash(f'Pagamento aprovado! Pedido #{pedido.id} gerado com sucesso.', 'success')
+                    else:
+                        # Erro no cartão: cancelar pedido e não enviar pro Bling
+                        db.session.delete(pedido)
+                        db.session.commit()
+                        flash(f'Erro no pagamento: {asaas_resp}', 'danger')
+                        return redirect(url_for('checkout'))
+                else:
+                    db.session.delete(pedido)
+                    db.session.commit()
+                    flash('Erro ao registrar cliente no servidor de pagamentos.', 'danger')
+                    return redirect(url_for('checkout'))
+
+            else:
+                # PIX/Boleto: Se tivermos as chaves, geramos via Banco Inter
+                pix_result = inter_pix.criar_cobranca(pedido, cliente)
+                if pix_result:
+                    pedido.pix_txid = pix_result.get('txid') 
+                    pedido.pix_copia_cola = pix_result.get('pix_copia_cola') 
+                    pedido.pix_location = pix_result.get('location')
+                    db.session.commit()
+
+            # Envia pedido para o Bling
+            if enviar_pedido_venda(pedido.id):
+                print(f"Pedido {pedido.id} exportado para o Bling com sucesso.")
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erro ao processar pedido: {str(e)}", "danger")
+            return redirect(url_for('checkout'))
         
         # Limpa o carrinho da sessão
         session['cart'] = {}
@@ -400,15 +471,6 @@ def checkout():
         
         # Salva o ID do último pedido na sessão para a página de status
         session['ultimo_pedido_id'] = pedido.id
-        
-        # Cria cobrança Boleto/Pix via API Inter (ou simulada se não configurado)
-        pix_result = inter_pix.criar_cobranca(pedido, cliente)
-        if pix_result:
-            pedido.pix_txid = pix_result.get('txid') # codigoSolicitacao
-            pedido.pix_copia_cola = pix_result.get('pix_copia_cola') # Inicialmente vazio na V3
-            pedido.pix_location = pix_result.get('location')
-            
-        db.session.commit()
         
         # Envia email de Novo Pedido (Aguardando Pagamento)
         enviar_email_novo_pedido(pedido)

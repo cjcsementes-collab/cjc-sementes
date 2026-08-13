@@ -47,6 +47,7 @@ class Cliente(db.Model):
     uf = db.Column(db.String(2), nullable=True)
     cep = db.Column(db.String(20), nullable=True)
     atividade = db.Column(db.String(100), nullable=True) # Produtor Rural, Agrônomo, Empresa, Outro
+    asaas_customer_id = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
         return f'<Cliente {self.nome}>'
@@ -58,6 +59,9 @@ class Pedido(db.Model):
     status = db.Column(db.String(50), default='Pendente') # Pendente, Pago, Enviado, Entregue, Cancelado
     total = db.Column(db.Float, nullable=False)
     metodo_pagamento = db.Column(db.String(50), nullable=False) # PIX, Cartão
+    status_pagamento = db.Column(db.String(50), nullable=True, default='PENDENTE')
+    parcelas = db.Column(db.Integer, nullable=True, default=1)
+    asaas_payment_id = db.Column(db.String(100), nullable=True)
     valor_frete = db.Column(db.Float, default=0.0)
     pix_txid = db.Column(db.String(100), nullable=True)        # txid da cobrança Inter
     pix_copia_cola = db.Column(db.Text, nullable=True)         # Código Pix Copia e Cola

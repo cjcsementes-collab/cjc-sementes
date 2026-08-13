@@ -137,11 +137,16 @@
                     <h3 class="summary-title" style="margin-bottom: 15px;"><i class="fa-solid fa-credit-card" style="color: var(--laranja-brasa); margin-right: 8px;"></i> 3. Pagamento</h3>
                     
                     <!-- Abas de Pagamento -->
-                    <div class="payment-methods" style="grid-template-columns: 1fr;">
-                        <div class="payment-method-card selected" id="payment-pix" style="background-color: var(--card-bg); border-color: var(--laranja-brasa);">
+                    <div class="payment-methods" style="grid-template-columns: 1fr 1fr;">
+                        <div class="payment-method-card selected" id="payment-pix">
                             <i class="fa-brands fa-pix payment-method-icon"></i>
-                            <div style="font-weight: bold; font-size: 0.9rem;">PIX ou Boleto</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">Geração Imediata</div>
+                            <div style="font-weight: bold; font-size: 0.9rem;">PIX / Boleto</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Imediato</div>
+                        </div>
+                        <div class="payment-method-card" id="payment-card">
+                            <i class="fa-solid fa-credit-card payment-method-icon"></i>
+                            <div style="font-weight: bold; font-size: 0.9rem;">Cartão de Crédito</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Até 12x</div>
                         </div>
                     </div>
                     
@@ -152,8 +157,51 @@
                         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Ao clicar em "Finalizar Pedido", nosso sistema gerará um Boleto com validade de 3 dias, que também possui um QR Code para pagamento via Pix.</p>
                     </div>
                     
-                    <!-- Hidden field to force PIX/Boleto as method -->
-                    <input type="hidden" name="metodo_pagamento" id="metodo_pagamento_input" value="PIX_BOLETO">
+                    <!-- Conteúdo: Cartão -->
+                    <div id="card-info-box" class="pix-details-box" style="display: none; text-align: left;">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label class="form-label" style="font-size: 0.85rem;">Nome Impresso no Cartão *</label>
+                            <input type="text" name="cc_holder" id="cc_holder" class="form-input">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label class="form-label" style="font-size: 0.85rem;">Número do Cartão *</label>
+                            <input type="text" name="cc_number" id="cc_number" class="form-input" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="form-row" style="margin-bottom: 10px; gap: 10px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label" style="font-size: 0.85rem;">Mês (MM)</label>
+                                <input type="text" name="cc_month" id="cc_month" class="form-input" placeholder="12" maxlength="2">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label" style="font-size: 0.85rem;">Ano (AAAA)</label>
+                                <input type="text" name="cc_year" id="cc_year" class="form-input" placeholder="2030" maxlength="4">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label" style="font-size: 0.85rem;">CVV</label>
+                                <input type="text" name="cc_cvv" id="cc_cvv" class="form-input" placeholder="123" maxlength="4">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem;">Parcelamento</label>
+                            <select name="cc_parcelas" id="cc_parcelas" class="form-input">
+                                <option value="1">1x (À vista)</option>
+                                <option value="2">2x</option>
+                                <option value="3">3x</option>
+                                <option value="4">4x</option>
+                                <option value="5">5x</option>
+                                <option value="6">6x</option>
+                                <option value="7">7x</option>
+                                <option value="8">8x</option>
+                                <option value="9">9x</option>
+                                <option value="10">10x</option>
+                                <option value="11">11x</option>
+                                <option value="12">12x</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden field to control method -->
+                    <!-- Hidden field to control method removed to prevent duplication -->
                 </div>
 
                 <!-- Resumo dos Valores -->
