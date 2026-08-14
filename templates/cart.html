@@ -52,10 +52,10 @@
                                     R$ {{ item.produto.preco_kg|round(2)|string|replace('.', ',') }} /{{ item.produto.unidade }}
                                 </td>
                                 <td>
-                                    <form action="{{ url_for('update_cart', produto_id=item.produto.id) }}" method="POST" style="display:flex; justify-content:center; align-items:center; gap:5px;">
-                                        <input type="number" name="quantidade" class="form-input" value="{% if item.produto.id == 1 or item.quantidade >= 100 %}{{ item.quantidade|int }}{% else %}100{% endif %}" min="{% if item.produto.id == 1 %}1{% else %}100{% endif %}" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="{% if item.produto.id == 1 %}Qualquer quantidade para testes{% else %}Pedido mínimo de 100 kg{% endif %}">
-                                        <button type="submit" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.8rem;" title="Atualizar quantidade">
-                                            <i class="fa-solid fa-rotate"></i>
+                                    <form action="{{ url_for('update_cart', produto_id=item.produto.id) }}" method="POST" class="update-cart-form" style="display: flex; gap: 5px;">
+                                        <input type="number" name="quantidade" class="form-input" value="{% if item.produto.codigo_bling == 'PRDT00092' or item.quantidade >= 100 %}{{ item.quantidade|int }}{% else %}100{% endif %}" min="{% if item.produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="{% if item.produto.codigo_bling == 'PRDT00092' %}Qualquer quantidade para testes{% else %}Pedido mínimo de 100 kg{% endif %}">
+                                        <button type="submit" class="btn-icon" style="background-color: var(--verde-claro); color: white; padding: 8px;" title="Atualizar">
+                                            <i class="fa-solid fa-arrows-rotate"></i>
                                         </button>
                                     </form>
                                 </td>
