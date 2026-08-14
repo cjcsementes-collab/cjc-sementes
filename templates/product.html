@@ -86,7 +86,9 @@
             </div>
             
             {% if produto.descricao %}
-            <p class="product-detail-desc">{{ produto.descricao }}</p>
+            <div class="product-detail-desc" style="font-size: 0.95rem; color: #4A5568; line-height: 1.6; margin-bottom: 20px;">
+                {{ produto.descricao|safe }}
+            </div>
             {% endif %}
             
             <!-- Ficha Técnica e Recomendações -->

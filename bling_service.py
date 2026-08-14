@@ -324,9 +324,6 @@ def sincronizar_produtos_bling():
                     detalhes = resp_detalhes.json().get('data', {})
                     descricao_complementar = detalhes.get('descricaoComplementar', '')
                     descricao_curta = detalhes.get('descricaoCurta', '')
-                    
-                    if not descricao_complementar and descricao_curta:
-                        descricao_complementar = descricao_curta
                         
                     if detalhes.get('preco'):
                         preco = float(detalhes.get('preco'))
@@ -364,6 +361,8 @@ def sincronizar_produtos_bling():
                     
                 if descricao_complementar:
                     produto.ficha_tecnica = descricao_complementar
+                if descricao_curta:
+                    produto.descricao = descricao_curta
                 
                 if imagem_url:
                     produto.imagem_url = str(imagem_url)
@@ -382,6 +381,7 @@ def sincronizar_produtos_bling():
                     estoque=estoque_total if estoque_total is not None else 0.0,
                     categoria=categoria_auto,
                     familia=familia_auto,
+                    descricao=descricao_curta,
                     ficha_tecnica=descricao_complementar,
                     imagem_url=str(imagem_url) if imagem_url else None
                 )
