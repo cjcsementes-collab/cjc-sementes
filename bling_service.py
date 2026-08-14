@@ -330,16 +330,27 @@ def sincronizar_produtos_bling():
                         
                     if detalhes.get('preco'):
                         preco = float(detalhes.get('preco'))
+                        
+                    # A imagem no Bling V3 pode vir dentro de 'midia' no próprio produto
+                    midia = detalhes.get('midia', {})
+                    imagens = midia.get('imagens', {})
+                    internas = imagens.get('internas', [])
+                    externas = imagens.get('externas', [])
                     
-                    # Em Bling V3, imagens podem vir na rota especifica ou no json principal
-                    time.sleep(0.35)
-                    resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
-                    if resp_img.status_code == 200:
-                        imagens_data = resp_img.json().get('data', [])
-                        if imagens_data and len(imagens_data) > 0:
-                            # A imagem pode ter URL na chave url ou link
-                            img_obj = imagens_data[0]
-                            imagem_url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
+                    if internas and len(internas) > 0:
+                        imagem_url = internas[0].get('link') or internas[0].get('linkMiniatura')
+                    elif externas and len(externas) > 0:
+                        imagem_url = externas[0].get('link')
+                    
+                    # Em Bling V3, imagens também poderiam vir na rota especifica
+                    if not imagem_url:
+                        time.sleep(0.35)
+                        resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
+                        if resp_img.status_code == 200:
+                            imagens_data = resp_img.json().get('data', [])
+                            if imagens_data and len(imagens_data) > 0:
+                                img_obj = imagens_data[0]
+                                imagem_url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
             except Exception as e:
                 print(f"Erro ao buscar detalhes do produto {codigo}: {e}")
 
