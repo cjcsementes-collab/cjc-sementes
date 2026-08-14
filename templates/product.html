@@ -85,7 +85,9 @@
                 </div>
             </div>
             
+            {% if produto.descricao %}
             <p class="product-detail-desc">{{ produto.descricao }}</p>
+            {% endif %}
             
             <!-- Ficha Técnica e Recomendações -->
             {% if produto.ficha_tecnica %}
