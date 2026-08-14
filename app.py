@@ -593,6 +593,7 @@ def webhook_pix():
                 # Envia o e-mail de confirmação
                 enviar_email_confirmacao(pedido)
         
+
         return jsonify({'status': 'ok'}), 200
         
     except Exception as e:
@@ -875,6 +876,15 @@ def initialize_database():
             db.session.execute(text('ALTER TABLE produtos ADD COLUMN codigo_bling VARCHAR(50);'))
             db.session.commit()
             print("✅ Coluna 'codigo_bling' adicionada na tabela 'produtos'.")
+        except Exception:
+            db.session.rollback()
+
+        # Adiciona a coluna ficha_tecnica na tabela produtos caso ainda não exista
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('ALTER TABLE produtos ADD COLUMN ficha_tecnica TEXT;'))
+            db.session.commit()
+            print("✅ Coluna 'ficha_tecnica' adicionada na tabela 'produtos'.")
         except Exception:
             db.session.rollback()
 

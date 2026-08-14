@@ -1,6 +1,7 @@
 import os
 import base64
 import requests
+import time
 from datetime import datetime, timedelta
 from models import db, BlingConfig, Pedido, Cliente
 
@@ -314,6 +315,8 @@ def sincronizar_produtos_bling():
             descricao_complementar = ''
             imagem_url = None
             try:
+                # Sleep de 0.35s para respeitar o Rate Limit de 3 requisições/s do Bling
+                time.sleep(0.35)
                 resp_detalhes = requests.get(f"{API_BASE_URL}/produtos/{bling_id}", headers=headers)
                 if resp_detalhes.status_code == 200:
                     detalhes = resp_detalhes.json().get('data', {})
