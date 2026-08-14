@@ -9,13 +9,19 @@ class Config:
     if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
         
-    # Verifica se o disco permanente do Render foi montado
-    if os.path.exists('/data'):
-        sqlite_uri = 'sqlite:////data/cjc_sementes.db'
+    # Use o disco persistente do Render se estiver na raiz absoluta ou na raiz do projeto
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    local_data_dir = os.path.join(basedir, 'data')
+    
+    if DATABASE_URL:
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    elif os.path.exists('/data'):
+        SQLALCHEMY_DATABASE_URI = 'sqlite:////data/cjc_sementes.db'
+    elif os.path.exists(local_data_dir):
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(local_data_dir, 'cjc_sementes.db')
     else:
-        sqlite_uri = 'sqlite:///cjc_sementes.db'
-        
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL or sqlite_uri
+        # Fallback para local efêmero
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'cjc_sementes.db')
     
     # Banco Inter API Pix
     INTER_CLIENT_ID = os.environ.get('INTER_CLIENT_ID')
