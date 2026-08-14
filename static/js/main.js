@@ -261,7 +261,30 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const total = checkoutSubtotal + valorFrete;
             labelTotalText.innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            // Atualiza os valores do parcelamento dinamicamente
+            const parcelasSelect = document.getElementById('cc_parcelas');
+            if (parcelasSelect) {
+                for (let i = 0; i < parcelasSelect.options.length; i++) {
+                    const option = parcelasSelect.options[i];
+                    const numParcelas = parseInt(option.value);
+                    if (!isNaN(numParcelas) && numParcelas > 0) {
+                        const valorParcela = total / numParcelas;
+                        const valorFormatado = valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        if (numParcelas === 1) {
+                            option.text = `1x de ${valorFormatado} (À vista)`;
+                        } else {
+                            option.text = `${numParcelas}x de ${valorFormatado} sem juros`;
+                        }
+                    }
+                }
+            }
         }
+    }
+    
+    // Inicializa as parcelas com o valor atual na carga da página
+    if (document.getElementById('cc_parcelas')) {
+        updateFinalTotal(parseFloat(inputValorFrete?.value || 0), inputFreteOpcao?.value || '');
     }
 
     // 5. Máscaras e Validações Simples nos Inputs de Formulário
