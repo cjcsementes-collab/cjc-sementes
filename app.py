@@ -402,14 +402,23 @@ def checkout():
             db.session.commit() # Salva o cliente e itens base
             
             if metodo_pagamento == 'Cartão':
+                parcelas = int(request.form.get('cc_parcelas', 1))
+                
+                # Recalcula total com juros se parcelado
+                if parcelas > 1:
+                    juros_mensal = 0.0299
+                    pmt = pedido.total * (juros_mensal * (1 + juros_mensal)**parcelas) / ((1 + juros_mensal)**parcelas - 1)
+                    pedido.total = round(pmt * parcelas, 2)
+                    db.session.commit()
+                
                 # Preparar dados do cartão
                 cc_info = {
                     'holderName': request.form.get('cc_holder'),
-                    'number': request.form.get('cc_number'),
+                    'number': request.form.get('cc_number', '').replace(' ', ''),
                     'expiryMonth': request.form.get('cc_month'),
                     'expiryYear': request.form.get('cc_year'),
                     'ccv': request.form.get('cc_cvv'),
-                    'parcelas': request.form.get('cc_parcelas', 1),
+                    'parcelas': parcelas,
                     'email': cliente.email,
                     'cpfCnpj': ''.join(filter(str.isdigit, cliente.cpf)),
                     'postalCode': ''.join(filter(str.isdigit, cliente.cep)) if cliente.cep else '',

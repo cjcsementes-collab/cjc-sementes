@@ -252,6 +252,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Função para atualizar a exibição do total final na tela (considerando juros)
+    function updateValorTotalDisplay() {
+        if (!labelTotalText) return;
+        const baseTotal = checkoutSubtotal + parseFloat(inputValorFrete?.value || 0);
+        let finalTotal = baseTotal;
+        
+        const metodoPagamento = document.getElementById('input-metodo-pagamento')?.value;
+        const parcelasSelect = document.getElementById('cc_parcelas');
+        
+        if (metodoPagamento === 'Cartão' && parcelasSelect) {
+            const numParcelas = parseInt(parcelasSelect.value);
+            if (!isNaN(numParcelas) && numParcelas > 1) {
+                const jurosMensal = 0.0299;
+                const pmt = baseTotal * (jurosMensal * Math.pow(1 + jurosMensal, numParcelas)) / (Math.pow(1 + jurosMensal, numParcelas) - 1);
+                finalTotal = pmt * numParcelas;
+            }
+        }
+        
+        labelTotalText.innerText = finalTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Listener para o seletor de parcelas
+    const parcelasSelect = document.getElementById('cc_parcelas');
+    if (parcelasSelect) {
+        parcelasSelect.addEventListener('change', updateValorTotalDisplay);
+    }
+    
+    // Listeners para os botões de método de pagamento (já existem mais acima, mas vamos garantir que chamam a atualização)
+    if (paymentPix) paymentPix.addEventListener('click', updateValorTotalDisplay);
+    if (paymentCard) paymentCard.addEventListener('click', updateValorTotalDisplay);
+
     function updateFinalTotal(valorFrete, nomeFrete) {
         if (labelFreteText && labelTotalText && inputValorFrete && inputFreteOpcao) {
             inputValorFrete.value = valorFrete;
@@ -259,25 +290,41 @@ document.addEventListener('DOMContentLoaded', function() {
             
             labelFreteText.innerText = valorFrete === 0 ? 'Grátis' : valorFrete.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             
-            const total = checkoutSubtotal + valorFrete;
-            labelTotalText.innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const baseTotal = checkoutSubtotal + valorFrete;
             
             // Atualiza os valores do parcelamento dinamicamente
-            const parcelasSelect = document.getElementById('cc_parcelas');
             if (parcelasSelect) {
+                const jurosMensal = 0.0299;
                 for (let i = 0; i < parcelasSelect.options.length; i++) {
                     const option = parcelasSelect.options[i];
                     const numParcelas = parseInt(option.value);
                     if (!isNaN(numParcelas) && numParcelas > 0) {
-                        const valorParcela = total / numParcelas;
+                        let valorParcela;
+                        let totalComJuros;
+                        
+                        if (numParcelas === 1) {
+                            valorParcela = baseTotal;
+                            totalComJuros = baseTotal;
+                        } else {
+                            const pmt = baseTotal * (jurosMensal * Math.pow(1 + jurosMensal, numParcelas)) / (Math.pow(1 + jurosMensal, numParcelas) - 1);
+                            valorParcela = pmt;
+                            totalComJuros = valorParcela * numParcelas;
+                        }
+                        
                         const valorFormatado = valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        const totalFormatado = totalComJuros.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        
                         if (numParcelas === 1) {
                             option.text = `1x de ${valorFormatado} (À vista)`;
                         } else {
-                            option.text = `${numParcelas}x de ${valorFormatado} sem juros`;
+                            option.text = `${numParcelas}x de ${valorFormatado} (Total: ${totalFormatado})`;
                         }
                     }
                 }
+                // Chama a atualização da tela
+                updateValorTotalDisplay();
+            } else {
+                updateValorTotalDisplay();
             }
         }
     }
