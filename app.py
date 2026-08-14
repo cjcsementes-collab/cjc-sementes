@@ -670,6 +670,45 @@ def admin_bling_sync():
     flash('🔄 Sincronização iniciada em segundo plano! Como são muitos dados, isso pode levar alguns minutos. Atualize a página mais tarde para ver os produtos.', 'info')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/debug/bling/<codigo>')
+@login_required
+def debug_bling(codigo):
+    import requests
+    from models import BlingConfig
+    config = BlingConfig.query.first()
+    if not config or not config.access_token:
+        return jsonify({"error": "Bling não configurado ou sem token"})
+    
+    headers = {
+        'Authorization': f'Bearer {config.access_token}',
+        'Accept': 'application/json'
+    }
+    
+    # 1. Buscar produto pelo código para obter ID
+    resp = requests.get(f"https://www.bling.com.br/Api/v3/produtos?codigo={codigo}", headers=headers)
+    if resp.status_code != 200:
+        return jsonify({"error": "Falha ao buscar listagem", "status": resp.status_code, "body": resp.text})
+        
+    data = resp.json().get('data', [])
+    if not data:
+        return jsonify({"error": "Produto não encontrado no Bling", "codigo": codigo})
+        
+    bling_id = data[0].get('id')
+    
+    # 2. Buscar detalhes
+    resp_detalhes = requests.get(f"https://www.bling.com.br/Api/v3/produtos/{bling_id}", headers=headers)
+    
+    # 3. Buscar imagens
+    resp_img = requests.get(f"https://www.bling.com.br/Api/v3/produtos/{bling_id}/imagens", headers=headers)
+    
+    return jsonify({
+        "1_id_bling": bling_id,
+        "2_detalhes_status": resp_detalhes.status_code,
+        "3_detalhes_body": resp_detalhes.json() if resp_detalhes.status_code == 200 else resp_detalhes.text,
+        "4_imagens_status": resp_img.status_code,
+        "5_imagens_body": resp_img.json() if resp_img.status_code == 200 else resp_img.text
+    })
+
 @app.route('/admin/produto/<int:produto_id>/excluir', methods=['GET', 'POST'])
 @login_required
 def admin_excluir_produto(produto_id):
