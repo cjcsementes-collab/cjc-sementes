@@ -323,6 +323,11 @@ def sincronizar_produtos_bling():
                 if resp_detalhes.status_code == 200:
                     detalhes = resp_detalhes.json().get('data', {})
                     descricao_complementar = detalhes.get('descricaoComplementar', '')
+                    descricao_curta = detalhes.get('descricaoCurta', '')
+                    
+                    if not descricao_complementar and descricao_curta:
+                        descricao_complementar = descricao_curta
+                        
                     if detalhes.get('preco'):
                         preco = float(detalhes.get('preco'))
                     
