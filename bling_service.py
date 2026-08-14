@@ -327,6 +327,7 @@ def sincronizar_produtos_bling():
                         preco = float(detalhes.get('preco'))
                     
                     # Em Bling V3, imagens podem vir na rota especifica ou no json principal
+                    time.sleep(0.35)
                     resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
                     if resp_img.status_code == 200:
                         imagens_data = resp_img.json().get('data', [])

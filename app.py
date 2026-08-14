@@ -656,11 +656,18 @@ def admin_bling_callback():
 @app.route('/admin/bling/sync')
 @login_required
 def admin_bling_sync():
-    sucesso, mensagem = sincronizar_produtos_bling()
-    if sucesso:
-        flash(mensagem, "success")
-    else:
-        flash(mensagem, "danger")
+    # Executa a sincronização em uma thread separada para não causar Timeout (Erro 502) no Render
+    import threading
+    def background_sync():
+        with app.app_context():
+            try:
+                sucesso, msg = sincronizar_produtos_bling()
+                print(f"Background Sync Result: {sucesso} - {msg}")
+            except Exception as e:
+                print(f"Background Sync Error: {e}")
+
+    threading.Thread(target=background_sync).start()
+    flash('🔄 Sincronização iniciada em segundo plano! Como são muitos dados, isso pode levar alguns minutos. Atualize a página mais tarde para ver os produtos.', 'info')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/produto/<int:produto_id>/excluir', methods=['GET', 'POST'])
