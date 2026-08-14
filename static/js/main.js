@@ -346,6 +346,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.value = value;
         });
     });
+
+    const ccInput = document.getElementById('cc_number');
+    if (ccInput) {
+        ccInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 16) value = value.slice(0, 16);
+            value = value.replace(/(\d{4})(?=\d)/g, "$1 ");
+            e.target.value = value;
+        });
+    }
     
     // Copiar código Pix Copia e Cola
     const btnCopyPix = document.getElementById('btn-copiar-pix');
