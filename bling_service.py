@@ -290,7 +290,7 @@ def sincronizar_produtos_bling():
         # Produtos que não devem ser importados nem exibidos
         EXCLUDED_SKUS = {
             "PRDT00089", "PRDT00088", "PRDT00087", "PRDT00086", 
-            "PRDT00085", "PRDT00083", "PRDT00082", "PRDT00081", 
+            "PRDT00085", "PRDT00083", 
             "PRDT0070", "PRDT00051", "PRDT48", "PRDT00031"
         }
         
