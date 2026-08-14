@@ -153,17 +153,18 @@ def add_to_cart(produto_id):
         quantidade = 100.0
         flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
         
-    # Limita ao estoque disponível
-    if quantidade > produto.estoque:
-        quantidade = produto.estoque
-        flash(f'Quantidade ajustada para o limite disponível em estoque ({int(produto.estoque)} {produto.unidade.upper()}).', 'info')
+    # Limita ao estoque disponível apenas se não for o produto de teste
+    if produto.codigo_bling != 'PRDT00092':
+        if quantidade > produto.estoque:
+            quantidade = produto.estoque
+            flash(f'Quantidade ajustada para o limite disponível em estoque ({int(produto.estoque)} {produto.unidade.upper()}).', 'info')
         
     cart_session = session.get('cart', {})
     prod_id_str = str(produto_id)
     
     if prod_id_str in cart_session:
         nova_quantidade = cart_session[prod_id_str] + quantidade
-        if nova_quantidade > produto.estoque:
+        if produto.codigo_bling != 'PRDT00092' and nova_quantidade > produto.estoque:
             nova_quantidade = produto.estoque
         cart_session[prod_id_str] = nova_quantidade
     else:
@@ -187,9 +188,10 @@ def update_cart(produto_id):
         quantidade = 100.0
         flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
         
-    if quantidade > produto.estoque:
-        quantidade = produto.estoque
-        flash(f'Quantidade limitada ao estoque atual ({int(produto.estoque)} {produto.unidade.upper()}).', 'warning')
+    if produto.codigo_bling != 'PRDT00092':
+        if quantidade > produto.estoque:
+            quantidade = produto.estoque
+            flash(f'Quantidade limitada ao estoque atual ({int(produto.estoque)} {produto.unidade.upper()}).', 'warning')
         
     cart_session = session.get('cart', {})
     cart_session[str(produto_id)] = quantidade

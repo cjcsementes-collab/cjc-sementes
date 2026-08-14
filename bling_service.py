@@ -310,6 +310,26 @@ def sincronizar_produtos_bling():
             estoque_total = saldos_dict.get(bling_id, 0.0)
             categoria_auto, familia_auto = get_classificacao_automatica(nome)
             
+            # Buscar detalhes adicionais do produto (Ficha Técnica e Imagens)
+            descricao_complementar = ''
+            imagem_url = None
+            try:
+                resp_detalhes = requests.get(f"{API_BASE_URL}/produtos/{bling_id}", headers=headers)
+                if resp_detalhes.status_code == 200:
+                    detalhes = resp_detalhes.json().get('data', {})
+                    descricao_complementar = detalhes.get('descricaoComplementar', '')
+                    
+                    # Em Bling V3, imagens podem vir na rota especifica ou no json principal
+                    resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
+                    if resp_img.status_code == 200:
+                        imagens_data = resp_img.json().get('data', [])
+                        if imagens_data and len(imagens_data) > 0:
+                            # A imagem pode ter URL na chave url ou link
+                            img_obj = imagens_data[0]
+                            imagem_url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
+            except Exception as e:
+                print(f"Erro ao buscar detalhes do produto {codigo}: {e}")
+
             # Se já existe, atualiza nome e estoque, mantém classificação caso o usuário tenha alterado, a não ser que estivesse como "Outros"
             produto = Produto.query.filter_by(codigo_bling=codigo).first()
             if produto:
@@ -317,6 +337,12 @@ def sincronizar_produtos_bling():
                 produto.preco_kg = preco
                 if estoque_total is not None:
                     produto.estoque = estoque_total
+                    
+                if descricao_complementar:
+                    produto.ficha_tecnica = descricao_complementar
+                
+                if imagem_url:
+                    produto.imagem_url = str(imagem_url)
                     
                 if produto.categoria == 'Outros':
                     produto.categoria = categoria_auto
@@ -329,12 +355,11 @@ def sincronizar_produtos_bling():
                     nome=nome,
                     codigo_bling=codigo,
                     preco_kg=preco,
-                    estoque=estoque_total if estoque_total is not None else 0,
-                    unidade='kg',
-                    descricao=f"Produto importado do Bling. Código: {codigo}",
+                    estoque=estoque_total if estoque_total is not None else 0.0,
                     categoria=categoria_auto,
                     familia=familia_auto,
-                    imagem_url=""
+                    ficha_tecnica=descricao_complementar,
+                    imagem_url=str(imagem_url) if imagem_url else None
                 )
                 db.session.add(novo_produto)
                 count_new += 1

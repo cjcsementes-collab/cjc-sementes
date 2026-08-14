@@ -87,48 +87,15 @@
             
             <p class="product-detail-desc">{{ produto.descricao }}</p>
             
-            <!-- Tabela Técnica Auxiliar -->
+            <!-- Ficha Técnica e Recomendações -->
+            {% if produto.ficha_tecnica %}
             <div class="product-detail-technical">
-                <h4><i class="fa-solid fa-circle-info"></i> Ficha Técnica e Recomendações</h4>
-                <table>
-                    <tr>
-                        <td>Profundidade Radicular</td>
-                        <td>
-                            {% if 'Crotalária' in produto.nome or 'Girassol' in produto.nome %}
-                                Profunda (até 2 metros, excelente descompactadora)
-                            {% elif 'Gramíneas' in produto.categoria or 'Milheto' in produto.nome %}
-                                Média/Fasciculada (reciclagem de nutrientes superficiais)
-                            {% else %}
-                                Média (melhoria estrutural geral)
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Fixação de Nitrogênio (FBN)</td>
-                        <td>
-                            {% if 'Adubação Verde' in produto.categoria %}
-                                Alta (Simbiose ativa com rizóbios)
-                            {% else %}
-                                Não fixa (Excelente recicladora e produtora de biomassa)
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Produção de Biomassa</td>
-                        <td>
-                            {% if 'Milheto' in produto.nome or 'Sorgo' in produto.nome or 'Feijão-de-Porco' in produto.nome %}
-                                Elevada (Mais de 10 a 15 toneladas de matéria seca/ha)
-                            {% else %}
-                                Moderada a Alta (Excelente cobertura protetora)
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Clima Recomendado</td>
-                        <td>Variável (Ótima tolerância a estresse hídrico)</td>
-                    </tr>
-                </table>
+                <h4><i class="fa-solid fa-circle-info"></i> Ficha Técnica (Bling)</h4>
+                <div style="background-color: var(--card-bg); padding: 15px; border-radius: 8px; font-size: 0.95rem; line-height: 1.6; color: var(--text-color);">
+                    {{ produto.ficha_tecnica|safe }}
+                </div>
             </div>
+            {% endif %}
             
             <!-- Compra e Quantidade -->
             <form action="{{ url_for('add_to_cart', produto_id=produto.id) }}" method="POST" style="margin-top: auto;">
@@ -139,7 +106,7 @@
                 <div class="qty-buy-box">
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" id="qty-minus">-</button>
-                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.id == 1 %}1{% else %}100{% endif %}" min="{% if produto.id == 1 %}1{% else %}100{% endif %}" max="{{ produto.estoque|int }}">
+                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.id == 1 or produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" min="{% if produto.id == 1 or produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" max="{% if produto.codigo_bling == 'PRDT00092' %}999999{% else %}{{ produto.estoque|int }}{% endif %}">
                         <button type="button" class="qty-btn" id="qty-plus">+</button>
                     </div>
                     
@@ -147,8 +114,8 @@
                         {{ produto.unidade.upper() }}
                     </span>
                     
-                    <button type="submit" class="btn btn-primary" style="flex: 1; height: 40px; border-radius: var(--radius-sm);">
-                        <i class="fa-solid fa-cart-plus" style="margin-right: 8px;"></i> Adicionar ao Carrinho
+                    <button type="submit" class="btn btn-primary" style="flex: 1; height: 40px; border-radius: var(--radius-sm);" {% if produto.estoque <= 0 and produto.codigo_bling != 'PRDT00092' %}disabled{% endif %}>
+                        <i class="fa-solid fa-cart-plus" style="margin-right: 8px;"></i> {% if produto.estoque > 0 or produto.codigo_bling == 'PRDT00092' %}Adicionar ao Carrinho{% else %}Esgotado{% endif %}
                     </button>
                 </div>
             </form>
@@ -163,7 +130,9 @@
                 {% for rec in recomendados %}
                     <div class="product-card">
                         <div class="product-card-img-wrapper" style="height: 140px;">
-                            {% if 'Gramíneas' in rec.categoria %}
+                            {% if rec.imagem_url %}
+                                <img src="{{ rec.imagem_url }}" alt="{{ rec.nome }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% elif 'Gramíneas' in rec.categoria %}
                                 <svg class="product-card-img" viewBox="0 0 64 64" width="50" height="50">
                                     <path d="M22,58 C22,40 28,24 38,10 C34,26 30,42 30,58 Z" fill="#81C784"/>
                                     <path d="M42,58 C42,44 45,34 50,22 C46,36 44,46 44,58 Z" fill="#4CAF50"/>
