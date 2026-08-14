@@ -162,18 +162,21 @@ def add_to_cart(produto_id):
     cart_session = session.get('cart', {})
     prod_id_str = str(produto_id)
     
+    qtd_antiga = cart_session.get(prod_id_str, 0)
+    
     if prod_id_str in cart_session:
         nova_quantidade = cart_session[prod_id_str] + quantidade
         if produto.codigo_bling != 'PRDT00092' and nova_quantidade > produto.estoque:
             nova_quantidade = produto.estoque
         cart_session[prod_id_str] = nova_quantidade
     else:
-        cart_session[prod_id_str] = quantidade
+        nova_quantidade = quantidade
+        cart_session[prod_id_str] = nova_quantidade
         
     session['cart'] = cart_session
     session.modified = True
     
-    flash(f'{produto.nome} foi adicionado ao carrinho!', 'success')
+    flash(f'{produto.nome} adicionado! (Tinha: {qtd_antiga}kg | Adicionou: {quantidade}kg | Total agora: {nova_quantidade}kg)', 'success')
     return redirect(url_for('cart'))
 
 @app.route('/carrinho/atualizar/<int:produto_id>', methods=['POST'])
