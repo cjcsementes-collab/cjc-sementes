@@ -4,10 +4,19 @@
 
 {% block content %}
 <section class="product-detail-section container">
-    <!-- Botão de Voltar -->
-    <a href="{{ url_for('index') }}" style="color: var(--verde-safra); font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px;">
-        <i class="fa-solid fa-arrow-left"></i> Voltar ao Catálogo
-    </a>
+    <!-- Top Bar: Voltar + Busca -->
+    <div class="product-top-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <!-- Botão de Voltar -->
+        <a href="{{ url_for('index') }}" style="color: var(--verde-safra); font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-arrow-left"></i> Voltar ao Catálogo
+        </a>
+        
+        <!-- Barra de Busca -->
+        <form action="{{ url_for('index') }}" method="GET" class="search-box" style="margin: 0; min-width: 250px;">
+            <input type="text" name="busca" class="search-input" placeholder="Buscar semente...">
+            <button type="submit" class="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+    </div>
     
     <div class="product-detail-grid">
         <!-- Lado Esquerdo: Imagem/SVG -->
