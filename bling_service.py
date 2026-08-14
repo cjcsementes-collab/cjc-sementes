@@ -230,6 +230,7 @@ def sincronizar_produtos_bling():
         todos_produtos = []
         
         while True:
+            time.sleep(0.35)
             response = requests.get(f"{API_BASE_URL}/produtos?limite=100&pagina={pagina}", headers=headers)
             if response.status_code != 200:
                 if pagina == 1:
@@ -272,6 +273,7 @@ def sincronizar_produtos_bling():
                     lote_ids = ids_list[i:i+20]
                     query_params = "&".join([f"idsProdutos[]={pid}" for pid in lote_ids])
                     
+                    time.sleep(0.35)
                     resp_estoque = requests.get(f"{API_BASE_URL}/estoques/saldos?{query_params}", headers=headers)
                     if resp_estoque.status_code == 200:
                         saldos_data = resp_estoque.json().get('data', [])
@@ -321,6 +323,8 @@ def sincronizar_produtos_bling():
                 if resp_detalhes.status_code == 200:
                     detalhes = resp_detalhes.json().get('data', {})
                     descricao_complementar = detalhes.get('descricaoComplementar', '')
+                    if detalhes.get('preco'):
+                        preco = float(detalhes.get('preco'))
                     
                     # Em Bling V3, imagens podem vir na rota especifica ou no json principal
                     resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
