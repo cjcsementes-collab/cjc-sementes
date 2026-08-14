@@ -656,6 +656,12 @@ def admin_bling_callback():
 @app.route('/admin/bling/sync')
 @login_required
 def admin_bling_sync():
+    from models import BlingConfig
+    config = BlingConfig.query.first()
+    if not config or not config.access_token:
+        flash('Erro: Bling não configurado! Clique em "Conectar com Bling ERP" primeiro.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
     # Executa a sincronização em uma thread separada para não causar Timeout (Erro 502) no Render
     import threading
     def background_sync():
@@ -707,6 +713,17 @@ def debug_bling(codigo):
         "3_detalhes_body": resp_detalhes.json() if resp_detalhes.status_code == 200 else resp_detalhes.text,
         "4_imagens_status": resp_img.status_code,
         "5_imagens_body": resp_img.json() if resp_img.status_code == 200 else resp_img.text
+    })
+
+@app.route('/debug/db')
+def debug_db():
+    import os
+    from models import Produto, BlingConfig
+    return jsonify({
+        "data_dir_exists": os.path.exists('/data'),
+        "db_uri": app.config.get('SQLALCHEMY_DATABASE_URI'),
+        "produtos_count": Produto.query.count(),
+        "bling_config_exists": BlingConfig.query.first() is not None
     })
 
 @app.route('/admin/produto/<int:produto_id>/excluir', methods=['GET', 'POST'])
