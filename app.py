@@ -149,9 +149,9 @@ def add_to_cart(produto_id):
     except ValueError:
         quantidade = 100.0
         
-    if produto_id != 1 and quantidade < 100.0:
+    if produto.codigo_bling != 'PRDT00092' and quantidade < 100.0:
         quantidade = 100.0
-        flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
+        flash('A quantidade mínima por pedido é de 100 kg (exceto para produto TESTE).', 'warning')
         
     # Limita ao estoque disponível apenas se não for o produto de teste
     if produto.codigo_bling != 'PRDT00092':
@@ -184,9 +184,9 @@ def update_cart(produto_id):
     except ValueError:
         quantidade = 100.0
         
-    if produto_id != 1 and quantidade < 100.0:
+    if produto.codigo_bling != 'PRDT00092' and quantidade < 100.0:
         quantidade = 100.0
-        flash('A quantidade mínima por pedido é de 100 kg.', 'warning')
+        flash('A quantidade mínima por pedido é de 100 kg (exceto para produto TESTE).', 'warning')
         
     if produto.codigo_bling != 'PRDT00092':
         if quantidade > produto.estoque:

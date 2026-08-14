@@ -76,7 +76,7 @@
                 
                 <div style="margin-top: 10px;">
                     <div class="product-badge" style="background-color: var(--verde-safra); color: white; padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600; display: inline-block;">
-                        {% if produto.id == 1 %}
+                        {% if produto.codigo_bling == 'PRDT00092' %}
                             <i class="fa-solid fa-flask"></i> Produto de Teste (Sem limite mínimo)
                         {% else %}
                             <i class="fa-solid fa-circle-exclamation"></i> Pedido Mínimo: 100 kg
@@ -106,7 +106,7 @@
                 <div class="qty-buy-box">
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" id="qty-minus">-</button>
-                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.id == 1 or produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" min="{% if produto.id == 1 or produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" max="{% if produto.codigo_bling == 'PRDT00092' %}999999{% else %}{{ produto.estoque|int }}{% endif %}">
+                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" min="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" max="{% if produto.codigo_bling == 'PRDT00092' %}999999{% else %}{{ produto.estoque|int }}{% endif %}">
                         <button type="button" class="qty-btn" id="qty-plus">+</button>
                     </div>
                     
