@@ -380,7 +380,7 @@ input, select, textarea, button {
 
 .product-card-img-wrapper {
     position: relative;
-    background-color: #EBF2F0;
+    background-color: transparent;
     height: 180px;
     display: flex;
     align-items: center;
