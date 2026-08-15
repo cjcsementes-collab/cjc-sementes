@@ -216,7 +216,7 @@ def enviar_pedido_venda(pedido_id):
         
     # 3. MONTAR O PEDIDO DE VENDA
     payload = {
-        "numero": pedido.id,
+        "numeroLoja": str(pedido.id),
         "data": pedido.data_criacao.strftime("%Y-%m-%d"),
         "contato": {
             "id": int(contato_id)
