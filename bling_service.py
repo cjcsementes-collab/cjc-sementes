@@ -150,30 +150,29 @@ def enviar_pedido_venda(pedido_id):
         return False, "Pedido não encontrado no banco de dados."
         
     cliente = pedido.cliente
-    
-    # Formata CPF/CNPJ
     cpf_cnpj = ''.join(filter(str.isdigit, cliente.cpf))
     
-    # Monta os Itens
-    itens = []
-    for i, item in enumerate(pedido.itens):
-        itens.append({
-            "codigo": item.produto.codigo_bling or str(item.produto.id),
-            "descricao": item.produto.nome,
-            "unidade": item.produto.unidade.upper(),
-            "quantidade": float(item.quantidade),
-            "valor": float(item.preco_unitario)
-        })
-        
-    # Extrai o cep
-    cep = ''.join(filter(str.isdigit, cliente.cep)) if cliente.cep else ''
+    # 1. BUSCAR OU CRIAR CONTATO NO BLING
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
     
-    payload = {
-        "numero": pedido.id,
-        "data": pedido.data_criacao.strftime("%Y-%m-%d"),
-        "contato": {
+    contato_id = None
+    # Tenta buscar pelo CPF/CNPJ
+    resp_busca = requests.get(f"{API_BASE_URL}/contatos?numeroDocumento={cpf_cnpj}", headers=headers)
+    if resp_busca.status_code == 200 and resp_busca.json().get('data'):
+        contatos_encontrados = resp_busca.json().get('data')
+        if contatos_encontrados:
+            contato_id = contatos_encontrados[0].get('id')
+            
+    if not contato_id:
+        # Cria o contato
+        cep = ''.join(filter(str.isdigit, cliente.cep)) if cliente.cep else ''
+        payload_contato = {
             "nome": cliente.nome,
-            "tipoPessoa": "J" if len(cpf_cnpj) > 11 else "F",
+            "tipo": "J" if len(cpf_cnpj) > 11 else "F",
             "numeroDocumento": cpf_cnpj,
             "ie": cliente.inscricao_estadual if cliente.inscricao_estadual else "",
             "email": cliente.email,
@@ -189,6 +188,38 @@ def enviar_pedido_venda(pedido_id):
                     "cep": cep
                 }
             }
+        }
+        resp_cria = requests.post(f"{API_BASE_URL}/contatos", json=payload_contato, headers=headers)
+        if resp_cria.status_code in [200, 201]:
+            contato_id = resp_cria.json().get('data', {}).get('id')
+        else:
+            return False, f"Erro ao criar contato no Bling: {resp_cria.text}"
+            
+    if not contato_id:
+        return False, "Não foi possível obter o ID do contato no Bling."
+
+    # 2. MONTAR OS ITENS
+    itens = []
+    for i, item in enumerate(pedido.itens):
+        item_payload = {
+            "quantidade": float(item.quantidade),
+            "valor": float(item.preco_unitario)
+        }
+        if item.produto.bling_id:
+            item_payload["produto"] = {"id": int(item.produto.bling_id)}
+        else:
+            item_payload["codigo"] = item.produto.codigo_bling or str(item.produto.id)
+            item_payload["descricao"] = item.produto.nome
+            item_payload["unidade"] = item.produto.unidade.upper()
+            
+        itens.append(item_payload)
+        
+    # 3. MONTAR O PEDIDO DE VENDA
+    payload = {
+        "numero": pedido.id,
+        "data": pedido.data_criacao.strftime("%Y-%m-%d"),
+        "contato": {
+            "id": int(contato_id)
         },
         "itens": itens,
         "transporte": {
@@ -371,6 +402,8 @@ def sincronizar_produtos_bling():
                 if produto.familia == 'Outros':
                     produto.familia = familia_auto
                     
+                produto.bling_id = int(bling_id) if bling_id else None
+                    
                 count_updated += 1
             else:
                 novo_produto = Produto(
@@ -382,7 +415,8 @@ def sincronizar_produtos_bling():
                     familia=familia_auto,
                     descricao=descricao_curta,
                     ficha_tecnica=descricao_complementar,
-                    imagem_url=str(imagem_url) if imagem_url else None
+                    imagem_url=str(imagem_url) if imagem_url else None,
+                    bling_id=int(bling_id) if bling_id else None
                 )
                 db.session.add(novo_produto)
                 count_new += 1
