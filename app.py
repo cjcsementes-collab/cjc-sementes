@@ -471,8 +471,11 @@ def checkout():
                     db.session.commit()
 
             # Envia pedido para o Bling
-            if enviar_pedido_venda(pedido.id):
-                print(f"Pedido {pedido.id} exportado para o Bling com sucesso.")
+            sucesso_bling, msg_bling = enviar_pedido_venda(pedido.id)
+            if not sucesso_bling:
+                flash(msg_bling, "warning")
+            else:
+                print(msg_bling)
         
         except Exception as e:
             db.session.rollback()

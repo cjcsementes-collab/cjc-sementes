@@ -143,12 +143,11 @@ def enviar_pedido_venda(pedido_id):
     """Envia o pedido da loja para o Bling como Pedido de Venda."""
     token = get_valid_access_token()
     if not token:
-        print("⚠️ Integração com Bling não está autorizada. Ignorando envio de pedido.")
-        return False
+        return False, "⚠️ Integração com Bling não está autorizada. Clique em 'Conectar com Bling ERP' no painel."
         
     pedido = Pedido.query.get(pedido_id)
     if not pedido:
-        return False
+        return False, "Pedido não encontrado no banco de dados."
         
     cliente = pedido.cliente
     
@@ -208,11 +207,11 @@ def enviar_pedido_venda(pedido_id):
     response = requests.post(f"{API_BASE_URL}/pedidos/vendas", json=payload, headers=headers)
     
     if response.status_code in [200, 201]:
-        print(f"✅ Pedido #{pedido.id} enviado para o Bling com sucesso.")
-        return True
+        return True, f"✅ Pedido #{pedido.id} enviado para o Bling com sucesso."
     else:
-        print(f"❌ Erro ao enviar pedido #{pedido.id} para o Bling: {response.text}")
-        return False
+        erro_msg = f"❌ Erro ao enviar pedido para o Bling: {response.text}"
+        print(erro_msg)
+        return False, erro_msg
 
 def sincronizar_produtos_bling():
     """Busca os produtos do Bling e sincroniza com o banco da loja."""
