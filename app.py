@@ -473,7 +473,18 @@ def checkout():
             # Envia pedido para o Bling
             sucesso_bling, msg_bling = enviar_pedido_venda(pedido.id)
             if not sucesso_bling:
-                flash(msg_bling, "warning")
+                # ARMADILHA: Trava a tela completamente para o usuário ler o erro!
+                db.session.rollback()
+                return f"""
+                <div style='padding: 50px; font-family: sans-serif; text-align: center;'>
+                    <h1 style='color: red;'>ALERTA: O Bling Rejeitou o Pedido!</h1>
+                    <p style='font-size: 20px;'>Tire uma foto desta tela e mande para o suporte.</p>
+                    <div style='background: #ffebee; padding: 20px; border: 2px solid red; margin: 20px; font-weight: bold;'>
+                        {msg_bling}
+                    </div>
+                    <a href='/' style='padding: 10px 20px; background: blue; color: white; text-decoration: none;'>Voltar para a Loja</a>
+                </div>
+                """
             else:
                 print(msg_bling)
         
