@@ -146,7 +146,7 @@
                     <div class="product-card">
                         <div class="product-card-img-wrapper" style="height: 140px;">
                             {% if rec.imagem_url %}
-                                <img src="{{ rec.imagem_url }}" alt="{{ rec.nome }}" style="width: 100%; height: 100%; object-fit: contain; background-color: transparent;">
+                                <img src="{{ rec.imagem_url }}" alt="{{ rec.nome }}" style="width: 100%; height: 100%; object-fit: contain; background-color: transparent; transform: scale(1.2);">
                             {% elif 'Gramíneas' in rec.categoria %}
                                 <svg class="product-card-img" viewBox="0 0 64 64" width="50" height="50">
                                     <path d="M22,58 C22,40 28,24 38,10 C34,26 30,42 30,58 Z" fill="#81C784"/>

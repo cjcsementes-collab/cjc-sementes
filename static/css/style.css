@@ -389,8 +389,8 @@ input, select, textarea, button {
 }
 
 .product-card-img {
-    max-width: 90px;
-    max-height: 90px;
+    max-width: 110px;
+    max-height: 110px;
     filter: drop-shadow(0 8px 12px rgba(47, 79, 47, 0.15));
 }
 
