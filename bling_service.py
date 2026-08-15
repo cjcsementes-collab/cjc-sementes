@@ -240,7 +240,8 @@ def enviar_pedido_venda(pedido_id):
     if response.status_code in [200, 201]:
         return True, f"✅ Pedido #{pedido.id} enviado para o Bling com sucesso."
     else:
-        erro_msg = f"❌ Erro ao enviar pedido para o Bling: {response.text}"
+        import json
+        erro_msg = f"❌ Erro ao enviar pedido para o Bling: {response.text} | PAYLOAD GERADO: {json.dumps(payload)}"
         print(erro_msg)
         return False, erro_msg
 

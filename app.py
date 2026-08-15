@@ -477,9 +477,9 @@ def checkout():
                 db.session.rollback()
                 return f"""
                 <div style='padding: 50px; font-family: sans-serif; text-align: center;'>
-                    <h1 style='color: red;'>ALERTA: O Bling Rejeitou o Pedido!</h1>
+                    <h1 style='color: red;'>ALERTA V3: O Bling Rejeitou o Pedido!</h1>
                     <p style='font-size: 20px;'>Tire uma foto desta tela e mande para o suporte.</p>
-                    <div style='background: #ffebee; padding: 20px; border: 2px solid red; margin: 20px; font-weight: bold;'>
+                    <div style='background: #ffebee; padding: 20px; border: 2px solid red; margin: 20px; font-weight: bold; text-align: left;'>
                         {msg_bling}
                     </div>
                     <a href='/' style='padding: 10px 20px; background: blue; color: white; text-decoration: none;'>Voltar para a Loja</a>
@@ -989,7 +989,16 @@ def initialize_database():
             db.session.add(admin_user)
             db.session.commit()
             print("✅ Usuário admin criado.")
+        db.create_all()
         
+        try:
+            from sqlalchemy import text
+            db.session.execute(text("ALTER TABLE produtos ADD COLUMN bling_id BIGINT;"))
+            db.session.commit()
+            print("Coluna bling_id adicionada.")
+        except Exception:
+            db.session.rollback()
+
         if not Produto.query.first():
             try:
                 from seed import seed_database
