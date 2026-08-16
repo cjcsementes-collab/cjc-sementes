@@ -144,7 +144,7 @@
             <div class="products-grid">
                 {% for rec in recomendados %}
                     <div class="product-card">
-                        <div class="product-card-img-wrapper" style="height: 140px;">
+                        <div class="product-card-img-wrapper">
                             {% if rec.imagem_url %}
                                 <img src="{{ rec.imagem_url }}" alt="{{ rec.nome }}" class="product-real-img">
                             {% elif 'Gramíneas' in rec.categoria %}
