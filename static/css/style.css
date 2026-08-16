@@ -381,17 +381,24 @@ input, select, textarea, button {
 .product-card-img-wrapper {
     position: relative;
     background-color: transparent;
-    height: 180px;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    padding-top: 15px;
 }
 
 .product-card-img {
-    max-width: 110px;
-    max-height: 110px;
+    max-width: 90px;
+    max-height: 90px;
     filter: drop-shadow(0 8px 12px rgba(47, 79, 47, 0.15));
+}
+
+.product-real-img {
+    width: 135px;
+    height: 135px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.1));
 }
 
 .product-card-badge {
