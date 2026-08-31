@@ -43,31 +43,64 @@ document.addEventListener('DOMContentLoaded', function() {
         function updateDetailTotal() {
             let qty = parseFloat(qtyInput.value);
             let min = parseFloat(qtyInput.getAttribute('min')) || 1;
-            if (isNaN(qty) || qty < min) qty = min;
+            let step = parseFloat(qtyInput.getAttribute('step')) || 1;
+            
+            if (isNaN(qty)) qty = min;
+            
             const total = basePrice * qty;
             totalDetailPrice.innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            const btnCart = document.getElementById('btn-add-cart');
+            const btnWhats = document.getElementById('btn-whatsapp-container');
+            if (btnCart && btnWhats) {
+                if (qty < 100 && step === 25) {
+                    btnCart.style.display = 'none';
+                    btnWhats.style.display = 'flex';
+                } else {
+                    btnCart.style.display = 'block';
+                    btnWhats.style.display = 'none';
+                }
+            }
         }
 
         if (btnMinus) {
             btnMinus.addEventListener('click', () => {
-                let current = parseFloat(qtyInput.value);
+                let current = parseFloat(qtyInput.value) || 0;
+                let step = parseFloat(qtyInput.getAttribute('step')) || 1;
                 let min = parseFloat(qtyInput.getAttribute('min')) || 1;
-                if (current > min) {
-                    qtyInput.value = current - 1;
-                    updateDetailTotal();
-                }
+                let next = current - step;
+                if (next < min) next = min;
+                qtyInput.value = next;
+                updateDetailTotal();
             });
         }
 
         if (btnPlus) {
             btnPlus.addEventListener('click', () => {
-                let current = parseFloat(qtyInput.value);
-                qtyInput.value = current + 1;
+                let current = parseFloat(qtyInput.value) || 0;
+                let step = parseFloat(qtyInput.getAttribute('step')) || 1;
+                qtyInput.value = current + step;
                 updateDetailTotal();
             });
         }
 
+        qtyInput.addEventListener('change', () => {
+            let current = parseFloat(qtyInput.value) || 0;
+            let step = parseFloat(qtyInput.getAttribute('step')) || 1;
+            let min = parseFloat(qtyInput.getAttribute('min')) || 1;
+            
+            if (step > 1) {
+                current = Math.round(current / step) * step;
+            }
+            if (current < min) current = min;
+            qtyInput.value = current;
+            updateDetailTotal();
+        });
+
         qtyInput.addEventListener('input', updateDetailTotal);
+        
+        // Initial run to set button state
+        updateDetailTotal();
     }
 
     // 3. Simulador de Frete no Carrinho

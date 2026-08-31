@@ -121,7 +121,7 @@
                 <div class="qty-buy-box">
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" id="qty-minus">-</button>
-                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" min="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" max="{% if produto.codigo_bling == 'PRDT00092' %}999999{% else %}{{ produto.estoque|int }}{% endif %}">
+                        <input type="number" name="quantidade" id="quantidade-selector" class="qty-input" value="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" min="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}25{% endif %}" step="{% if produto.codigo_bling == 'PRDT00092' %}1{% else %}25{% endif %}" max="{% if produto.codigo_bling == 'PRDT00092' %}999999{% else %}{{ produto.estoque|int }}{% endif %}">
                         <button type="button" class="qty-btn" id="qty-plus">+</button>
                     </div>
                     
@@ -129,9 +129,16 @@
                         {{ produto.unidade.upper() }}
                     </span>
                     
-                    <button type="submit" class="btn btn-primary" style="flex: 1; height: 40px; border-radius: var(--radius-sm);" {% if produto.estoque <= 0 and produto.codigo_bling != 'PRDT00092' %}disabled{% endif %}>
+                    <button type="submit" id="btn-add-cart" class="btn btn-primary" style="flex: 1; height: 40px; border-radius: var(--radius-sm);" {% if produto.estoque <= 0 and produto.codigo_bling != 'PRDT00092' %}disabled{% endif %}>
                         <i class="fa-solid fa-cart-plus" style="margin-right: 8px;"></i> {% if produto.estoque > 0 or produto.codigo_bling == 'PRDT00092' %}Adicionar ao Carrinho{% else %}Esgotado{% endif %}
                     </button>
+                    
+                    <div id="btn-whatsapp-container" style="flex: 1; display: none; flex-direction: column; gap: 5px;">
+                        <span style="font-size: 0.7rem; color: var(--laranja-brasa); font-weight: bold; text-align: center; line-height: 1.1;">O pedido mínimo pelo site é 100kg. Fale conosco:</span>
+                        <a href="https://wa.me/5546999062375?text=Olá! Gostaria de comprar a quantidade de sacarias do produto {{ produto.nome }}, porém deu menos que 100 kg." target="_blank" class="btn btn-success" style="height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; width: 100%;">
+                            <i class="fa-brands fa-whatsapp"></i> Comprar via WhatsApp
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>

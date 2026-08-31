@@ -53,7 +53,7 @@
                                 </td>
                                 <td>
                                     <form action="{{ url_for('update_cart', produto_id=item.produto.id) }}" method="POST" class="update-cart-form" style="display: flex; gap: 5px;">
-                                        <input type="number" name="quantidade" class="form-input" value="{% if item.produto.codigo_bling == 'PRDT00092' or item.quantidade >= 100 %}{{ item.quantidade|int }}{% else %}100{% endif %}" min="{% if item.produto.codigo_bling == 'PRDT00092' %}1{% else %}100{% endif %}" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="{% if item.produto.codigo_bling == 'PRDT00092' %}Qualquer quantidade para testes{% else %}Pedido mínimo de 100 kg{% endif %}">
+                                        <input type="number" name="quantidade" class="form-input" value="{% if item.produto.codigo_bling == 'PRDT00092' or item.quantidade >= 100 %}{{ item.quantidade|int }}{% else %}{{ item.quantidade|int }}{% endif %}" min="{% if item.produto.codigo_bling == 'PRDT00092' %}1{% else %}25{% endif %}" step="{% if item.produto.codigo_bling == 'PRDT00092' %}1{% else %}25{% endif %}" max="{{ item.produto.estoque|int }}" style="width: 75px; padding: 6px; text-align: center; font-weight: bold; border-color: var(--border-color);" title="{% if item.produto.codigo_bling == 'PRDT00092' %}Qualquer quantidade para testes{% else %}Múltiplos de 25 kg{% endif %}">
                                         <button type="submit" class="btn-icon" style="background-color: var(--verde-claro); color: white; padding: 8px;" title="Atualizar">
                                             <i class="fa-solid fa-arrows-rotate"></i>
                                         </button>
@@ -123,9 +123,19 @@
                     O valor total final com frete será calculado na tela de finalização.
                 </p>
                 
-                <a href="{{ url_for('checkout') }}" class="btn btn-primary" style="width: 100%; border-radius: var(--radius-sm); font-size: 1.1rem; padding: 12px 20px;">
-                    Prosseguir para Checkout <i class="fa-solid fa-circle-chevron-right" style="margin-left: 8px;"></i>
-                </a>
+                {% if peso_total_kg >= 100 %}
+                    <a href="{{ url_for('checkout') }}" class="btn btn-primary" style="width: 100%; border-radius: var(--radius-sm); font-size: 1.1rem; padding: 12px 20px;">
+                        Prosseguir para Checkout <i class="fa-solid fa-circle-chevron-right" style="margin-left: 8px;"></i>
+                    </a>
+                {% else %}
+                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; color: #856404; font-size: 0.9rem;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> O pedido mínimo no site é de <strong>100 kg</strong> (Você tem {{ peso_total_kg }} kg no total).<br>
+                        Para quantidades menores, feche seu pedido pelo WhatsApp!
+                    </div>
+                    <a href="https://wa.me/5546999062375?text=Olá! Tenho interesse em comprar algumas sementes, mas meu pedido total é de {{ peso_total_kg }} kg." target="_blank" class="btn btn-success" style="width: 100%; border-radius: var(--radius-sm); font-size: 1.1rem; padding: 12px 20px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                        <i class="fa-brands fa-whatsapp"></i> Finalizar via WhatsApp
+                    </a>
+                {% endif %}
             </div>
         </div>
     {% else %}
