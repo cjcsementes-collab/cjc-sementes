@@ -784,7 +784,7 @@ def admin_forcar_blacklist():
             continue
         if p_existente.nome:
             nome_limpo = p_existente.nome.strip().upper()
-            nome_limpo = nome_limpo.replace("\ufffd", "É")
+            nome_limpo = nome_limpo.replace("\ufffd", "\u00c9")
             if nome_limpo in EXCLUDED_NAMES_UPPER:
                 db.session.delete(p_existente)
                 count += 1
