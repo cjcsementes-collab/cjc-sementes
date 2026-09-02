@@ -772,6 +772,26 @@ def admin_limpar_tudo():
         db.session.rollback()
         flash(f'Erro ao apagar produtos: {str(e)}', 'danger')
     return redirect(url_for('admin_dashboard'))
+@app.route('/admin/forcar_blacklist')
+@login_required
+def admin_forcar_blacklist():
+    from bling_service import EXCLUDED_SKUS, EXCLUDED_NAMES_UPPER
+    count = 0
+    for p_existente in Produto.query.all():
+        if p_existente.codigo_bling in EXCLUDED_SKUS:
+            db.session.delete(p_existente)
+            count += 1
+            continue
+        if p_existente.nome:
+            nome_limpo = p_existente.nome.strip().upper()
+            nome_limpo = nome_limpo.replace("\ufffd", "É")
+            if nome_limpo in EXCLUDED_NAMES_UPPER:
+                db.session.delete(p_existente)
+                count += 1
+    
+    db.session.commit()
+    flash(f'{count} produtos da lista negra foram removidos com sucesso do banco de dados!', 'success')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/api/temp_export/<secret>')
 def temp_export(secret):

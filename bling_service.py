@@ -5,6 +5,33 @@ import time
 from datetime import datetime, timedelta
 from models import db, BlingConfig, Pedido, Cliente
 
+EXCLUDED_SKUS = {
+    "PRDT00089", "PRDT00088", "PRDT00087", "PRDT00086", 
+    "PRDT00085", "PRDT00083", 
+    "PRDT0070", "PRDT00051", "PRDT48", "PRDT00031",
+    "PRDT00042", "PRDT00046", "PRDT00063", "PRDT00060",
+    "PRDT00076", "PRDT00080", "PRDT00061", "PRDT00091",
+    "PRDT00070", "PRDT00071", "PRDT00072", "PRDT00027",
+    "PRDT00013"
+}
+
+EXCLUDED_NAMES_UPPER = {
+    "SEMENTE DE MIX CUSTOMIZADO VERÃO",
+    "SEMENTE DE MIX CUSTOMIZADO VERAO",
+    "SEMENTE SYNERGIX 495",
+    "SEMENTE SYNERGIX 260",
+    "SEMENTE SYNERGIX 4120",
+    "SEMENTE SYNERGIX 4100-1",
+    "SEMENTES RAPHANUS SATIVUS (NABO FORRAGEIRO) IPR 116 CAT. S1 S. 23/23 - LOTES:2730-04",
+    "UROCHLOA BRIZANTHA CV MARANDU VC 50 NUA",
+    "SEMENTE MILHO BM3072 VIP3",
+    "SEMENTES DE NABO FORRAGEIRO IPR 210, EXCETO TRANSGENICAS GENÉTICA",
+    "SEMENTES DE NABO FORRAGEIRO IPR 116, EXCETO TRANSGENICAS GENÉTICA",
+    "SEMENTES DE CENTEIO, EXCETO TRANSGENICAS GENÉTICA",
+    "SEMENTE DE TRIGO MOURISCO IPR 92 ALTAR S1",
+    "SEMENTES DE FEIJAO, EXCETO TRANSGENICAS"
+}
+
 def get_classificacao_automatica(nome):
     nome_lower = nome.lower()
     
@@ -284,47 +311,6 @@ def sincronizar_produtos_bling():
             return True, "Nenhum produto encontrado no Bling."
             
         from models import Produto, db
-        
-        EXCLUDED_SKUS = {
-            "PRDT00089", "PRDT00088", "PRDT00087", "PRDT00086", 
-            "PRDT00085", "PRDT00083", 
-            "PRDT0070", "PRDT00051", "PRDT48", "PRDT00031",
-            "PRDT00042", "PRDT00046", "PRDT00063", "PRDT00060",
-            "PRDT00076", "PRDT00080", "PRDT00061", "PRDT00091",
-            "PRDT00070", "PRDT00071", "PRDT00072", "PRDT00027",
-            "PRDT00013"
-        }
-        
-        EXCLUDED_NAMES_UPPER = {
-            "SEMENTE DE MIX CUSTOMIZADO VERÃO",
-            "SEMENTE DE MIX CUSTOMIZADO VERAO",
-            "SEMENTE SYNERGIX 495",
-            "SEMENTE SYNERGIX 260",
-            "SEMENTE SYNERGIX 4120",
-            "SEMENTE SYNERGIX 4100-1",
-            "SEMENTES RAPHANUS SATIVUS (NABO FORRAGEIRO) IPR 116 CAT. S1 S. 23/23 - LOTES:2730-04",
-            "UROCHLOA BRIZANTHA CV MARANDU VC 50 NUA",
-            "SEMENTE MILHO BM3072 VIP3",
-            "SEMENTES DE NABO FORRAGEIRO IPR 210, EXCETO TRANSGENICAS GENÉTICA",
-            "SEMENTES DE NABO FORRAGEIRO IPR 116, EXCETO TRANSGENICAS GENÉTICA",
-            "SEMENTES DE CENTEIO, EXCETO TRANSGENICAS GENÉTICA",
-            "SEMENTE DE TRIGO MOURISCO IPR 92 ALTAR S1",
-            "SEMENTES DE FEIJAO, EXCETO TRANSGENICAS"
-        }
-        
-        # Proativamente remove produtos da lista negra que já possam estar no banco
-        for p_existente in Produto.query.all():
-            if p_existente.codigo_bling in EXCLUDED_SKUS:
-                db.session.delete(p_existente)
-                continue
-            if p_existente.nome:
-                nome_limpo = p_existente.nome.strip().upper()
-                # Resolve problemas com acentuação quebrada que vem do Bling
-                nome_limpo = nome_limpo.replace("\ufffd", "É")
-                if nome_limpo in EXCLUDED_NAMES_UPPER:
-                    db.session.delete(p_existente)
-                    
-        db.session.commit()
         
         count_new = 0
         count_updated = 0
