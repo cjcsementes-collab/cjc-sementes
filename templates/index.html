@@ -52,7 +52,7 @@
         {% if categoria_selecionada %}
             <a href="{{ url_for('index') }}?categoria={{ categoria_selecionada }}{% if busca %}&busca={{ busca }}{% endif %}" 
                class="filter-btn {% if not familia_selecionada %}active{% endif %}">
-                <i class="fa-solid fa-border-all"></i> Todas de {{ categoria_selecionada }}
+                <i class="fa-solid fa-border-all"></i> Todas de {{ 'MIX DE SEMENTES' if categoria_selecionada == 'MIX CUSTOMIZADO' else categoria_selecionada }}
             </a>
             
             {% for fam in familias %}
@@ -82,7 +82,7 @@
     {% if busca or categoria_selecionada %}
         <p style="margin-bottom: 20px; font-size: 0.95rem; color: var(--text-muted);">
             Exibindo {{ produtos|length }} resultados 
-            {% if categoria_selecionada %} na categoria <strong>"{{ categoria_selecionada }}"</strong>{% endif %}
+            {% if categoria_selecionada %} na categoria <strong>"{{ 'MIX DE SEMENTES' if categoria_selecionada == 'MIX CUSTOMIZADO' else categoria_selecionada }}"</strong>{% endif %}
             {% if busca %} para a busca <strong>"{{ busca }}"</strong>{% endif %}.
             <a href="{{ url_for('index') }}" style="color: var(--laranja-brasa); margin-left: 10px; font-weight: bold;">Limpar Filtros</a>
         </p>
