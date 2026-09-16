@@ -717,7 +717,7 @@ def debug_bling(codigo):
     }
     
     # 1. Buscar produto pelo código para obter ID
-    resp = requests.get(f"https://www.bling.com.br/Api/v3/produtos?codigo={codigo}", headers=headers)
+    resp = requests.get(f"https://api.bling.com.br/v3/produtos?codigo={codigo}", headers=headers)
     if resp.status_code != 200:
         return jsonify({"error": "Falha ao buscar listagem", "status": resp.status_code, "body": resp.text})
         
@@ -728,10 +728,11 @@ def debug_bling(codigo):
     bling_id = data[0].get('id')
     
     # 2. Buscar detalhes
-    resp_detalhes = requests.get(f"https://www.bling.com.br/Api/v3/produtos/{bling_id}", headers=headers)
+    resp_detalhes = requests.get(f"https://api.bling.com.br/v3/produtos/{bling_id}", headers=headers)
+    detalhes = resp_detalhes.json() if resp_detalhes.status_code == 200 else {"error": resp_detalhes.text}
     
     # 3. Buscar imagens
-    resp_img = requests.get(f"https://www.bling.com.br/Api/v3/produtos/{bling_id}/imagens", headers=headers)
+    resp_img = requests.get(f"https://api.bling.com.br/v3/produtos/{bling_id}/imagens", headers=headers)
     
     return jsonify({
         "1_id_bling": bling_id,

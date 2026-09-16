@@ -71,8 +71,8 @@ def get_classificacao_automatica(nome):
 BLING_CLIENT_ID = os.environ.get('BLING_CLIENT_ID')
 BLING_CLIENT_SECRET = os.environ.get('BLING_CLIENT_SECRET')
 
-TOKEN_URL = "https://www.bling.com.br/Api/v3/oauth/token"
-API_BASE_URL = "https://www.bling.com.br/Api/v3"
+TOKEN_URL = "https://api.bling.com.br/v3/oauth/token"
+API_BASE_URL = "https://api.bling.com.br/v3"
 
 def get_config():
     config = BlingConfig.query.first()
