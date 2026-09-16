@@ -426,6 +426,15 @@ def sincronizar_produtos_bling():
                 
                 if imagem_url:
                     produto.imagem_url = str(imagem_url)
+                    # Baixa a imagem e converte para base64 porque o link do S3 do Bling expira
+                    try:
+                        resp_img_data = requests.get(imagem_url, timeout=10)
+                        if resp_img_data.status_code == 200:
+                            import base64
+                            encoded = base64.b64encode(resp_img_data.content).decode('utf-8')
+                            produto.imagem_base64 = encoded
+                    except Exception as e:
+                        print(f"Erro ao baixar imagem para cache do produto {codigo}: {e}")
                     
                 if produto.categoria == 'Outros':
                     produto.categoria = categoria_auto
@@ -436,6 +445,16 @@ def sincronizar_produtos_bling():
                     
                 count_updated += 1
             else:
+                imagem_base64_data = None
+                if imagem_url:
+                    try:
+                        resp_img_data = requests.get(imagem_url, timeout=10)
+                        if resp_img_data.status_code == 200:
+                            import base64
+                            imagem_base64_data = base64.b64encode(resp_img_data.content).decode('utf-8')
+                    except Exception as e:
+                        print(f"Erro ao baixar imagem para cache do produto {codigo}: {e}")
+
                 novo_produto = Produto(
                     nome=nome,
                     codigo_bling=codigo,
@@ -446,6 +465,7 @@ def sincronizar_produtos_bling():
                     descricao=descricao_curta,
                     ficha_tecnica=descricao_complementar,
                     imagem_url=str(imagem_url) if imagem_url else None,
+                    imagem_base64=imagem_base64_data,
                     bling_id=int(bling_id) if bling_id else None
                 )
                 db.session.add(novo_produto)

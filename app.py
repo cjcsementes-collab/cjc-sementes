@@ -852,11 +852,21 @@ def admin_migrate_schema():
     try:
         # Adiciona a coluna familia se não existir
         db.session.execute(text("ALTER TABLE produtos ADD COLUMN familia VARCHAR(100) DEFAULT 'Outros'"))
+    except Exception as e:
+        pass
+    
+    try:
+        # Adiciona a coluna imagem_base64 para cache persistente de imagens do Bling (S3 expira)
+        db.session.execute(text("ALTER TABLE produtos ADD COLUMN imagem_base64 TEXT"))
+    except Exception as e:
+        pass
+        
+    try:
         db.session.commit()
-        flash('Banco de dados atualizado com sucesso! (coluna familia adicionada)', 'success')
+        flash('Banco de dados atualizado com sucesso! (esquema verificado)', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Erro ao atualizar o banco de dados: (Pode já ter sido atualizado) {str(e)}', 'warning')
+        flash(f'Erro ao atualizar o banco de dados: {str(e)}', 'warning')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/api/webhooks/bling/estoque', methods=['POST'])
@@ -978,6 +988,14 @@ def initialize_database():
     with app.app_context():
         # Cria as tabelas necessárias
         db.create_all()
+        
+        # Adiciona a coluna imagem_base64 automaticamente
+        try:
+            from sqlalchemy import text
+            db.session.execute(text("ALTER TABLE produtos ADD COLUMN imagem_base64 TEXT"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
         
         # Adiciona a coluna codigo_bling na tabela produtos caso ainda não exista
         try:

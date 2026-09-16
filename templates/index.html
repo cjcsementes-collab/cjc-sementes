@@ -104,7 +104,9 @@
                         </span>
                         
                         <!-- Ícone Dinâmico SVG baseados na semente -->
-                        {% if produto.imagem_url %}
+                        {% if produto.imagem_base64 %}
+                            <img src="data:image/jpeg;base64,{{ produto.imagem_base64 }}" alt="{{ produto.nome }}" class="product-real-img">
+                        {% elif produto.imagem_url %}
                             <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}" class="product-real-img">
                         {% elif 'Milho' in produto.nome %}
                             <svg class="product-card-img" viewBox="0 0 64 64" width="80" height="80">
