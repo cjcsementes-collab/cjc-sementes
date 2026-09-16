@@ -800,6 +800,18 @@ def temp_export(secret):
     produtos = Produto.query.all()
     return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "imagem_url": p.imagem_url, "imagem_base64": "YES" if p.imagem_base64 else "NO"} for p in produtos]}
 
+@app.route('/api/sync_debug/<secret>')
+def api_sync_debug(secret):
+    if secret != 'cjc2026':
+        return "Unauthorized", 401
+    from bling_service import sincronizar_produtos_bling
+    try:
+        sucesso, msg = sincronizar_produtos_bling()
+        return {"sucesso": sucesso, "msg": msg}
+    except Exception as e:
+        import traceback
+        return {"sucesso": False, "msg": str(e), "traceback": traceback.format_exc()}
+
 @app.route('/admin/aplicar_classificacao')
 @login_required
 def admin_aplicar_classificacao():
