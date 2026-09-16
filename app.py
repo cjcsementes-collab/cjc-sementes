@@ -798,7 +798,7 @@ def temp_export(secret):
     if secret != 'cjc2026':
         return "Unauthorized", 401
     produtos = Produto.query.all()
-    return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "categoria": p.categoria, "familia": p.familia} for p in produtos]}
+    return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "categoria": p.categoria, "familia": p.familia, "imagem_url": p.imagem_url} for p in produtos]}
 
 @app.route('/admin/aplicar_classificacao')
 @login_required
