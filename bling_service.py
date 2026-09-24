@@ -492,8 +492,13 @@ def sincronizar_produtos_bling():
                             db.session.add(nova_img)
                     except Exception as e:
                         print(f"Erro ao baixar img sec: {e}")
-                
-        db.session.commit()
+            
+            # COMITA POR PRODUTO PARA NÃO ESTOURAR A MEMÓRIA DO SERVIDOR
+            db.session.commit()
+            db.session.expunge_all()
+            import gc
+            gc.collect()
+            
         return True, f"Sincronização concluída! {count_new} novos criados e {count_updated} atualizados com os códigos e ESTOQUES corretos."
     except Exception as e:
         return False, f"Erro interno na sincronização: {e}"
