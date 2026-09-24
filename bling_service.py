@@ -395,21 +395,24 @@ def sincronizar_produtos_bling():
                     externas = imagens.get('externas', [])
                     
                     all_image_urls = []
-                    for img in internas:
-                        url = img.get('link') or img.get('linkMiniatura')
-                        if url: all_image_urls.append(url)
-                    for img in externas:
-                        url = img.get('link')
-                        if url: all_image_urls.append(url)
-                        
-                    if not all_image_urls:
-                        time.sleep(0.35)
-                        resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
-                        if resp_img.status_code == 200:
-                            for img_obj in resp_img.json().get('data', []):
-                                url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
-                                if url: all_image_urls.append(url)
+                    
+                    time.sleep(0.35)
+                    resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
+                    if resp_img.status_code == 200:
+                        for img_obj in resp_img.json().get('data', []):
+                            url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
+                            if url and url not in all_image_urls:
+                                all_image_urls.append(url)
                                 
+                    # Fallback para o que veio no body do produto, caso a rota de imagens falhe
+                    if not all_image_urls:
+                        for img in internas:
+                            url = img.get('link') or img.get('linkMiniatura')
+                            if url and url not in all_image_urls: all_image_urls.append(url)
+                        for img in externas:
+                            url = img.get('link')
+                            if url and url not in all_image_urls: all_image_urls.append(url)
+                            
                     imagem_url = all_image_urls[0] if all_image_urls else None
             except Exception as e:
                 print(f"Erro ao buscar detalhes do produto {codigo}: {e}")
