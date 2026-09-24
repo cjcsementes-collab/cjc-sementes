@@ -852,6 +852,28 @@ def debug_produto(codigo):
         "secundarias": [{"id": s.id, "has_base64": bool(s.imagem_base64), "url": s.imagem_url} for s in secundarias]
     }
 
+@app.route('/debug/sync_one/<codigo>')
+def debug_sync_one(codigo):
+    from bling_service import get_valid_access_token, API_BASE_URL
+    import requests
+    token = get_valid_access_token()
+    headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/json'}
+    
+    # Busca pelo código
+    r = requests.get(f"{API_BASE_URL}/produtos?codigo={codigo}", headers=headers)
+    if r.status_code != 200 or not r.json().get('data'):
+        return {"erro": "Nao achou o produto no bling", "status": r.status_code}
+        
+    bling_id = r.json()['data'][0]['id']
+    
+    # Imagens do produto
+    r_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
+    
+    return {
+        "bling_id": bling_id,
+        "imagens_endpoint": r_img.json() if r_img.status_code == 200 else str(r_img.status_code)
+    }
+
 @app.route('/api/sync_debug/<secret>')
 def api_sync_debug(secret):
     if secret != 'cjc2026':
