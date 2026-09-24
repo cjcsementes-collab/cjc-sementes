@@ -107,6 +107,25 @@ def product_detail(produto_id):
     recomendados = Produto.query.filter(Produto.categoria == produto.categoria, Produto.id != produto.id).limit(4).all()
     return render_template('product.html', produto=produto, recomendados=recomendados)
 
+@app.route('/imagem/<int:produto_id>')
+def imagem_produto(produto_id):
+    produto = Produto.query.get_or_404(produto_id)
+    if produto.imagem_base64:
+        import base64
+        from flask import Response
+        try:
+            image_data = base64.b64decode(produto.imagem_base64)
+            response = Response(image_data, mimetype='image/jpeg')
+            response.headers['Cache-Control'] = 'public, max-age=604800'
+            return response
+        except Exception:
+            pass
+            
+    if produto.imagem_url:
+        return redirect(produto.imagem_url)
+        
+    return redirect(url_for('static', filename='img/placeholder.jpg'))
+
 # ----------------- ROTAS DO CARRINHO -----------------
 
 @app.route('/carrinho')
