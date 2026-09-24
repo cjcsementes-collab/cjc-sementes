@@ -818,7 +818,7 @@ def temp_export(secret):
     if secret != 'cjc2026':
         return "Unauthorized", 401
     produtos = Produto.query.all()
-    return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "imagem_url": p.imagem_url, "imagem_base64": "YES" if p.imagem_base64 else "NO"} for p in produtos]}
+    return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "imagem_url": p.imagem_url} for p in produtos]}
 
 @app.route('/api/sync_debug/<secret>')
 def api_sync_debug(secret):

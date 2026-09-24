@@ -21,7 +21,10 @@ class Produto(db.Model):
     preco_kg = db.Column(db.Float, nullable=False) # Representa preço unitário (seja KG ou Saca)
     unidade = db.Column(db.String(10), default='kg') # 'kg' ou 'sc' (saca)
     imagem_url = db.Column(db.String(255), nullable=True)
-    imagem_base64 = db.Column(db.Text, nullable=True)
+    
+    from sqlalchemy.orm import deferred
+    imagem_base64 = deferred(db.Column(db.Text, nullable=True))
+    
     estoque = db.Column(db.Float, default=1000.0)
     codigo_bling = db.Column(db.String(50), nullable=True) # SKU no Bling
     bling_id = db.Column(db.BigInteger, nullable=True) # ID interno no Bling V3
