@@ -559,8 +559,8 @@ input, select, textarea, button {
 }
 
 .product-detail-image-box img {
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 90%;
+    max-height: 90%;
     filter: drop-shadow(0 15px 25px rgba(47, 79, 47, 0.2));
 }
 

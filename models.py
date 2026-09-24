@@ -13,6 +13,17 @@ class Admin(db.Model, UserMixin):
     def __repr__(self):
         return f'<Admin {self.username}>'
 
+class ProdutoImagem(db.Model):
+    __tablename__ = 'produto_imagens'
+    id = db.Column(db.Integer, primary_key=True)
+    produto_id = db.Column(db.Integer, db.ForeignKey('produtos.id', ondelete='CASCADE'), nullable=False)
+    imagem_url = db.Column(db.String(255), nullable=True)
+    
+    from sqlalchemy.orm import deferred
+    imagem_base64 = deferred(db.Column(db.Text, nullable=True))
+    
+    produto = db.relationship('Produto', backref=db.backref('imagens_secundarias', cascade='all, delete-orphan', lazy=True))
+
 class Produto(db.Model):
     __tablename__ = 'produtos'
     id = db.Column(db.Integer, primary_key=True)

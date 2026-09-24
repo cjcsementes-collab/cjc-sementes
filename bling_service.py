@@ -394,20 +394,23 @@ def sincronizar_produtos_bling():
                     internas = imagens.get('internas', [])
                     externas = imagens.get('externas', [])
                     
-                    if internas and len(internas) > 0:
-                        imagem_url = internas[0].get('link') or internas[0].get('linkMiniatura')
-                    elif externas and len(externas) > 0:
-                        imagem_url = externas[0].get('link')
-                    
-                    # Em Bling V3, imagens também poderiam vir na rota especifica
-                    if not imagem_url:
+                    all_image_urls = []
+                    for img in internas:
+                        url = img.get('link') or img.get('linkMiniatura')
+                        if url: all_image_urls.append(url)
+                    for img in externas:
+                        url = img.get('link')
+                        if url: all_image_urls.append(url)
+                        
+                    if not all_image_urls:
                         time.sleep(0.35)
                         resp_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
                         if resp_img.status_code == 200:
-                            imagens_data = resp_img.json().get('data', [])
-                            if imagens_data and len(imagens_data) > 0:
-                                img_obj = imagens_data[0]
-                                imagem_url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
+                            for img_obj in resp_img.json().get('data', []):
+                                url = img_obj.get('url') or img_obj.get('link') or img_obj.get('linkMiniatura')
+                                if url: all_image_urls.append(url)
+                                
+                    imagem_url = all_image_urls[0] if all_image_urls else None
             except Exception as e:
                 print(f"Erro ao buscar detalhes do produto {codigo}: {e}")
 
@@ -469,7 +472,26 @@ def sincronizar_produtos_bling():
                     bling_id=int(bling_id) if bling_id else None
                 )
                 db.session.add(novo_produto)
+                db.session.flush() # Para pegar o ID
+                produto = novo_produto
                 count_new += 1
+                
+            # Processar imagens secundárias
+            if 'all_image_urls' in locals() and len(all_image_urls) > 1:
+                # Remove imagens antigas
+                from models import ProdutoImagem
+                ProdutoImagem.query.filter_by(produto_id=produto.id).delete()
+                
+                for extra_url in all_image_urls[1:]:
+                    try:
+                        resp_img = requests.get(extra_url, timeout=10)
+                        if resp_img.status_code == 200:
+                            import base64
+                            extra_b64 = base64.b64encode(resp_img.content).decode('utf-8')
+                            nova_img = ProdutoImagem(produto_id=produto.id, imagem_url=extra_url, imagem_base64=extra_b64)
+                            db.session.add(nova_img)
+                    except Exception as e:
+                        print(f"Erro ao baixar img sec: {e}")
                 
         db.session.commit()
         return True, f"Sincronização concluída! {count_new} novos criados e {count_updated} atualizados com os códigos e ESTOQUES corretos."

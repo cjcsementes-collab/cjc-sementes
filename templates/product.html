@@ -112,6 +112,19 @@
             </div>
             {% endif %}
             
+            {% if produto.imagens_secundarias %}
+            <div class="product-detail-secondary-images" style="margin-top: 20px; margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; color: var(--text-dark); margin-bottom: 10px;"><i class="fa-solid fa-images"></i> Imagens Adicionais</h4>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    {% for img in produto.imagens_secundarias %}
+                        <a href="{{ url_for('imagem_secundaria', imagem_id=img.id) }}" target="_blank" title="Clique para ampliar">
+                            <img src="{{ url_for('imagem_secundaria', imagem_id=img.id) }}" alt="Imagem Secundária" style="width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;">
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
             <!-- Compra e Quantidade -->
             <form action="{{ url_for('add_to_cart', produto_id=produto.id) }}" method="POST" style="margin-top: auto;">
                 <div style="margin-bottom: 15px; font-weight: bold; font-size: 1.1rem;">

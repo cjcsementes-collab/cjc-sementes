@@ -126,6 +126,24 @@ def imagem_produto(produto_id):
         
     return redirect(url_for('static', filename='img/placeholder.jpg'))
 
+@app.route('/imagem_secundaria/<int:imagem_id>')
+def imagem_secundaria(imagem_id):
+    from models import ProdutoImagem
+    img = ProdutoImagem.query.get_or_404(imagem_id)
+    if img.imagem_base64:
+        import base64
+        from flask import Response
+        try:
+            image_data = base64.b64decode(img.imagem_base64)
+            response = Response(image_data, mimetype='image/jpeg')
+            response.headers['Cache-Control'] = 'public, max-age=604800'
+            return response
+        except Exception:
+            pass
+    if img.imagem_url:
+        return redirect(img.imagem_url)
+    return redirect(url_for('static', filename='img/placeholder.jpg'))
+
 # ----------------- ROTAS DO CARRINHO -----------------
 
 @app.route('/carrinho')
