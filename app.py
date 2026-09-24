@@ -838,6 +838,20 @@ def temp_export(secret):
     produtos = Produto.query.all()
     return {"produtos": [{"id": p.id, "nome": p.nome, "codigo": p.codigo_bling, "imagem_url": p.imagem_url} for p in produtos]}
 
+@app.route('/debug/produto/<codigo>')
+def debug_produto(codigo):
+    p = Produto.query.filter_by(codigo_bling=codigo).first()
+    if not p: return {"erro": "nao encontrado"}
+    from models import ProdutoImagem
+    secundarias = ProdutoImagem.query.filter_by(produto_id=p.id).all()
+    return {
+        "id": p.id,
+        "nome": p.nome,
+        "has_base64": bool(p.imagem_base64),
+        "url": p.imagem_url,
+        "secundarias": [{"id": s.id, "has_base64": bool(s.imagem_base64), "url": s.imagem_url} for s in secundarias]
+    }
+
 @app.route('/api/sync_debug/<secret>')
 def api_sync_debug(secret):
     if secret != 'cjc2026':
