@@ -103,9 +103,12 @@ def index():
 @app.route('/produto/<int:produto_id>')
 def product_detail(produto_id):
     produto = Produto.query.get_or_404(produto_id)
+    # Imagens secundárias
+    from models import ProdutoImagem
+    imagens_secundarias = ProdutoImagem.query.filter_by(produto_id=produto.id).all()
     # Produtos recomendados da mesma categoria (excluindo o atual)
     recomendados = Produto.query.filter(Produto.categoria == produto.categoria, Produto.id != produto.id).limit(4).all()
-    return render_template('product.html', produto=produto, recomendados=recomendados)
+    return render_template('product.html', produto=produto, recomendados=recomendados, imagens_secundarias=imagens_secundarias)
 
 @app.route('/imagem/<int:produto_id>')
 def imagem_produto(produto_id):
