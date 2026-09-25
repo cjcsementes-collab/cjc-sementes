@@ -868,19 +868,19 @@ def debug_sync_one(codigo):
     token = get_valid_access_token()
     headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/json'}
     
-    # Busca pelo código
+    # Busca pelo código para pegar o ID interno
     r = requests.get(f"{API_BASE_URL}/produtos?codigo={codigo}", headers=headers)
     if r.status_code != 200 or not r.json().get('data'):
         return {"erro": "Nao achou o produto no bling", "status": r.status_code}
         
     bling_id = r.json()['data'][0]['id']
     
-    # Imagens do produto
-    r_img = requests.get(f"{API_BASE_URL}/produtos/{bling_id}/imagens", headers=headers)
+    # Busca detalhes do produto
+    r_det = requests.get(f"{API_BASE_URL}/produtos/{bling_id}", headers=headers)
     
     return {
         "bling_id": bling_id,
-        "imagens_endpoint": r_img.json() if r_img.status_code == 200 else str(r_img.status_code)
+        "detalhes": r_det.json() if r_det.status_code == 200 else str(r_det.status_code)
     }
 
 @app.route('/api/sync_debug/<secret>')
