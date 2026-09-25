@@ -119,7 +119,7 @@ def imagem_produto(produto_id):
         try:
             image_data = base64.b64decode(produto.imagem_base64)
             response = Response(image_data, mimetype='image/jpeg')
-            response.headers['Cache-Control'] = 'public, max-age=604800'
+            response.headers['Cache-Control'] = 'public, max-age=3600'
             return response
         except Exception:
             pass
@@ -139,7 +139,7 @@ def imagem_secundaria(imagem_id):
         try:
             image_data = base64.b64decode(img.imagem_base64)
             response = Response(image_data, mimetype='image/jpeg')
-            response.headers['Cache-Control'] = 'public, max-age=604800'
+            response.headers['Cache-Control'] = 'public, max-age=3600'
             return response
         except Exception:
             pass
