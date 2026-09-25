@@ -843,13 +843,19 @@ def debug_produto(codigo):
     p = Produto.query.filter_by(codigo_bling=codigo).first()
     if not p: return {"erro": "nao encontrado"}
     from models import ProdutoImagem
-    secundarias = ProdutoImagem.query.filter_by(produto_id=p.id).all()
+    secundarias_dir = ProdutoImagem.query.filter_by(produto_id=p.id).all()
+    try:
+        backref_len = len(p.imagens_secundarias)
+    except Exception as e:
+        backref_len = str(e)
+        
     return {
         "id": p.id,
         "nome": p.nome,
         "has_base64": bool(p.imagem_base64),
         "url": p.imagem_url,
-        "secundarias": [{"id": s.id, "has_base64": bool(s.imagem_base64), "url": s.imagem_url} for s in secundarias]
+        "backref_funciona": backref_len,
+        "secundarias": [{"id": s.id, "has_base64": bool(s.imagem_base64), "url": s.imagem_url} for s in secundarias_dir]
     }
 
 @app.route('/debug/sync_one/<codigo>')
