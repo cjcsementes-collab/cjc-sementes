@@ -112,7 +112,7 @@
             </div>
             {% endif %}
             
-            {% if produto.imagens_secundarias %}
+            {% if produto.imagens_secundarias|length > 0 %}
             <div class="product-detail-secondary-images" style="margin-top: 20px; margin-bottom: 20px;">
                 <h4 style="font-size: 1rem; color: var(--text-dark); margin-bottom: 10px;"><i class="fa-solid fa-images"></i> Imagens Adicionais</h4>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
