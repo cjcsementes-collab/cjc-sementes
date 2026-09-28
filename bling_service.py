@@ -502,6 +502,42 @@ def sincronizar_produtos_bling():
             import gc
             gc.collect()
             
+        # ETAPA DE LIMPEZA (GHOST PRODUCTS)
+        # Remove do banco local qualquer produto que não veio nesta sincronização do Bling
+        # ou que esteja na lista negra (EXCLUDED)
+        if todos_produtos:
+            # Pegar todos os SKUs válidos (que não caíram nos IFs de exclusão)
+            valid_skus = []
+            for item in todos_produtos:
+                codigo = str(item.get('codigo', ''))
+                nome = item.get('nome', '')
+                if not codigo or not nome: continue
+                
+                is_excluded = False
+                if codigo in EXCLUDED_SKUS:
+                    is_excluded = True
+                elif nome:
+                    nome_limpo = nome.strip().upper().replace("\ufffd", "É")
+                    if nome_limpo in EXCLUDED_NAMES_UPPER:
+                        is_excluded = True
+                        
+                if not is_excluded:
+                    valid_skus.append(codigo)
+                    
+            # Busca todos os produtos locais
+            from models import Produto
+            produtos_locais = Produto.query.all()
+            count_deleted = 0
+            for p_local in produtos_locais:
+                if p_local.codigo_bling not in valid_skus:
+                    db.session.delete(p_local)
+                    count_deleted += 1
+                    
+            if count_deleted > 0:
+                db.session.commit()
+                
+            return True, f"Sincronização concluída! {count_new} novos, {count_updated} atualizados. {count_deleted} produtos antigos/inativos foram removidos."
+
         return True, f"Sincronização concluída! {count_new} novos criados e {count_updated} atualizados com os códigos e ESTOQUES corretos."
     except Exception as e:
         return False, f"Erro interno na sincronização: {e}"
