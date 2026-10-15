@@ -249,6 +249,161 @@ input, select, textarea, button {
     color: rgba(255, 255, 255, 0.7);
 }
 
+/* Carrossel de Banners Dinâmicos do Topo */
+.banner-carousel-section {
+    width: 100%;
+    margin-bottom: 35px;
+    background-color: var(--verde-safra);
+}
+
+.banner-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto;
+    overflow: hidden;
+    user-select: none;
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.banner-carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 100%;
+}
+
+.banner-slide {
+    min-width: 100%;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0b2e1a;
+}
+
+.banner-slide-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.banner-slide img {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Setas de Navegação (Flexinhas) */
+.banner-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.banner-carousel-arrow:hover {
+    background: var(--laranja-brasa);
+    border-color: var(--laranja-brasa);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 15px rgba(204, 85, 0, 0.45);
+}
+
+.banner-carousel-arrow.prev {
+    left: 20px;
+}
+
+.banner-carousel-arrow.next {
+    right: 20px;
+}
+
+/* Indicadores de Posição (Bolinhas) */
+.banner-carousel-dots {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 6px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.banner-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.banner-dot:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.banner-dot.active {
+    background: var(--laranja-brasa);
+    width: 28px;
+    border-radius: 10px;
+}
+
+/* Responsividade Mobile para o Carrossel */
+@media (max-width: 768px) {
+    .banner-carousel {
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+    
+    .banner-slide img {
+        min-height: 180px;
+        max-height: 320px;
+    }
+    
+    .banner-carousel-arrow {
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
+    }
+    
+    .banner-carousel-arrow.prev {
+        left: 10px;
+    }
+    
+    .banner-carousel-arrow.next {
+        right: 10px;
+    }
+    
+    .banner-carousel-dots {
+        bottom: 10px;
+        padding: 4px 10px;
+    }
+}
+
 /* Grid de Produtos e Filtros */
 .store-section {
     padding-bottom: 60px;

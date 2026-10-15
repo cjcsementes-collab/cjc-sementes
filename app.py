@@ -11,10 +11,52 @@ import smtplib
 from email.message import EmailMessage
 import threading
 from bling_service import gerar_tokens, enviar_pedido_venda, sincronizar_produtos_bling, BLING_CLIENT_ID
-from models import db, Admin, Produto, Cliente, Pedido, ItemPedido
+from models import db, Admin, Produto, Cliente, Pedido, ItemPedido, Banner
 from inter_pix import inter_pix
 from asaas_service import get_or_create_customer, criar_cobranca_cartao
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
+
+def process_banner_upload(file_storage):
+    """
+    Processa upload de imagem do banner:
+    Converte para RGB, redimensiona se largura > 1920px (mantendo proporção),
+    comprime como JPEG qualidade 85 e retorna (base64_str, mimetype).
+    """
+    import base64
+    import io
+    try:
+        from PIL import Image
+        img = Image.open(file_storage.stream)
+        
+        # Converte modos com transparência ou paleta
+        if img.mode in ("RGBA", "P"):
+            if img.mode == "RGBA":
+                bg = Image.new("RGB", img.size, (255, 255, 255))
+                bg.paste(img, mask=img.split()[3])
+                img = bg
+            else:
+                img = img.convert("RGB")
+        elif img.mode != "RGB":
+            img = img.convert("RGB")
+            
+        # Limita a largura máxima a 1920px mantendo proporção
+        if img.width > 1920:
+            ratio = 1920.0 / float(img.width)
+            new_height = int(float(img.height) * ratio)
+            img = img.resize((1920, new_height), Image.Resampling.LANCZOS)
+            
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=85, optimize=True)
+        img_bytes = buf.getvalue()
+        mimetype = 'image/jpeg'
+    except Exception as e:
+        print(f"Erro ao processar imagem de banner com PIL: {e}")
+        file_storage.seek(0)
+        img_bytes = file_storage.read()
+        mimetype = file_storage.mimetype or 'image/jpeg'
+        
+    encoded = base64.b64encode(img_bytes).decode('utf-8')
+    return encoded, mimetype
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -91,14 +133,34 @@ def index():
             "Polygonáceas"
         ]
     
+    # Busca banners ativos para o carrossel do topo
+    banners = Banner.query.filter_by(ativo=True).order_by(Banner.ordem.asc(), Banner.id.asc()).all()
+    
     return render_template(
         'index.html', 
         produtos=produtos, 
         categoria_selecionada=categoria_selecionada,
         familia_selecionada=familia_selecionada,
         familias=familias,
-        busca=busca
+        busca=busca,
+        banners=banners
     )
+
+@app.route('/banner/imagem/<int:banner_id>')
+def banner_imagem(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    if banner.imagem_base64:
+        import base64
+        from flask import Response
+        try:
+            image_data = base64.b64decode(banner.imagem_base64)
+            response = Response(image_data, mimetype=banner.mimetype or 'image/jpeg')
+            response.headers['Cache-Control'] = 'public, max-age=3600'
+            return response
+        except Exception:
+            pass
+            
+    return redirect(url_for('static', filename='img/placeholder.jpg'))
 
 @app.route('/produto/<int:produto_id>')
 def product_detail(produto_id):
@@ -1010,6 +1072,9 @@ def admin_dashboard():
     # Produtos com estoque baixo (< 200 KG/Sacas)
     estoque_baixo = Produto.query.filter(Produto.estoque < 200).all()
     
+    # Banners do carrossel do topo
+    banners = Banner.query.order_by(Banner.ordem.asc(), Banner.id.desc()).all()
+    
     return render_template(
         'admin/dashboard.html', 
         pedidos=pedidos, 
@@ -1017,8 +1082,118 @@ def admin_dashboard():
         total_vendas=total_vendas,
         num_pedidos=num_pedidos,
         pedidos_pendentes=pedidos_pendentes,
-        estoque_baixo=estoque_baixo
+        estoque_baixo=estoque_baixo,
+        banners=banners
     )
+
+# ----------------- GESTÃO DE BANNERS (ADMIN) -----------------
+
+@app.route('/admin/banner/novo', methods=['POST'])
+@login_required
+def admin_novo_banner():
+    file = request.files.get('imagem')
+    if not file or file.filename == '':
+        flash('Por favor, selecione uma imagem para o banner.', 'warning')
+        return redirect(url_for('admin_dashboard'))
+        
+    titulo = request.form.get('titulo', '').strip()
+    subtitulo = request.form.get('subtitulo', '').strip()
+    link_url = request.form.get('link_url', '').strip()
+    try:
+        ordem = int(request.form.get('ordem', 0))
+    except (ValueError, TypeError):
+        ordem = 0
+    ativo = request.form.get('ativo') in ['on', '1', 'true', True]
+    
+    encoded_img, mimetype = process_banner_upload(file)
+    
+    novo_banner = Banner(
+        titulo=titulo,
+        subtitulo=subtitulo,
+        link_url=link_url,
+        ordem=ordem,
+        ativo=ativo,
+        imagem_base64=encoded_img,
+        mimetype=mimetype
+    )
+    db.session.add(novo_banner)
+    db.session.commit()
+    flash('Banner cadastrado com sucesso!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/banner/editar/<int:banner_id>', methods=['POST'])
+@login_required
+def admin_editar_banner(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    
+    titulo = request.form.get('titulo')
+    if titulo is not None:
+        banner.titulo = titulo.strip()
+        
+    subtitulo = request.form.get('subtitulo')
+    if subtitulo is not None:
+        banner.subtitulo = subtitulo.strip()
+        
+    link_url = request.form.get('link_url')
+    if link_url is not None:
+        banner.link_url = link_url.strip()
+        
+    ordem = request.form.get('ordem')
+    if ordem is not None:
+        try:
+            banner.ordem = int(ordem)
+        except (ValueError, TypeError):
+            pass
+            
+    # Se enviou nova imagem, substitui
+    file = request.files.get('imagem')
+    if file and file.filename != '':
+        encoded_img, mimetype = process_banner_upload(file)
+        banner.imagem_base64 = encoded_img
+        banner.mimetype = mimetype
+        
+    db.session.commit()
+    flash(f'Banner #{banner.id} atualizado com sucesso!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/banner/toggle/<int:banner_id>', methods=['POST'])
+@login_required
+def admin_toggle_banner(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    banner.ativo = not banner.ativo
+    db.session.commit()
+    status_str = "ativado" if banner.ativo else "desativado"
+    flash(f'Banner #{banner.id} {status_str} com sucesso!', 'info')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/banner/excluir/<int:banner_id>', methods=['POST'])
+@login_required
+def admin_excluir_banner(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    db.session.delete(banner)
+    db.session.commit()
+    flash('Banner excluído com sucesso!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/banner/download/<int:banner_id>')
+@login_required
+def admin_download_banner(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    if banner.imagem_base64:
+        import base64
+        import io
+        from flask import send_file
+        data = base64.b64decode(banner.imagem_base64)
+        ext = 'jpg' if 'jpeg' in (banner.mimetype or '').lower() else 'png'
+        filename = f"banner_{banner.id}_{banner.titulo or 'folder'}.{ext}".replace(' ', '_')
+        return send_file(
+            io.BytesIO(data),
+            mimetype=banner.mimetype or 'image/jpeg',
+            as_attachment=True,
+            download_name=filename
+        )
+    flash('Imagem do banner não encontrada para download.', 'danger')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/pedido/status/<int:pedido_id>', methods=['POST'])
 @login_required

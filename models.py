@@ -114,3 +114,20 @@ class BlingConfig(db.Model):
 
     def __repr__(self):
         return f'<BlingConfig {self.id}>'
+
+class Banner(db.Model):
+    __tablename__ = 'banners'
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(150), nullable=True)
+    subtitulo = db.Column(db.String(255), nullable=True)
+    link_url = db.Column(db.String(500), nullable=True)
+    ordem = db.Column(db.Integer, default=0)
+    ativo = db.Column(db.Boolean, default=True)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    from sqlalchemy.orm import deferred
+    imagem_base64 = deferred(db.Column(db.Text, nullable=False))
+    mimetype = db.Column(db.String(50), default='image/jpeg')
+
+    def __repr__(self):
+        return f'<Banner #{self.id} - {self.titulo or "Sem título"}>'

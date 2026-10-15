@@ -70,6 +70,142 @@
         </div>
     {% endif %}
 
+    <!-- Seção de Gestão de Banners do Topo -->
+    <div class="admin-section-card" id="gestao-banners" style="margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="color: var(--grafite-titanio); font-size: 1.3rem; margin-bottom: 4px;">
+                    <i class="fa-solid fa-images" style="color: var(--verde-safra); margin-right: 8px;"></i> Gestão de Banners do Topo (Carrossel)
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                    Adicione os folders/banners para rotacionarem a cada 3 segundos no topo do site. <strong>Tamanho recomendado: 1920 x 800 pixels</strong> (ou 1920 x 700 px).
+                </p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('form-novo-banner-container').scrollIntoView({behavior: 'smooth'})" style="font-size: 0.85rem; padding: 6px 14px;">
+                <i class="fa-solid fa-plus"></i> Novo Banner
+            </button>
+        </div>
+
+        <!-- Formulário para Upload de Novo Banner -->
+        <div id="form-novo-banner-container" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+            <h4 style="font-size: 1rem; color: var(--grafite-titanio); margin-bottom: 15px;">
+                <i class="fa-solid fa-cloud-arrow-up" style="color: var(--laranja-brasa); margin-right: 6px;"></i> Fazer Upload de Novo Folder / Banner
+            </h4>
+            <form action="{{ url_for('admin_novo_banner') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; align-items: end;">
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Imagem do Folder (PNG, JPG, WEBP) *</label>
+                    <input type="file" name="imagem" accept="image/*" required class="form-input" style="padding: 6px; font-size: 0.85rem; width: 100%; background: white;">
+                    <span style="font-size: 0.75rem; color: #64748b;">Resolução ideal: 1920 x 800 px</span>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Título / Identificação (Opcional)</label>
+                    <input type="text" name="titulo" placeholder="Ex: Safra de Verão 2026" class="form-input" style="padding: 7px; font-size: 0.85rem; width: 100%;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Link de Destino ao Clicar (Opcional)</label>
+                    <input type="text" name="link_url" placeholder="Ex: https://wa.me/... ou #catalogo" class="form-input" style="padding: 7px; font-size: 0.85rem; width: 100%;">
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Ordem</label>
+                        <input type="number" name="ordem" value="{{ (banners|length + 1) if banners else 1 }}" min="1" class="form-input" style="padding: 7px; font-size: 0.85rem; width: 100%; text-align: center;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; padding-top: 20px;">
+                        <input type="checkbox" name="ativo" id="banner_ativo_check" checked style="width: 18px; height: 18px; accent-color: var(--verde-safra); cursor: pointer;">
+                        <label for="banner_ativo_check" style="font-size: 0.85rem; cursor: pointer; font-weight: 600;">Ativo</label>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 9px; font-size: 0.9rem; border-radius: var(--radius-sm); font-weight: bold;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 6px;"></i> Enviar e Publicar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabela de Banners Cadastrados -->
+        {% if banners %}
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px; text-align: center;">Ordem</th>
+                            <th style="width: 160px; text-align: center;">Preview</th>
+                            <th>Título e Informações</th>
+                            <th>Link de Redirecionamento</th>
+                            <th style="width: 100px; text-align: center;">Status</th>
+                            <th style="width: 220px; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in banners %}
+                            <tr>
+                                <td style="text-align: center; font-weight: bold;">
+                                    <form action="{{ url_for('admin_editar_banner', banner_id=b.id) }}" method="POST" style="display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="number" name="ordem" value="{{ b.ordem }}" min="0" style="width: 50px; text-align: center; padding: 4px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px;" title="Alterar ordem">
+                                        <button type="submit" class="btn" style="padding: 3px 6px; font-size: 0.75rem; background: #e2e8f0; color: #334155;" title="Salvar Ordem"><i class="fa-solid fa-check"></i></button>
+                                    </form>
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="{{ url_for('banner_imagem', banner_id=b.id) }}" target="_blank" title="Clique para abrir imagem cheia">
+                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="Banner {{ b.id }}" style="width: 140px; height: 58px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                    </a>
+                                </td>
+                                <td>
+                                    <strong>{{ b.titulo or 'Sem Título' }}</strong>
+                                    {% if b.subtitulo %}<br><small style="color: var(--text-muted);">{{ b.subtitulo }}</small>{% endif %}
+                                    <br><small style="color: #94a3b8; font-size: 0.75rem;">Cadastrado em {{ b.data_criacao.strftime('%d/%m/%Y às %H:%M') }}</small>
+                                </td>
+                                <td>
+                                    {% if b.link_url %}
+                                        <a href="{{ b.link_url }}" target="_blank" style="color: var(--laranja-brasa); font-size: 0.85rem; word-break: break-all;">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ b.link_url }}
+                                        </a>
+                                    {% else %}
+                                        <span style="color: #94a3b8; font-size: 0.85rem;">Nenhum link (apenas imagem)</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    <form action="{{ url_for('admin_toggle_banner', banner_id=b.id) }}" method="POST" style="display: inline;">
+                                        {% if b.ativo %}
+                                            <button type="submit" class="btn" style="background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 4px 10px; font-size: 0.8rem; border-radius: 20px; font-weight: bold; cursor: pointer;" title="Clique para pausar/desativar">
+                                                <i class="fa-solid fa-circle-check"></i> Ativo
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 4px 10px; font-size: 0.8rem; border-radius: 20px; font-weight: bold; cursor: pointer;" title="Clique para ativar">
+                                                <i class="fa-solid fa-circle-pause"></i> Inativo
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                                        <!-- Botão Download do Folder -->
+                                        <a href="{{ url_for('admin_download_banner', banner_id=b.id) }}" class="btn" style="background-color: #0284c7; color: white; padding: 5px 9px; font-size: 0.8rem; border-radius: var(--radius-sm); text-decoration: none;" title="Baixar Arquivo do Folder">
+                                            <i class="fa-solid fa-download"></i> Baixar Folder
+                                        </a>
+                                        <!-- Botão Excluir -->
+                                        <form action="{{ url_for('admin_excluir_banner', banner_id=b.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir permanentemente este banner?');" style="display: inline;">
+                                            <button type="submit" class="btn" style="background-color: #ef4444; color: white; padding: 5px 9px; font-size: 0.8rem; border-radius: var(--radius-sm); border: none; cursor: pointer;" title="Excluir Banner">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 30px 15px; background: white; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                <i class="fa-solid fa-panorama" style="font-size: 2.5rem; color: #94a3b8; margin-bottom: 10px;"></i>
+                <h5 style="color: #475569; margin-bottom: 5px;">Nenhum folder/banner cadastrado ainda</h5>
+                <p style="font-size: 0.85rem; color: #64748b;">Enquanto nenhum banner for cadastrado aqui, o site exibe o texto institucional padrão com os dados da empresa. Faça o upload do seu primeiro folder acima para ativar o carrossel!</p>
+            </div>
+        {% endif %}
+    </div>
+
     <!-- Seção de Gestão de Pedidos -->
     <div class="admin-section-card">
         <h3 style="color: var(--grafite-titanio); font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">

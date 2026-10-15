@@ -3,6 +3,7 @@ import os
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'cjc-sementes-super-secret-key-2026'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max upload para banners em alta definição
     
     # SQLite para desenvolvimento, PostgreSQL para produção se estiver configurado
     DATABASE_URL = os.environ.get('DATABASE_URL')

@@ -3,7 +3,44 @@
 {% block title %}CJC Sementes - Catálogo de Sementes de Cobertura e Forrageiras{% endblock %}
 
 {% block content %}
-<!-- Banner Hero Institucional -->
+{% if banners and banners|length > 0 %}
+<!-- Carrossel de Banners Dinâmicos do Topo -->
+<section class="banner-carousel-section">
+    <div class="banner-carousel" id="homeBannerCarousel" data-interval="3000">
+        <div class="banner-carousel-track" id="bannerCarouselTrack">
+            {% for b in banners %}
+                <div class="banner-slide" data-index="{{ loop.index0 }}">
+                    {% if b.link_url %}
+                        <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
+                            <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                        </a>
+                    {% else %}
+                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if banners|length > 1 %}
+            <!-- Botões de Navegação (Flexinhas) -->
+            <button type="button" class="banner-carousel-arrow prev" id="bannerPrevBtn" aria-label="Banner Anterior" title="Banner Anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" class="banner-carousel-arrow next" id="bannerNextBtn" aria-label="Próximo Banner" title="Próximo Banner">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            
+            <!-- Indicadores (Bolinhas) -->
+            <div class="banner-carousel-dots" id="bannerDots">
+                {% for b in banners %}
+                    <button type="button" class="banner-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Ir para o banner {{ loop.index }}"></button>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% else %}
+<!-- Banner Hero Institucional Padrão (Exibido quando não houver folders cadastrados no Admin) -->
 <section class="hero-banner">
     <div class="container">
         <div class="hero-content">
@@ -30,6 +67,7 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- Seção do Catálogo -->
 <section class="store-section container" id="catalogo">
@@ -178,4 +216,109 @@
     {% endif %}
     
 </section>
+
+{% if banners and banners|length > 1 %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const track = document.getElementById('bannerCarouselTrack');
+    const carousel = document.getElementById('homeBannerCarousel');
+    if (!track || !carousel) return;
+    
+    const slides = track.querySelectorAll('.banner-slide');
+    if (slides.length <= 1) return;
+    
+    const prevBtn = document.getElementById('bannerPrevBtn');
+    const nextBtn = document.getElementById('bannerNextBtn');
+    const dots = document.querySelectorAll('.banner-dot');
+    
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    let autoTimer = null;
+    const intervalTime = parseInt(carousel.getAttribute('data-interval') || '3000', 10);
+    
+    function goToSlide(index) {
+        currentIndex = (index + totalSlides) % totalSlides;
+        track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+        
+        dots.forEach((dot, i) => {
+            if (i === currentIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+    
+    function nextSlide() {
+        goToSlide(currentIndex + 1);
+    }
+    
+    function prevSlide() {
+        goToSlide(currentIndex - 1);
+    }
+    
+    function startAutoPlay() {
+        stopAutoPlay();
+        autoTimer = setInterval(nextSlide, intervalTime);
+    }
+    
+    function stopAutoPlay() {
+        if (autoTimer) {
+            clearInterval(autoTimer);
+            autoTimer = null;
+        }
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            nextSlide();
+            startAutoPlay();
+        });
+    }
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            prevSlide();
+            startAutoPlay();
+        });
+    }
+    
+    dots.forEach((dot, idx) => {
+        dot.addEventListener('click', function(e) {
+            e.preventDefault();
+            goToSlide(idx);
+            startAutoPlay();
+        });
+    });
+    
+    // Pausa a rotação enquanto o usuário passa o mouse por cima
+    carousel.addEventListener('mouseenter', stopAutoPlay);
+    carousel.addEventListener('mouseleave', startAutoPlay);
+    
+    // Navegação por toque (touch swipe) no celular
+    let touchStartX = 0;
+    let touchEndX = 0;
+    carousel.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        stopAutoPlay();
+    }, { passive: true });
+    
+    carousel.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (diff > 45) {
+            nextSlide();
+        } else if (diff < -45) {
+            prevSlide();
+        }
+        startAutoPlay();
+    }, { passive: true });
+    
+    // Inicia rotação a cada 3 segundos
+    startAutoPlay();
+});
+</script>
+{% endif %}
 {% endblock %}
