@@ -10,17 +10,17 @@
         <div class="banner-carousel-track" id="bannerCarouselTrack">
             {% for b in banners %}
                 <div class="banner-slide" data-index="{{ loop.index0 }}">
-                    {% if b.id == 1 or not b.link_url or b.link_url == '#catalogo' %}
+                    {% if b.id == 1 %}
                         {% if b.tem_mobile %}
                             <!-- Imagem exclusiva para Celular / Mobile criada no Admin -->
                             <div class="banner-slide-mobile-only">
                                 <a href="{{ b.link_url or '#catalogo' }}" class="banner-slide-link" title="{{ b.titulo or 'Ver catálogo' }}">
-                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=4" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=5" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 </a>
                             </div>
                             <!-- Layout Desktop Institucional: Cidimar em 4K + Fundo Verde 100% Uniforme + Texto HTML Crisp e Botão Real -->
                             <div class="banner-slide-desktop-only banner-slide-institutional">
-                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=4" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 <div class="container banner-hero-container">
                                     <div class="hero-content">
                                         <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
@@ -34,7 +34,7 @@
                         {% else %}
                             <!-- Banner Institucional: Cidimar em 4K + Fundo Verde 100% Uniforme + Texto HTML Crisp e Botão Real -->
                             <div class="banner-slide-institutional">
-                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=4" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 <div class="container banner-hero-container">
                                     <div class="hero-content">
                                         <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
@@ -47,16 +47,25 @@
                             </div>
                         {% endif %}
                     {% else %}
-                        <!-- Banner Gráfico / Promocional Padrão com Suporte a Imagem Mobile -->
+                        <!-- Banner Gráfico / Folder Puro (Sem sobreposição de textos, ícones ou botões) -->
                         <div class="banner-slide-inner">
-                            <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
+                            {% if b.link_url %}
+                                <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
+                                    <picture>
+                                        {% if b.tem_mobile %}
+                                            <source media="(max-width: 768px)" srcset="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=5">
+                                        {% endif %}
+                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    </picture>
+                                </a>
+                            {% else %}
                                 <picture>
                                     {% if b.tem_mobile %}
-                                        <source media="(max-width: 768px)" srcset="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=4">
+                                        <source media="(max-width: 768px)" srcset="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=5">
                                     {% endif %}
-                                    <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=4" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 </picture>
-                            </a>
+                            {% endif %}
                         </div>
                     {% endif %}
                 </div>

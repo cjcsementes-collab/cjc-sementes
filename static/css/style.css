@@ -303,11 +303,10 @@ input, select, textarea, button {
     text-decoration: none;
 }
 
-.banner-slide-inner img {
+.banner-slide-inner img,
+.banner-slide-inner picture img {
     width: 100%;
     height: auto;
-    max-height: 600px;
-    object-fit: cover;
     display: block;
     margin: 0 auto;
 }
@@ -327,7 +326,8 @@ input, select, textarea, button {
 .banner-slide-institutional {
     position: relative;
     width: 100%;
-    min-height: 520px;
+    aspect-ratio: 1920 / 800;
+    min-height: 500px;
     background-color: #225e3a;
     display: flex;
     align-items: center;
@@ -512,12 +512,13 @@ input, select, textarea, button {
         display: none !important;
     }
     
+    .banner-slide-inner img,
     .banner-slide-inner picture img {
         width: 100%;
         height: auto;
-        min-height: 180px;
-        max-height: 560px;
-        object-fit: cover;
+        min-height: 0;
+        max-height: none;
+        object-fit: contain;
         display: block;
     }
     
@@ -541,6 +542,7 @@ input, select, textarea, button {
     }
     
     .banner-slide-institutional {
+        aspect-ratio: auto;
         min-height: 480px;
     }
     .banner-slide-institutional::after {
