@@ -1315,6 +1315,42 @@ def initialize_database():
             except Exception as e:
                 print(f"⚠️ Erro ao popular banco: {e}")
 
+        # Atualização automática do Banner 1 com o fundo verde uniforme e link para o catálogo
+        try:
+            from models import Banner
+            import base64
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            fixed_banner_path = os.path.join(basedir, 'static', 'img', 'banner_principal_cjc.jpg')
+            if os.path.exists(fixed_banner_path):
+                with open(fixed_banner_path, 'rb') as f:
+                    fixed_base64 = base64.b64encode(f.read()).decode('utf-8')
+                    
+                b1 = Banner.query.get(1)
+                if b1:
+                    b1.imagem_base64 = fixed_base64
+                    b1.mimetype = 'image/jpeg'
+                    b1.link_url = '#catalogo'
+                    if not b1.titulo:
+                        b1.titulo = "Tecnologia que Nutre a Terra"
+                    db.session.commit()
+                    print("✅ Banner #1 atualizado com fundo verde uniforme e link #catalogo.")
+                else:
+                    b_novo = Banner(
+                        id=1,
+                        titulo="Tecnologia que Nutre a Terra",
+                        link_url="#catalogo",
+                        ordem=1,
+                        ativo=True,
+                        imagem_base64=fixed_base64,
+                        mimetype='image/jpeg'
+                    )
+                    db.session.add(b_novo)
+                    db.session.commit()
+                    print("✅ Banner #1 criado com fundo verde uniforme e link #catalogo.")
+        except Exception as e:
+            print(f"Aviso ao inicializar banner principal: {e}")
+            db.session.rollback()
+
 initialize_database()
 
 if __name__ == '__main__':

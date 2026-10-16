@@ -10,13 +10,20 @@
         <div class="banner-carousel-track" id="bannerCarouselTrack">
             {% for b in banners %}
                 <div class="banner-slide" data-index="{{ loop.index0 }}">
-                    {% if b.link_url %}
-                        <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
-                            <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                        </a>
-                    {% else %}
-                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                    {% endif %}
+                    <div class="banner-slide-inner">
+                        {% if b.link_url %}
+                            <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver Catálogo Completo' }}">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=2" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            </a>
+                        {% else %}
+                            <a href="#catalogo" class="banner-slide-link" title="{{ b.titulo or 'Ver Catálogo Completo' }}">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=2" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            </a>
+                        {% endif %}
+                        
+                        <!-- Ícone / Botão interativo clicável alinhado exatamente sobre o campo laranja "Ver Catálogo Completo" -->
+                        <a href="{{ b.link_url or '#catalogo' }}" {% if b.link_url and b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-btn-hotspot" aria-label="Ver Catálogo Completo" title="Clique para Ver Catálogo Completo"></a>
+                    </div>
                 </div>
             {% endfor %}
         </div>

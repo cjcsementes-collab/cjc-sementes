@@ -34,6 +34,10 @@
 }
 
 /* Reset e Estrutura */
+html {
+    scroll-behavior: smooth;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -253,7 +257,7 @@ input, select, textarea, button {
 .banner-carousel-section {
     width: 100%;
     margin-bottom: 35px;
-    background-color: var(--verde-safra);
+    background-color: #225e3a;
 }
 
 .banner-carousel {
@@ -281,22 +285,53 @@ input, select, textarea, button {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #0b2e1a;
+    background-color: #225e3a;
+}
+
+.banner-slide-inner {
+    position: relative;
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto;
+    display: block;
 }
 
 .banner-slide-link {
     display: block;
     width: 100%;
     height: 100%;
+    text-decoration: none;
 }
 
-.banner-slide img {
+.banner-slide-inner img {
     width: 100%;
     height: auto;
     max-height: 600px;
     object-fit: cover;
     display: block;
     margin: 0 auto;
+}
+
+/* Hotspot Interativo Clicável no Botão Laranja "Ver Catálogo Completo" */
+.banner-btn-hotspot {
+    position: absolute;
+    left: 3.7%;
+    top: 61.0%;
+    width: 24.6%;
+    height: 9.9%;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.25s ease;
+    background-color: transparent;
+    display: block;
+}
+
+.banner-btn-hotspot:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 25px rgba(240, 101, 12, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transform: scale(1.02);
 }
 
 /* Setas de Navegação (Flexinhas) */
