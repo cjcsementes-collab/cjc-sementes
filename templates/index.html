@@ -13,7 +13,7 @@
                     {% if b.id == 1 or not b.link_url or b.link_url == '#catalogo' %}
                         <!-- Banner Institucional: Cidimar em 4K + Fundo Verde 100% Uniforme + Texto HTML Crisp e Botão Real -->
                         <div class="banner-slide-institutional">
-                            <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=3" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=4" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                             <div class="container banner-hero-container">
                                 <div class="hero-content">
                                     <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
@@ -28,7 +28,7 @@
                         <!-- Banner Gráfico / Promocional Padrão -->
                         <div class="banner-slide-inner">
                             <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
-                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=3" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=4" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                             </a>
                         </div>
                     {% endif %}
