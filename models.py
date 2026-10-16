@@ -123,11 +123,14 @@ class Banner(db.Model):
     link_url = db.Column(db.String(500), nullable=True)
     ordem = db.Column(db.Integer, default=0)
     ativo = db.Column(db.Boolean, default=True)
+    tem_mobile = db.Column(db.Boolean, default=False)
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     
     from sqlalchemy.orm import deferred
     imagem_base64 = deferred(db.Column(db.Text, nullable=False))
     mimetype = db.Column(db.String(50), default='image/jpeg')
+    imagem_mobile_base64 = deferred(db.Column(db.Text, nullable=True))
+    mimetype_mobile = db.Column(db.String(50), default='image/jpeg', nullable=True)
 
     def __repr__(self):
         return f'<Banner #{self.id} - {self.titulo or "Sem título"}>'

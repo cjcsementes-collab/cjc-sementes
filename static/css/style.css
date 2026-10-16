@@ -312,6 +312,17 @@ input, select, textarea, button {
     margin: 0 auto;
 }
 
+/* Classes para alternância Desktop / Mobile nos Banners */
+.banner-slide-mobile-only {
+    display: none;
+    width: 100%;
+}
+
+.banner-slide-desktop-only {
+    display: flex;
+    width: 100%;
+}
+
 /* Slide Institucional (Cidimar + Texto HTML Crisp) */
 .banner-slide-institutional {
     position: relative;
@@ -483,9 +494,31 @@ input, select, textarea, button {
         border-bottom-right-radius: 16px;
     }
     
-    .banner-slide img {
+    .banner-slide-mobile-only {
+        display: block !important;
+        width: 100%;
+    }
+    
+    .banner-slide-mobile-only img {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        display: block;
+        object-fit: contain;
+    }
+    
+    .banner-slide-desktop-only {
+        display: none !important;
+    }
+    
+    .banner-slide-inner picture img {
+        width: 100%;
+        height: auto;
         min-height: 180px;
-        max-height: 320px;
+        max-height: 560px;
+        object-fit: cover;
+        display: block;
     }
     
     .banner-carousel-arrow {
@@ -509,6 +542,14 @@ input, select, textarea, button {
     
     .banner-slide-institutional {
         min-height: 480px;
+    }
+    .banner-slide-institutional::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(34, 94, 58, 0.92) 0%, rgba(34, 94, 58, 0.82) 50%, rgba(34, 94, 58, 0.92) 100%);
+        z-index: 1;
+        pointer-events: none;
     }
     .banner-slide-institutional .banner-hero-container {
         padding: 40px 15px;

@@ -78,7 +78,7 @@
                     <i class="fa-solid fa-images" style="color: var(--verde-safra); margin-right: 8px;"></i> Gestão de Banners do Topo (Carrossel)
                 </h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
-                    Adicione os folders/banners para rotacionarem a cada 3 segundos no topo do site. <strong>Tamanho recomendado: 1920 x 800 pixels</strong> (ou 1920 x 700 px).
+                    Cadastre seus folders/banners com suporte a <strong>Computador (1920x800)</strong> e <strong>Celular (1080x1080 ou 1080x1350)</strong>. Rotação a cada 3 segundos.
                 </p>
             </div>
             <button type="button" class="btn btn-primary" onclick="document.getElementById('form-novo-banner-container').scrollIntoView({behavior: 'smooth'})" style="font-size: 0.85rem; padding: 6px 14px;">
@@ -93,9 +93,14 @@
             </h4>
             <form action="{{ url_for('admin_novo_banner') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; align-items: end;">
                 <div>
-                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Imagem do Folder (PNG, JPG, WEBP) *</label>
+                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">💻 Imagem Desktop (Computador) *</label>
                     <input type="file" name="imagem" accept="image/*" required class="form-input" style="padding: 6px; font-size: 0.85rem; width: 100%; background: white;">
-                    <span style="font-size: 0.75rem; color: #64748b;">Resolução ideal: 1920 x 800 px</span>
+                    <span style="font-size: 0.75rem; color: #64748b;">Ideal: 1920 x 800 px (horizontal)</span>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">📱 Imagem Mobile (Celular) (Opcional)</label>
+                    <input type="file" name="imagem_mobile" accept="image/*" class="form-input" style="padding: 6px; font-size: 0.85rem; width: 100%; background: white;">
+                    <span style="font-size: 0.75rem; color: #16a34a; font-weight: 600;">Ideal: 1080 x 1080 px ou 1080 x 1350 px</span>
                 </div>
                 <div>
                     <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Título / Identificação (Opcional)</label>
@@ -130,11 +135,11 @@
                     <thead>
                         <tr>
                             <th style="width: 70px; text-align: center;">Ordem</th>
-                            <th style="width: 160px; text-align: center;">Preview</th>
+                            <th style="width: 210px; text-align: center;">Previews (Desktop & Mobile)</th>
                             <th>Título e Informações</th>
                             <th>Link de Redirecionamento</th>
                             <th style="width: 100px; text-align: center;">Status</th>
-                            <th style="width: 220px; text-align: center;">Ações</th>
+                            <th style="width: 270px; text-align: center;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -147,14 +152,38 @@
                                     </form>
                                 </td>
                                 <td style="text-align: center;">
-                                    <a href="{{ url_for('banner_imagem', banner_id=b.id) }}" target="_blank" title="Clique para abrir imagem cheia">
-                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="Banner {{ b.id }}" style="width: 140px; height: 58px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                    </a>
+                                    <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                        <!-- Desktop Preview -->
+                                        <div style="text-align: center;">
+                                            <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; display: block; margin-bottom: 2px;">💻 PC</span>
+                                            <a href="{{ url_for('banner_imagem', banner_id=b.id) }}" target="_blank" title="Clique para abrir imagem desktop cheia">
+                                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}" alt="Banner {{ b.id }} Desktop" style="width: 100px; height: 48px; object-fit: cover; border-radius: 5px; border: 1px solid #cbd5e1;">
+                                            </a>
+                                        </div>
+                                        <!-- Mobile Preview -->
+                                        <div style="text-align: center;">
+                                            <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; display: block; margin-bottom: 2px;">📱 Celular</span>
+                                            {% if b.tem_mobile %}
+                                                <a href="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}" target="_blank" title="Clique para abrir imagem mobile cheia">
+                                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}" alt="Banner {{ b.id }} Mobile" style="width: 44px; height: 48px; object-fit: cover; border-radius: 5px; border: 2px solid #22c55e;">
+                                                </a>
+                                            {% else %}
+                                                <div style="width: 44px; height: 48px; border-radius: 5px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; background: #f8fafc; font-size: 0.65rem; color: #94a3b8; text-align: center; line-height: 1.1; padding: 2px;" title="Nenhuma imagem mobile específica enviada. O site usa versão desktop adaptada.">
+                                                    Auto
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <strong>{{ b.titulo or 'Sem Título' }}</strong>
                                     {% if b.subtitulo %}<br><small style="color: var(--text-muted);">{{ b.subtitulo }}</small>{% endif %}
                                     <br><small style="color: #94a3b8; font-size: 0.75rem;">Cadastrado em {{ b.data_criacao.strftime('%d/%m/%Y às %H:%M') }}</small>
+                                    {% if b.tem_mobile %}
+                                        <span style="display: inline-block; background-color: #dcfce7; color: #166534; font-size: 0.7rem; font-weight: bold; padding: 1px 6px; border-radius: 10px; margin-top: 3px;">
+                                            <i class="fa-solid fa-mobile-screen"></i> Arte Mobile Ativa
+                                        </span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if b.link_url %}
@@ -179,18 +208,80 @@
                                     </form>
                                 </td>
                                 <td style="text-align: center;">
-                                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                                        <!-- Botão Download do Folder -->
-                                        <a href="{{ url_for('admin_download_banner', banner_id=b.id) }}" class="btn" style="background-color: #0284c7; color: white; padding: 5px 9px; font-size: 0.8rem; border-radius: var(--radius-sm); text-decoration: none;" title="Baixar Arquivo do Folder">
-                                            <i class="fa-solid fa-download"></i> Baixar Folder
+                                    <div style="display: flex; gap: 5px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                                        <!-- Botão Editar / Subir Imagem Mobile -->
+                                        <button type="button" class="btn" onclick="const r = document.getElementById('edit-banner-row-{{ b.id }}'); r.style.display = r.style.display === 'none' ? 'table-row' : 'none';" style="background-color: #f59e0b; color: white; padding: 5px 8px; font-size: 0.8rem; border-radius: var(--radius-sm); border: none; cursor: pointer;" title="Editar Banner / Enviar Arte Mobile">
+                                            <i class="fa-solid fa-pen-to-square"></i> Editar / 📱
+                                        </button>
+                                        <!-- Botão Download do Folder Desktop -->
+                                        <a href="{{ url_for('admin_download_banner', banner_id=b.id) }}" class="btn" style="background-color: #0284c7; color: white; padding: 5px 8px; font-size: 0.8rem; border-radius: var(--radius-sm); text-decoration: none;" title="Baixar Arquivo Desktop">
+                                            <i class="fa-solid fa-download"></i> PC
                                         </a>
+                                        <!-- Botão Download do Folder Mobile (se houver) -->
+                                        {% if b.tem_mobile %}
+                                            <a href="{{ url_for('admin_download_banner_mobile', banner_id=b.id) }}" class="btn" style="background-color: #0d9488; color: white; padding: 5px 8px; font-size: 0.8rem; border-radius: var(--radius-sm); text-decoration: none;" title="Baixar Arquivo Mobile">
+                                                <i class="fa-solid fa-download"></i> 📱
+                                            </a>
+                                        {% endif %}
                                         <!-- Botão Excluir -->
                                         <form action="{{ url_for('admin_excluir_banner', banner_id=b.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir permanentemente este banner?');" style="display: inline;">
-                                            <button type="submit" class="btn" style="background-color: #ef4444; color: white; padding: 5px 9px; font-size: 0.8rem; border-radius: var(--radius-sm); border: none; cursor: pointer;" title="Excluir Banner">
+                                            <button type="submit" class="btn" style="background-color: #ef4444; color: white; padding: 5px 8px; font-size: 0.8rem; border-radius: var(--radius-sm); border: none; cursor: pointer;" title="Excluir Banner">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
                                     </div>
+                                </td>
+                            </tr>
+                            <!-- Linha Expansível para Edição do Banner e Upload da Imagem Mobile -->
+                            <tr id="edit-banner-row-{{ b.id }}" style="display: none; background-color: #f8fafc;">
+                                <td colspan="6" style="padding: 16px 20px;">
+                                    <form action="{{ url_for('admin_editar_banner', banner_id=b.id) }}" method="POST" enctype="multipart/form-data" style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                                            <h5 style="margin: 0; color: var(--grafite-titanio); font-size: 0.95rem;">
+                                                <i class="fa-solid fa-pen-to-square" style="color: var(--laranja-brasa); margin-right: 6px;"></i> Editar Banner #{{ b.id }} — {{ b.titulo or 'Sem Título' }}
+                                            </h5>
+                                            <button type="button" onclick="document.getElementById('edit-banner-row-{{ b.id }}').style.display='none'" style="background: none; border: none; font-size: 1.1rem; color: #94a3b8; cursor: pointer;">&times;</button>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
+                                            <div>
+                                                <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 4px;">Substituir Imagem Desktop (1920x800)</label>
+                                                <input type="file" name="imagem" accept="image/*" class="form-input" style="padding: 6px; font-size: 0.8rem; width: 100%;">
+                                                <small style="color: #64748b; font-size: 0.72rem;">Deixe em branco para manter a imagem atual</small>
+                                            </div>
+                                            <div>
+                                                <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 4px;">
+                                                    📱 Enviar / Substituir Imagem Mobile (Celular)
+                                                </label>
+                                                <input type="file" name="imagem_mobile" accept="image/*" class="form-input" style="padding: 6px; font-size: 0.8rem; width: 100%; border: 1px solid #16a34a;">
+                                                <small style="color: #16a34a; font-size: 0.72rem; font-weight: 600; display: block; margin-top: 3px;">
+                                                    Recomendado: 1080 x 1080 px ou 1080 x 1350 px
+                                                </small>
+                                                {% if b.tem_mobile %}
+                                                    <div style="margin-top: 6px;">
+                                                        <label style="font-size: 0.75rem; color: #dc2626; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-weight: 600;">
+                                                            <input type="checkbox" name="remover_mobile" value="1"> Remover imagem mobile (voltar para automática)
+                                                        </label>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 4px;">Título / Identificação</label>
+                                                <input type="text" name="titulo" value="{{ b.titulo or '' }}" class="form-input" style="padding: 7px; font-size: 0.8rem; width: 100%;">
+                                            </div>
+                                            <div>
+                                                <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 4px;">Link de Destino</label>
+                                                <input type="text" name="link_url" value="{{ b.link_url or '' }}" placeholder="Ex: #catalogo ou https://..." class="form-input" style="padding: 7px; font-size: 0.8rem; width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                                            <button type="button" class="btn" onclick="document.getElementById('edit-banner-row-{{ b.id }}').style.display='none'" style="background: #e2e8f0; color: #475569; font-size: 0.8rem; padding: 6px 14px; border-radius: var(--radius-sm);">
+                                                Cancelar
+                                            </button>
+                                            <button type="submit" class="btn btn-primary" style="font-size: 0.8rem; padding: 6px 18px; border-radius: var(--radius-sm); font-weight: bold;">
+                                                <i class="fa-solid fa-check"></i> Salvar Alterações
+                                            </button>
+                                        </div>
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}

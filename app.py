@@ -16,10 +16,10 @@ from inter_pix import inter_pix
 from asaas_service import get_or_create_customer, criar_cobranca_cartao
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
 
-def process_banner_upload(file_storage):
+def process_banner_upload(file_storage, max_width=1920):
     """
     Processa upload de imagem do banner:
-    Converte para RGB, redimensiona se largura > 1920px (mantendo proporção),
+    Converte para RGB, redimensiona se largura > max_width (mantendo proporção),
     comprime como JPEG qualidade 85 e retorna (base64_str, mimetype).
     """
     import base64
@@ -39,11 +39,11 @@ def process_banner_upload(file_storage):
         elif img.mode != "RGB":
             img = img.convert("RGB")
             
-        # Limita a largura máxima a 1920px mantendo proporção
-        if img.width > 1920:
-            ratio = 1920.0 / float(img.width)
+        # Limita a largura máxima mantendo proporção
+        if img.width > max_width:
+            ratio = float(max_width) / float(img.width)
             new_height = int(float(img.height) * ratio)
-            img = img.resize((1920, new_height), Image.Resampling.LANCZOS)
+            img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
             
         buf = io.BytesIO()
         img.save(buf, format='JPEG', quality=85, optimize=True)
@@ -161,6 +161,23 @@ def banner_imagem(banner_id):
             pass
             
     return redirect(url_for('static', filename='img/placeholder.jpg'))
+
+@app.route('/banner/imagem-mobile/<int:banner_id>')
+def banner_imagem_mobile(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    if banner.imagem_mobile_base64:
+        import base64
+        from flask import Response
+        try:
+            image_data = base64.b64decode(banner.imagem_mobile_base64)
+            response = Response(image_data, mimetype=banner.mimetype_mobile or 'image/jpeg')
+            response.headers['Cache-Control'] = 'public, max-age=3600'
+            return response
+        except Exception:
+            pass
+            
+    # Se não tiver imagem específica para mobile, redireciona para a desktop
+    return redirect(url_for('banner_imagem', banner_id=banner.id))
 
 @app.route('/produto/<int:produto_id>')
 def product_detail(produto_id):
@@ -1093,7 +1110,7 @@ def admin_dashboard():
 def admin_novo_banner():
     file = request.files.get('imagem')
     if not file or file.filename == '':
-        flash('Por favor, selecione uma imagem para o banner.', 'warning')
+        flash('Por favor, selecione uma imagem para o banner (versão computador).', 'warning')
         return redirect(url_for('admin_dashboard'))
         
     titulo = request.form.get('titulo', '').strip()
@@ -1105,7 +1122,15 @@ def admin_novo_banner():
         ordem = 0
     ativo = request.form.get('ativo') in ['on', '1', 'true', True]
     
-    encoded_img, mimetype = process_banner_upload(file)
+    encoded_img, mimetype = process_banner_upload(file, max_width=1920)
+    
+    # Processa imagem mobile opcional
+    encoded_mobile, mimetype_mobile = None, None
+    tem_mobile = False
+    file_mobile = request.files.get('imagem_mobile')
+    if file_mobile and file_mobile.filename != '':
+        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1080)
+        tem_mobile = True
     
     novo_banner = Banner(
         titulo=titulo,
@@ -1114,7 +1139,10 @@ def admin_novo_banner():
         ordem=ordem,
         ativo=ativo,
         imagem_base64=encoded_img,
-        mimetype=mimetype
+        mimetype=mimetype,
+        imagem_mobile_base64=encoded_mobile,
+        mimetype_mobile=mimetype_mobile,
+        tem_mobile=tem_mobile
     )
     db.session.add(novo_banner)
     db.session.commit()
@@ -1145,12 +1173,26 @@ def admin_editar_banner(banner_id):
         except (ValueError, TypeError):
             pass
             
-    # Se enviou nova imagem, substitui
+    # Se enviou nova imagem desktop, substitui
     file = request.files.get('imagem')
     if file and file.filename != '':
-        encoded_img, mimetype = process_banner_upload(file)
+        encoded_img, mimetype = process_banner_upload(file, max_width=1920)
         banner.imagem_base64 = encoded_img
         banner.mimetype = mimetype
+        
+    # Se enviou nova imagem mobile, substitui
+    file_mobile = request.files.get('imagem_mobile')
+    if file_mobile and file_mobile.filename != '':
+        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1080)
+        banner.imagem_mobile_base64 = encoded_mobile
+        banner.mimetype_mobile = mimetype_mobile
+        banner.tem_mobile = True
+
+    # Se solicitou remover a imagem mobile
+    if request.form.get('remover_mobile') == '1':
+        banner.imagem_mobile_base64 = None
+        banner.mimetype_mobile = None
+        banner.tem_mobile = False
         
     db.session.commit()
     flash(f'Banner #{banner.id} atualizado com sucesso!', 'success')
@@ -1193,6 +1235,26 @@ def admin_download_banner(banner_id):
             download_name=filename
         )
     flash('Imagem do banner não encontrada para download.', 'danger')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/banner/download-mobile/<int:banner_id>')
+@login_required
+def admin_download_banner_mobile(banner_id):
+    banner = Banner.query.get_or_404(banner_id)
+    if banner.imagem_mobile_base64:
+        import base64
+        import io
+        from flask import send_file
+        data = base64.b64decode(banner.imagem_mobile_base64)
+        ext = 'jpg' if 'jpeg' in (banner.mimetype_mobile or '').lower() else 'png'
+        filename = f"banner_mobile_{banner.id}_{banner.titulo or 'folder'}.{ext}".replace(' ', '_')
+        return send_file(
+            io.BytesIO(data),
+            mimetype=banner.mimetype_mobile or 'image/jpeg',
+            as_attachment=True,
+            download_name=filename
+        )
+    flash('Imagem mobile do banner não encontrada para download.', 'danger')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/pedido/status/<int:pedido_id>', methods=['POST'])
@@ -1304,6 +1366,31 @@ def initialize_database():
             db.session.execute(text("ALTER TABLE produtos ADD COLUMN bling_id BIGINT;"))
             db.session.commit()
             print("Coluna bling_id adicionada.")
+        except Exception:
+            db.session.rollback()
+
+        # Migração de colunas mobile na tabela banners
+        try:
+            from sqlalchemy import text
+            db.session.execute(text("ALTER TABLE banners ADD COLUMN imagem_mobile_base64 TEXT;"))
+            db.session.commit()
+            print("✅ Coluna 'imagem_mobile_base64' adicionada em banners.")
+        except Exception:
+            db.session.rollback()
+
+        try:
+            from sqlalchemy import text
+            db.session.execute(text("ALTER TABLE banners ADD COLUMN mimetype_mobile VARCHAR(50);"))
+            db.session.commit()
+            print("✅ Coluna 'mimetype_mobile' adicionada em banners.")
+        except Exception:
+            db.session.rollback()
+
+        try:
+            from sqlalchemy import text
+            db.session.execute(text("ALTER TABLE banners ADD COLUMN tem_mobile BOOLEAN DEFAULT FALSE;"))
+            db.session.commit()
+            print("✅ Coluna 'tem_mobile' adicionada em banners.")
         except Exception:
             db.session.rollback()
 
