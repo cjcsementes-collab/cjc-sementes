@@ -16,16 +16,18 @@ from inter_pix import inter_pix
 from asaas_service import get_or_create_customer, criar_cobranca_cartao
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
 
-def process_banner_upload(file_storage, max_width=1920):
+def process_banner_upload(file_storage, max_width=2560):
     """
     Processa upload de imagem do banner:
-    Converte para RGB, redimensiona se largura > max_width (mantendo proporção),
-    comprime como JPEG qualidade 85 e retorna (base64_str, mimetype).
+    Converte para RGB, redimensiona apenas se largura > max_width (mantendo proporção),
+    comprime como JPEG com qualidade 92 (alta fidelidade visual) e retorna (base64_str, mimetype).
     """
     import base64
     import io
     try:
         from PIL import Image
+        # Remove limite padrão de descompressão do Pillow para suportar artes em 4K e ultra resolução
+        Image.MAX_IMAGE_PIXELS = None
         img = Image.open(file_storage.stream)
         
         # Converte modos com transparência ou paleta
@@ -39,14 +41,15 @@ def process_banner_upload(file_storage, max_width=1920):
         elif img.mode != "RGB":
             img = img.convert("RGB")
             
-        # Limita a largura máxima mantendo proporção
+        # Limita a largura máxima mantendo proporção (ex: 2560px para telas 2K/4K)
         if img.width > max_width:
             ratio = float(max_width) / float(img.width)
             new_height = int(float(img.height) * ratio)
             img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
             
         buf = io.BytesIO()
-        img.save(buf, format='JPEG', quality=85, optimize=True)
+        # Salva com alta qualidade (92) e otimização para máxima nitidez de fontes e fotos
+        img.save(buf, format='JPEG', quality=92, optimize=True)
         img_bytes = buf.getvalue()
         mimetype = 'image/jpeg'
     except Exception as e:
@@ -70,6 +73,12 @@ def force_https():
     if request.headers.get('X-Forwarded-Proto') == 'http':
         url = request.url.replace('http://', 'https://', 1)
         return redirect(url, code=301)
+
+# Tratamento para arquivo que excede o limite de upload (HTTP 413)
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    flash('O arquivo enviado é muito pesado (o limite máximo suportado é de até 95 MB por imagem). Por favor, reduza um pouco o arquivo no Canva e tente novamente.', 'danger')
+    return redirect(request.referrer or url_for('admin_dashboard'))
 
 # Inicializa o cliente Pix do Banco Inter
 inter_pix.init_app(app)
@@ -1122,14 +1131,14 @@ def admin_novo_banner():
         ordem = 0
     ativo = request.form.get('ativo') in ['on', '1', 'true', True]
     
-    encoded_img, mimetype = process_banner_upload(file, max_width=1920)
+    encoded_img, mimetype = process_banner_upload(file, max_width=2560)
     
     # Processa imagem mobile opcional
     encoded_mobile, mimetype_mobile = None, None
     tem_mobile = False
     file_mobile = request.files.get('imagem_mobile')
     if file_mobile and file_mobile.filename != '':
-        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1080)
+        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1200)
         tem_mobile = True
     
     novo_banner = Banner(
@@ -1176,14 +1185,14 @@ def admin_editar_banner(banner_id):
     # Se enviou nova imagem desktop, substitui
     file = request.files.get('imagem')
     if file and file.filename != '':
-        encoded_img, mimetype = process_banner_upload(file, max_width=1920)
+        encoded_img, mimetype = process_banner_upload(file, max_width=2560)
         banner.imagem_base64 = encoded_img
         banner.mimetype = mimetype
         
     # Se enviou nova imagem mobile, substitui
     file_mobile = request.files.get('imagem_mobile')
     if file_mobile and file_mobile.filename != '':
-        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1080)
+        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1200)
         banner.imagem_mobile_base64 = encoded_mobile
         banner.mimetype_mobile = mimetype_mobile
         banner.tem_mobile = True
