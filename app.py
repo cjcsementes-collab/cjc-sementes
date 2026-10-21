@@ -16,11 +16,12 @@ from inter_pix import inter_pix
 from asaas_service import get_or_create_customer, criar_cobranca_cartao
 from email_service import enviar_email_confirmacao, enviar_email_novo_pedido
 
-def process_banner_upload(file_storage, max_width=2560):
+def process_banner_upload(file_storage, max_width=3840):
     """
     Processa upload de imagem do banner:
     Converte para RGB, redimensiona apenas se largura > max_width (mantendo proporção),
-    comprime como JPEG com qualidade 92 (alta fidelidade visual) e retorna (base64_str, mimetype).
+    comprime como JPEG com qualidade 95 e subsampling=0 (4:4:4 para máxima fidelidade de cores, fontes e recortes)
+    e retorna (base64_str, mimetype).
     """
     import base64
     import io
@@ -41,15 +42,15 @@ def process_banner_upload(file_storage, max_width=2560):
         elif img.mode != "RGB":
             img = img.convert("RGB")
             
-        # Limita a largura máxima mantendo proporção (ex: 2560px para telas 2K/4K)
+        # Limita a largura máxima mantendo proporção (ex: 3840px para telas 4K UHD nativas)
         if img.width > max_width:
             ratio = float(max_width) / float(img.width)
             new_height = int(float(img.height) * ratio)
             img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
             
         buf = io.BytesIO()
-        # Salva com alta qualidade (92) e otimização para máxima nitidez de fontes e fotos
-        img.save(buf, format='JPEG', quality=92, optimize=True)
+        # Salva com alta qualidade (95), subsampling=0 (sem compressão de croma) e otimização
+        img.save(buf, format='JPEG', quality=95, optimize=True, subsampling=0)
         img_bytes = buf.getvalue()
         mimetype = 'image/jpeg'
     except Exception as e:
@@ -1131,14 +1132,14 @@ def admin_novo_banner():
         ordem = 0
     ativo = request.form.get('ativo') in ['on', '1', 'true', True]
     
-    encoded_img, mimetype = process_banner_upload(file, max_width=2560)
+    encoded_img, mimetype = process_banner_upload(file, max_width=3840)
     
     # Processa imagem mobile opcional
     encoded_mobile, mimetype_mobile = None, None
     tem_mobile = False
     file_mobile = request.files.get('imagem_mobile')
     if file_mobile and file_mobile.filename != '':
-        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1200)
+        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1600)
         tem_mobile = True
     
     novo_banner = Banner(
@@ -1185,14 +1186,14 @@ def admin_editar_banner(banner_id):
     # Se enviou nova imagem desktop, substitui
     file = request.files.get('imagem')
     if file and file.filename != '':
-        encoded_img, mimetype = process_banner_upload(file, max_width=2560)
+        encoded_img, mimetype = process_banner_upload(file, max_width=3840)
         banner.imagem_base64 = encoded_img
         banner.mimetype = mimetype
         
     # Se enviou nova imagem mobile, substitui
     file_mobile = request.files.get('imagem_mobile')
     if file_mobile and file_mobile.filename != '':
-        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1200)
+        encoded_mobile, mimetype_mobile = process_banner_upload(file_mobile, max_width=1600)
         banner.imagem_mobile_base64 = encoded_mobile
         banner.mimetype_mobile = mimetype_mobile
         banner.tem_mobile = True
@@ -1422,15 +1423,9 @@ def initialize_database():
                     fixed_base64 = base64.b64encode(f.read()).decode('utf-8')
                     
                 b1 = Banner.query.get(1)
-                if b1:
-                    b1.imagem_base64 = fixed_base64
-                    b1.mimetype = 'image/jpeg'
-                    b1.link_url = '#catalogo'
-                    if not b1.titulo:
-                        b1.titulo = "Tecnologia que Nutre a Terra"
-                    db.session.commit()
-                    print("✅ Banner #1 atualizado com fundo verde uniforme e link #catalogo.")
-                else:
+                if not b1:
+                    with open(fixed_banner_path, 'rb') as f:
+                        fixed_base64 = base64.b64encode(f.read()).decode('utf-8')
                     b_novo = Banner(
                         id=1,
                         titulo="Tecnologia que Nutre a Terra",

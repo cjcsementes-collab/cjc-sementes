@@ -11,41 +11,32 @@
             {% for b in banners %}
                 <div class="banner-slide" data-index="{{ loop.index0 }}">
                     {% if b.id == 1 %}
-                        {% if b.tem_mobile %}
-                            <!-- Imagem exclusiva para Celular / Mobile criada no Admin -->
-                            <div class="banner-slide-mobile-only">
-                                <a href="{{ b.link_url or '#catalogo' }}" class="banner-slide-link" title="{{ b.titulo or 'Ver catálogo' }}">
-                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=5" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                        <!-- Banner Institucional: Celular (Mobile) com Foto Nítida no Topo + Texto HTML Crisp e Botão Real -->
+                        <div class="banner-slide-mobile-only banner-slide-institutional-mobile">
+                            <div class="banner-mobile-cidimar-box">
+                                <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="CJC Sementes - Cidimar Cassol" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            </div>
+                            <div class="banner-mobile-content-box">
+                                <h2 class="banner-mobile-hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h2>
+                                <p class="banner-mobile-hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
+                                <a href="#catalogo" class="banner-mobile-hero-btn" title="Ver Catálogo Completo">
+                                    <i class="fa-solid fa-seedling"></i> Ver Catálogo Completo
                                 </a>
                             </div>
-                            <!-- Layout Desktop Institucional: Cidimar em 4K + Fundo Verde 100% Uniforme + Texto HTML Crisp e Botão Real -->
-                            <div class="banner-slide-desktop-only banner-slide-institutional">
-                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                                <div class="container banner-hero-container">
-                                    <div class="hero-content">
-                                        <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
-                                        <p class="hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
-                                        <a href="#catalogo" class="btn btn-primary hero-btn">
-                                            <i class="fa-solid fa-seedling" style="margin-right: 8px;"></i> Ver Catálogo Completo
-                                        </a>
-                                    </div>
+                        </div>
+                        <!-- Banner Institucional: Desktop (Computador) -->
+                        <div class="banner-slide-desktop-only banner-slide-institutional">
+                            <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                            <div class="container banner-hero-container">
+                                <div class="hero-content">
+                                    <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
+                                    <p class="hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
+                                    <a href="#catalogo" class="btn btn-primary hero-btn">
+                                        <i class="fa-solid fa-seedling" style="margin-right: 8px;"></i> Ver Catálogo Completo
+                                    </a>
                                 </div>
                             </div>
-                        {% else %}
-                            <!-- Banner Institucional: Cidimar em 4K + Fundo Verde 100% Uniforme + Texto HTML Crisp e Botão Real -->
-                            <div class="banner-slide-institutional">
-                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                                <div class="container banner-hero-container">
-                                    <div class="hero-content">
-                                        <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
-                                        <p class="hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
-                                        <a href="#catalogo" class="btn btn-primary hero-btn">
-                                            <i class="fa-solid fa-seedling" style="margin-right: 8px;"></i> Ver Catálogo Completo
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
+                        </div>
                     {% else %}
                         <!-- Banner Gráfico / Folder Puro (Sem sobreposição de textos, ícones ou botões) -->
                         <div class="banner-slide-inner">
