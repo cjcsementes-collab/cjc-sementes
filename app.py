@@ -145,6 +145,9 @@ def index():
     
     # Busca banners ativos para o carrossel do topo
     banners = Banner.query.filter_by(ativo=True).order_by(Banner.ordem.asc(), Banner.id.asc()).all()
+    banners_desktop = [b for b in banners if b.imagem_base64]
+    banners_com_mobile = [b for b in banners if b.tem_mobile]
+    banners_mobile = banners_com_mobile if banners_com_mobile else banners_desktop
     
     return render_template(
         'index.html', 
@@ -153,7 +156,9 @@ def index():
         familia_selecionada=familia_selecionada,
         familias=familias,
         busca=busca,
-        banners=banners
+        banners=banners,
+        banners_desktop=banners_desktop,
+        banners_mobile=banners_mobile
     )
 
 @app.route('/banner/imagem/<int:banner_id>')
@@ -1101,6 +1106,8 @@ def admin_dashboard():
     
     # Banners do carrossel do topo
     banners = Banner.query.order_by(Banner.ordem.asc(), Banner.id.desc()).all()
+    banners_desktop = [b for b in banners if b.ativo and b.imagem_base64]
+    banners_mobile = [b for b in banners if b.ativo and b.tem_mobile]
     
     return render_template(
         'admin/dashboard.html', 
@@ -1110,7 +1117,9 @@ def admin_dashboard():
         num_pedidos=num_pedidos,
         pedidos_pendentes=pedidos_pendentes,
         estoque_baixo=estoque_baixo,
-        banners=banners
+        banners=banners,
+        banners_desktop=banners_desktop,
+        banners_mobile=banners_mobile
     )
 
 # ----------------- GESTÃO DE BANNERS (ADMIN) -----------------

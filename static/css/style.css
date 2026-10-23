@@ -311,6 +311,17 @@ input, select, textarea, button {
     margin: 0 auto;
 }
 
+/* Container de Alternância do Carrossel Desktop / Mobile */
+.banner-carousel-desktop-wrap {
+    display: block;
+    width: 100%;
+}
+
+.banner-carousel-mobile-wrap {
+    display: none;
+    width: 100%;
+}
+
 /* Classes para alternância Desktop / Mobile nos Banners */
 .banner-slide-mobile-only {
     display: none;
@@ -493,6 +504,14 @@ input, select, textarea, button {
 
 /* Responsividade Mobile para o Carrossel */
 @media (max-width: 768px) {
+    .banner-carousel-desktop-wrap {
+        display: none !important;
+    }
+    .banner-carousel-mobile-wrap {
+        display: block !important;
+        width: 100% !important;
+    }
+    
     .banner-carousel {
         border-bottom-left-radius: 16px;
         border-bottom-right-radius: 16px;

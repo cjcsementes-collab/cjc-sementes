@@ -168,8 +168,8 @@
                                                     <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}" alt="Banner {{ b.id }} Mobile" style="width: 44px; height: 48px; object-fit: cover; border-radius: 5px; border: 2px solid #22c55e;">
                                                 </a>
                                             {% else %}
-                                                <div style="width: 44px; height: 48px; border-radius: 5px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; background: #f8fafc; font-size: 0.65rem; color: #94a3b8; text-align: center; line-height: 1.1; padding: 2px;" title="Nenhuma imagem mobile específica enviada. O site usa versão desktop adaptada.">
-                                                    Auto
+                                                <div style="width: 44px; height: 48px; border-radius: 5px; border: 1px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; background: #f8fafc; font-size: 0.65rem; color: #94a3b8; text-align: center; line-height: 1.1; padding: 2px;" title="Sem arte mobile. Exibido apenas no Computador.">
+                                                    Só PC
                                                 </div>
                                             {% endif %}
                                         </div>
@@ -181,7 +181,11 @@
                                     <br><small style="color: #94a3b8; font-size: 0.75rem;">Cadastrado em {{ b.data_criacao.strftime('%d/%m/%Y às %H:%M') }}</small>
                                     {% if b.tem_mobile %}
                                         <span style="display: inline-block; background-color: #dcfce7; color: #166534; font-size: 0.7rem; font-weight: bold; padding: 1px 6px; border-radius: 10px; margin-top: 3px;">
-                                            <i class="fa-solid fa-mobile-screen"></i> Arte Mobile Ativa
+                                            <i class="fa-solid fa-mobile-screen"></i> Exibido no Celular & PC
+                                        </span>
+                                    {% else %}
+                                        <span style="display: inline-block; background-color: #f1f5f9; color: #64748b; font-size: 0.7rem; font-weight: bold; padding: 1px 6px; border-radius: 10px; margin-top: 3px;" title="Envie uma imagem mobile se quiser exibir também no celular">
+                                            <i class="fa-solid fa-desktop"></i> Exibido apenas no PC
                                         </span>
                                     {% endif %}
                                 </td>

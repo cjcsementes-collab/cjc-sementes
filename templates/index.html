@@ -6,80 +6,113 @@
 {% if banners and banners|length > 0 %}
 <!-- Carrossel de Banners Dinâmicos do Topo -->
 <section class="banner-carousel-section">
-    <div class="banner-carousel" id="homeBannerCarousel" data-interval="3000">
-        <div class="banner-carousel-track" id="bannerCarouselTrack">
-            {% for b in banners %}
-                <div class="banner-slide" data-index="{{ loop.index0 }}">
-                    {% if b.id == 1 %}
-                        <!-- Banner Institucional: Celular (Mobile) com Foto Nítida no Topo + Texto HTML Crisp e Botão Real -->
-                        <div class="banner-slide-mobile-only banner-slide-institutional-mobile">
-                            <div class="banner-mobile-cidimar-box">
-                                <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="CJC Sementes - Cidimar Cassol" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+
+    <!-- Carrossel Exclusivo para Desktop (Computador) -->
+    <div class="banner-carousel-desktop-wrap">
+        <div class="banner-carousel" id="homeBannerCarouselDesktop" data-interval="3000">
+            <div class="banner-carousel-track">
+                {% for b in banners_desktop %}
+                    <div class="banner-slide" data-index="{{ loop.index0 }}">
+                        {% if b.id == 1 %}
+                            <div class="banner-slide-institutional">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                <div class="container banner-hero-container">
+                                    <div class="hero-content">
+                                        <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
+                                        <p class="hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
+                                        <a href="#catalogo" class="btn btn-primary hero-btn">
+                                            <i class="fa-solid fa-seedling" style="margin-right: 8px;"></i> Ver Catálogo Completo
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="banner-mobile-content-box">
-                                <h2 class="banner-mobile-hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h2>
-                                <p class="banner-mobile-hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
-                                <a href="#catalogo" class="banner-mobile-hero-btn" title="Ver Catálogo Completo">
-                                    <i class="fa-solid fa-seedling"></i> Ver Catálogo Completo
-                                </a>
+                        {% else %}
+                            <div class="banner-slide-inner">
+                                {% if b.link_url %}
+                                    <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
+                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    </a>
+                                {% else %}
+                                    <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                {% endif %}
                             </div>
-                        </div>
-                        <!-- Banner Institucional: Desktop (Computador) -->
-                        <div class="banner-slide-desktop-only banner-slide-institutional">
-                            <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                            <div class="container banner-hero-container">
-                                <div class="hero-content">
-                                    <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
-                                    <p class="hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
-                                    <a href="#catalogo" class="btn btn-primary hero-btn">
-                                        <i class="fa-solid fa-seedling" style="margin-right: 8px;"></i> Ver Catálogo Completo
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% if banners_desktop|length > 1 %}
+                <!-- Botões de Navegação (Flexinhas) -->
+                <button type="button" class="banner-carousel-arrow prev" aria-label="Banner Anterior" title="Banner Anterior">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="banner-carousel-arrow next" aria-label="Próximo Banner" title="Próximo Banner">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                
+                <!-- Indicadores (Bolinhas) -->
+                <div class="banner-carousel-dots">
+                    {% for b in banners_desktop %}
+                        <button type="button" class="banner-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Ir para o banner {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Carrossel Exclusivo para Mobile (Celular) -->
+    <div class="banner-carousel-mobile-wrap">
+        <div class="banner-carousel" id="homeBannerCarouselMobile" data-interval="3000">
+            <div class="banner-carousel-track">
+                {% for b in banners_mobile %}
+                    <div class="banner-slide" data-index="{{ loop.index0 }}">
+                        {% if b.id == 1 %}
+                            <div class="banner-slide-institutional-mobile">
+                                <div class="banner-mobile-cidimar-box">
+                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="CJC Sementes - Cidimar Cassol" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                </div>
+                                <div class="banner-mobile-content-box">
+                                    <h2 class="banner-mobile-hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h2>
+                                    <p class="banner-mobile-hero-subtitle">Mais de 70 variedades de sementes de cobertura, adubação verde e forrageiras de alto vigor para descompactação, reciclagem de nutrientes e controle biológico de nematoides.</p>
+                                    <a href="#catalogo" class="banner-mobile-hero-btn" title="Ver Catálogo Completo">
+                                        <i class="fa-solid fa-seedling"></i> Ver Catálogo Completo
                                     </a>
                                 </div>
                             </div>
-                        </div>
-                    {% else %}
-                        <!-- Banner Gráfico / Folder Puro (Sem sobreposição de textos, ícones ou botões) -->
-                        <div class="banner-slide-inner">
-                            {% if b.link_url %}
-                                <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
-                                    <picture>
-                                        {% if b.tem_mobile %}
-                                            <source media="(max-width: 768px)" srcset="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=5">
-                                        {% endif %}
-                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                                    </picture>
-                                </a>
-                            {% else %}
-                                <picture>
-                                    {% if b.tem_mobile %}
-                                        <source media="(max-width: 768px)" srcset="{{ url_for('banner_imagem_mobile', banner_id=b.id) }}?v=5">
-                                    {% endif %}
-                                    <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=5" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
-                                </picture>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-        
-        {% if banners|length > 1 %}
-            <!-- Botões de Navegação (Flexinhas) -->
-            <button type="button" class="banner-carousel-arrow prev" id="bannerPrevBtn" aria-label="Banner Anterior" title="Banner Anterior">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button type="button" class="banner-carousel-arrow next" id="bannerNextBtn" aria-label="Próximo Banner" title="Próximo Banner">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-            
-            <!-- Indicadores (Bolinhas) -->
-            <div class="banner-carousel-dots" id="bannerDots">
-                {% for b in banners %}
-                    <button type="button" class="banner-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Ir para o banner {{ loop.index }}"></button>
+                        {% else %}
+                            <div class="banner-slide-inner">
+                                {% if b.link_url %}
+                                    <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
+                                        <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    </a>
+                                {% else %}
+                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
                 {% endfor %}
             </div>
-        {% endif %}
+            
+            {% if banners_mobile|length > 1 %}
+                <!-- Botões de Navegação (Flexinhas) -->
+                <button type="button" class="banner-carousel-arrow prev" aria-label="Banner Anterior" title="Banner Anterior">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="banner-carousel-arrow next" aria-label="Próximo Banner" title="Próximo Banner">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                
+                <!-- Indicadores (Bolinhas) -->
+                <div class="banner-carousel-dots">
+                    {% for b in banners_mobile %}
+                        <button type="button" class="banner-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Ir para o banner {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
     </div>
+
 </section>
 {% else %}
 <!-- Banner Hero Institucional Padrão (Exibido quando não houver folders cadastrados no Admin) -->
@@ -259,107 +292,112 @@
     
 </section>
 
-{% if banners and banners|length > 1 %}
+{% if (banners_desktop and banners_desktop|length > 1) or (banners_mobile and banners_mobile|length > 1) %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const track = document.getElementById('bannerCarouselTrack');
-    const carousel = document.getElementById('homeBannerCarousel');
-    if (!track || !carousel) return;
-    
-    const slides = track.querySelectorAll('.banner-slide');
-    if (slides.length <= 1) return;
-    
-    const prevBtn = document.getElementById('bannerPrevBtn');
-    const nextBtn = document.getElementById('bannerNextBtn');
-    const dots = document.querySelectorAll('.banner-dot');
-    
-    let currentIndex = 0;
-    const totalSlides = slides.length;
-    let autoTimer = null;
-    const intervalTime = parseInt(carousel.getAttribute('data-interval') || '3000', 10);
-    
-    function goToSlide(index) {
-        currentIndex = (index + totalSlides) % totalSlides;
-        track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+    function initCarousel(carousel) {
+        if (!carousel) return;
+        const track = carousel.querySelector('.banner-carousel-track');
+        if (!track) return;
         
-        dots.forEach((dot, i) => {
-            if (i === currentIndex) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
+        const slides = track.querySelectorAll('.banner-slide');
+        if (slides.length <= 1) return;
+        
+        const prevBtn = carousel.querySelector('.banner-carousel-arrow.prev');
+        const nextBtn = carousel.querySelector('.banner-carousel-arrow.next');
+        const dots = carousel.querySelectorAll('.banner-dot');
+        
+        let currentIndex = 0;
+        const totalSlides = slides.length;
+        let autoTimer = null;
+        const intervalTime = parseInt(carousel.getAttribute('data-interval') || '3000', 10);
+        
+        function goToSlide(index) {
+            currentIndex = (index + totalSlides) % totalSlides;
+            track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+            
+            dots.forEach((dot, i) => {
+                if (i === currentIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+        
+        function nextSlide() {
+            goToSlide(currentIndex + 1);
+        }
+        
+        function prevSlide() {
+            goToSlide(currentIndex - 1);
+        }
+        
+        function startAutoPlay() {
+            stopAutoPlay();
+            autoTimer = setInterval(nextSlide, intervalTime);
+        }
+        
+        function stopAutoPlay() {
+            if (autoTimer) {
+                clearInterval(autoTimer);
+                autoTimer = null;
             }
-        });
-    }
-    
-    function nextSlide() {
-        goToSlide(currentIndex + 1);
-    }
-    
-    function prevSlide() {
-        goToSlide(currentIndex - 1);
-    }
-    
-    function startAutoPlay() {
-        stopAutoPlay();
-        autoTimer = setInterval(nextSlide, intervalTime);
-    }
-    
-    function stopAutoPlay() {
-        if (autoTimer) {
-            clearInterval(autoTimer);
-            autoTimer = null;
         }
-    }
-    
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            nextSlide();
-            startAutoPlay();
-        });
-    }
-    
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            prevSlide();
-            startAutoPlay();
-        });
-    }
-    
-    dots.forEach((dot, idx) => {
-        dot.addEventListener('click', function(e) {
-            e.preventDefault();
-            goToSlide(idx);
-            startAutoPlay();
-        });
-    });
-    
-    // Pausa a rotação enquanto o usuário passa o mouse por cima
-    carousel.addEventListener('mouseenter', stopAutoPlay);
-    carousel.addEventListener('mouseleave', startAutoPlay);
-    
-    // Navegação por toque (touch swipe) no celular
-    let touchStartX = 0;
-    let touchEndX = 0;
-    carousel.addEventListener('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-        stopAutoPlay();
-    }, { passive: true });
-    
-    carousel.addEventListener('touchend', function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        const diff = touchStartX - touchEndX;
-        if (diff > 45) {
-            nextSlide();
-        } else if (diff < -45) {
-            prevSlide();
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                nextSlide();
+                startAutoPlay();
+            });
         }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                prevSlide();
+                startAutoPlay();
+            });
+        }
+        
+        dots.forEach((dot, idx) => {
+            dot.addEventListener('click', function(e) {
+                e.preventDefault();
+                goToSlide(idx);
+                startAutoPlay();
+            });
+        });
+        
+        // Pausa a rotação enquanto o usuário passa o mouse por cima
+        carousel.addEventListener('mouseenter', stopAutoPlay);
+        carousel.addEventListener('mouseleave', startAutoPlay);
+        
+        // Navegação por toque (touch swipe) no celular
+        let touchStartX = 0;
+        let touchEndX = 0;
+        carousel.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            stopAutoPlay();
+        }, { passive: true });
+        
+        carousel.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (diff > 45) {
+                nextSlide();
+            } else if (diff < -45) {
+                prevSlide();
+            }
+            startAutoPlay();
+        }, { passive: true });
+        
+        // Inicia rotação automática
         startAutoPlay();
-    }, { passive: true });
-    
-    // Inicia rotação a cada 3 segundos
-    startAutoPlay();
+    }
+
+    // Inicializa separadamente o carrossel Desktop e o Mobile
+    document.querySelectorAll('.banner-carousel').forEach(initCarousel);
 });
 </script>
 {% endif %}
