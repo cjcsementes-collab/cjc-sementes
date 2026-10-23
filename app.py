@@ -1447,6 +1447,18 @@ def initialize_database():
                     db.session.add(b_novo)
                     db.session.commit()
                     print("✅ Banner #1 criado com fundo verde uniforme e link #catalogo.")
+                
+            # Atualiza a imagem mobile limpa do Banner 1 para remover o texto cortado/duplicado
+            fixed_mobile_path = os.path.join(basedir, 'static', 'img', 'banner_principal_cjc_mobile.jpg')
+            if os.path.exists(fixed_mobile_path):
+                b1 = Banner.query.get(1)
+                if b1:
+                    with open(fixed_mobile_path, 'rb') as f:
+                        b1.imagem_mobile_base64 = base64.b64encode(f.read()).decode('utf-8')
+                    b1.mimetype_mobile = 'image/jpeg'
+                    b1.tem_mobile = True
+                    db.session.commit()
+                    print("✅ Banner #1 mobile atualizado com a imagem limpa sem texto duplicado.")
         except Exception as e:
             print(f"Aviso ao inicializar banner principal: {e}")
             db.session.rollback()

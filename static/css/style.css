@@ -544,7 +544,7 @@ input, select, textarea, button {
     
     .banner-mobile-cidimar-box {
         width: 100% !important;
-        max-height: 300px !important;
+        max-height: 240px !important;
         overflow: hidden !important;
         display: flex !important;
         justify-content: center !important;
@@ -554,9 +554,9 @@ input, select, textarea, button {
     
     .banner-mobile-cidimar-box img {
         width: 100% !important;
-        max-width: 440px !important;
+        max-width: 380px !important;
         height: auto !important;
-        max-height: 300px !important;
+        max-height: 240px !important;
         object-fit: cover !important;
         object-position: top center !important;
         display: block !important;

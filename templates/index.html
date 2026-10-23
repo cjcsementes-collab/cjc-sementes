@@ -15,7 +15,7 @@
                     <div class="banner-slide" data-index="{{ loop.index0 }}">
                         {% if b.id == 1 %}
                             <div class="banner-slide-institutional">
-                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=7" class="banner-slide-bg" alt="CJC Sementes" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 <div class="container banner-hero-container">
                                     <div class="hero-content">
                                         <h1 class="hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h1>
@@ -30,10 +30,10 @@
                             <div class="banner-slide-inner">
                                 {% if b.link_url %}
                                     <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
-                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                        <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=7" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                     </a>
                                 {% else %}
-                                    <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    <img src="{{ url_for('banner_imagem', banner_id=b.id) }}?v=7" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 {% endif %}
                             </div>
                         {% endif %}
@@ -69,7 +69,7 @@
                         {% if b.id == 1 %}
                             <div class="banner-slide-institutional-mobile">
                                 <div class="banner-mobile-cidimar-box">
-                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="CJC Sementes - Cidimar Cassol" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=7" alt="CJC Sementes - Cidimar Cassol" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 </div>
                                 <div class="banner-mobile-content-box">
                                     <h2 class="banner-mobile-hero-title">Tecnologia que Nutre a <span>Terra</span> e Protege sua <span>Safra</span></h2>
@@ -83,10 +83,10 @@
                             <div class="banner-slide-inner">
                                 {% if b.link_url %}
                                     <a href="{{ b.link_url }}" {% if b.link_url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %} class="banner-slide-link" title="{{ b.titulo or 'Ver mais' }}">
-                                        <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                        <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=7" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                     </a>
                                 {% else %}
-                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=6" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                                    <img src="{{ url_for('banner_imagem_mobile', banner_id=b.id) if b.tem_mobile else url_for('banner_imagem', banner_id=b.id) }}?v=7" alt="{{ b.titulo or 'Banner CJC Sementes' }}" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
                                 {% endif %}
                             </div>
                         {% endif %}
