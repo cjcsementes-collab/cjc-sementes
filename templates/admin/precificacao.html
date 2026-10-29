@@ -1,0 +1,1604 @@
+{% extends 'base.html' %}
+
+{% block title %}Calculadora de Decisão & Precificação de Vendas — CJC Sementes{% endblock %}
+
+{% block content %}
+<div class="precificacao-wrapper">
+    <div class="container" style="padding: 30px 15px;">
+        
+        <!-- Cabeçalho Executivo -->
+        <div class="precificacao-header">
+            <div class="header-titles">
+                <div class="badge-seguranca">
+                    <i class="fa-solid fa-shield-halved"></i> Painel Restrito — Apenas Vendedores & Diretoria
+                </div>
+                <h2>Calculadora de Decisão & Precificação</h2>
+                <p>Simulação tributária e precificação de vendas comparando <strong>CAMPO (Simples Nacional)</strong> vs <strong>J CASSOL (Lucro Presumido)</strong>.</p>
+            </div>
+            <div class="header-actions-group">
+                <button type="button" class="btn btn-exemplo" onclick="carregarExemploPlanilha()">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Exemplo da Planilha (Trigo Mourisco)
+                </button>
+                <button type="button" class="btn btn-whatsapp" onclick="copiarPropostaWhatsApp()">
+                    <i class="fa-brands fa-whatsapp"></i> Copiar Proposta
+                </button>
+                <button type="button" class="btn btn-imprimir" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Imprimir / PDF
+                </button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-voltar">
+                    <i class="fa-solid fa-arrow-left"></i> Painel Admin
+                </a>
+            </div>
+        </div>
+
+        <!-- Banner de Veredito Dinâmico (The Golden Verdict) -->
+        <div id="card-veredito" class="veredito-card veredito-jcassol">
+            <div class="veredito-icone">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div class="veredito-conteudo">
+                <span class="veredito-tag">VEREDITO TRIBUTÁRIO SUGERIDO</span>
+                <h3 id="ver-empresa-vencedora">Faturar pela J CASSOL (Lucro Presumido)</h3>
+                <div class="veredito-metricas">
+                    <div class="metrica-item">
+                        <span class="metrica-label">Vantagem Financeira:</span>
+                        <strong class="metrica-val" id="ver-vantagem-reais">R$ 808,25</strong>
+                    </div>
+                    <div class="metrica-item">
+                        <span class="metrica-label">Ganho sobre a Venda:</span>
+                        <strong class="metrica-val" id="ver-vantagem-pct">+1,22%</strong>
+                    </div>
+                    <div class="metrica-item">
+                        <span class="metrica-label">Saldo Credor ICMS (p/ próximas vendas):</span>
+                        <strong class="metrica-val destaque-saldo" id="ver-saldo-icms">R$ 545,00</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Principal de Formulário e Resultados -->
+        <div class="precificacao-grid">
+            
+            <!-- Coluna da Esquerda: Entradas de Dados (Células Amarelas da Planilha) -->
+            <div class="painel-entradas">
+                
+                <!-- Seção 1: Dados da Mercadoria e Operação -->
+                <div class="secao-card">
+                    <div class="secao-card-header">
+                        <h4><i class="fa-solid fa-seedling"></i> 1. Dados da Mercadoria & Compra</h4>
+                        <span class="badge-amarela">Entradas Manuais</span>
+                    </div>
+                    <div class="secao-card-body">
+                        
+                        <!-- Produto -->
+                        <div class="form-group-custom">
+                            <label for="inp-produto">Produto / Semente:</label>
+                            <div class="input-select-group">
+                                <input type="text" id="inp-produto" class="form-input-calc" value="Trigo Mourisco" list="lista-produtos-site" placeholder="Digite ou selecione do catálogo">
+                                <datalist id="lista-produtos-site">
+                                    {% for p in produtos %}
+                                        <option value="{{ p.nome }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                            </div>
+                            <span class="dica-campo">Você pode escolher do catálogo cadastrado ou digitar livremente.</span>
+                        </div>
+
+                        <!-- Quantidade e Preço de Compra -->
+                        <div class="form-row-2">
+                            <div class="form-group-custom">
+                                <label for="inp-quantidade">Quantidade Total (kg):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-quantidade" class="form-input-calc" value="25000" step="any" min="1" oninput="recalcular()">
+                                    <span class="unit-tag">kg</span>
+                                </div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="inp-preco-compra">Preço de Compra (R$/kg):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-preco-compra" class="form-input-calc" value="2.00" step="0.0001" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">R$/kg</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UFs: Origem da Compra, Empresa Vendedora e Destino da Venda -->
+                        <div class="form-row-3">
+                            <div class="form-group-custom">
+                                <label for="sel-uf-compra" title="Onde você comprou a semente do produtor ou fornecedor">UF Origem Compra:</label>
+                                <select id="sel-uf-compra" class="form-select-calc" onchange="recalcular()">
+                                    {% for uf in ufs %}
+                                        <option value="{{ uf }}" {% if uf == 'MG' %}selected{% endif %}>{{ uf }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="sel-uf-vendedora" title="UF da filial/empresa que emite a nota de venda (J Cassol = PR)">UF Vendedora:</label>
+                                <select id="sel-uf-vendedora" class="form-select-calc" onchange="recalcular()">
+                                    {% for uf in ufs %}
+                                        <option value="{{ uf }}" {% if uf == 'PR' %}selected{% endif %}>{{ uf }} (J Cassol)</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="sel-uf-destino" title="Estado onde o seu cliente vai receber a mercadoria">UF Destino Venda:</label>
+                                <select id="sel-uf-destino" class="form-select-calc" onchange="recalcular()">
+                                    {% for uf in ufs %}
+                                        <option value="{{ uf }}" {% if uf == 'MS' %}selected{% endif %}>{{ uf }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="info-tributos-rapida">
+                            <span><i class="fa-solid fa-arrow-right-arrow-left"></i> ICMS Compra (<strong id="tag-uf-compra">MG</strong> &rarr; <strong id="tag-uf-vend">PR</strong>): <strong id="txt-aliq-compra">12.0%</strong> (Efetivo: <strong id="txt-aliq-compra-efet">4.8%</strong>)</span>
+                            <span><i class="fa-solid fa-truck-fast"></i> ICMS Venda (<strong id="tag-uf-vend2">PR</strong> &rarr; <strong id="tag-uf-dest">MS</strong>): <strong id="txt-aliq-venda">7.0%</strong> (Efetivo: <strong id="txt-aliq-venda-efet">2.8%</strong>)</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Seção 2: Frete & Repasse ao Cliente (Gross Up de Frete) -->
+                <div class="secao-card">
+                    <div class="secao-card-header">
+                        <h4><i class="fa-solid fa-truck"></i> 2. Frete da Carga & Repasse</h4>
+                    </div>
+                    <div class="secao-card-body">
+                        <div class="form-row-2">
+                            <div class="form-group-custom">
+                                <label>Condição de Frete:</label>
+                                <div class="pill-selector">
+                                    <label class="pill-option">
+                                        <input type="radio" name="rad-tipo-frete" value="FOB" checked onchange="recalcular()">
+                                        <span>FOB (Cliente Paga)</span>
+                                    </label>
+                                    <label class="pill-option">
+                                        <input type="radio" name="rad-tipo-frete" value="CIF" onchange="recalcular()">
+                                        <span>CIF (Incluso na Nota)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group-custom" id="box-valor-frete">
+                                <label for="inp-valor-frete">Custo Transportadora (R$ Total):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-valor-frete" class="form-input-calc" value="0.00" step="any" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">R$</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card de Repasse de Frete (quando CIF) -->
+                        <div id="box-repasse-frete" class="box-repasse-cif" style="display: none;">
+                            <div class="repasse-flex">
+                                <div>
+                                    <span class="repasse-title">Divisor de Markup do Frete:</span>
+                                    <strong id="txt-divisor-frete">0.9492</strong>
+                                </div>
+                                <div>
+                                    <span class="repasse-title">Valor a Cobrar do Cliente (c/ impostos):</span>
+                                    <strong id="txt-frete-cobrado" class="repasse-destaque">R$ 0,00</strong>
+                                </div>
+                            </div>
+                            <p class="repasse-nota">Cobre exatamente este valor do cliente para que os tributos sobre o frete não reduzam a sua margem de lucro.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção 3: Estratégia de Precificação & Margem de Lucro -->
+                <div class="secao-card secao-precificacao">
+                    <div class="secao-card-header">
+                        <h4><i class="fa-solid fa-calculator"></i> 3. Estratégia de Margem & Preço de Venda</h4>
+                    </div>
+                    <div class="secao-card-body">
+                        
+                        <!-- Toggle de Modo de Precificação -->
+                        <div class="modo-toggle-container">
+                            <button type="button" id="btn-modo-preco" class="btn-modo active" onclick="setModoCalculo('preco')">
+                                <i class="fa-solid fa-tag"></i> Informar Preço de Venda (Calcular Margem)
+                            </button>
+                            <button type="button" id="btn-modo-margem" class="btn-modo" onclick="setModoCalculo('margem')">
+                                <i class="fa-solid fa-chart-pie"></i> Informar Margem Desejada (Sugerir Preço)
+                            </button>
+                        </div>
+
+                        <!-- Bloco Modo Preço de Venda -->
+                        <div id="bloco-modo-preco" class="bloco-modo">
+                            <div class="form-group-custom">
+                                <label for="inp-preco-venda" style="font-size: 1.05rem; font-weight: bold; color: var(--grafite-titanio);">
+                                    Preço de Venda Praticado (R$/kg):
+                                </label>
+                                <div class="input-with-unit input-destaque-venda">
+                                    <input type="number" id="inp-preco-venda" class="form-input-calc" value="2.65" step="0.0001" min="0.01" oninput="onPrecoVendaDigitado()">
+                                    <span class="unit-tag">R$/kg</span>
+                                </div>
+                                <span class="dica-campo">Exemplo da planilha: R$ 2,65/kg para 25.000 kg resulta em Faturamento FOB de R$ 66.250,00.</span>
+                            </div>
+                        </div>
+
+                        <!-- Bloco Modo Margem Desejada -->
+                        <div id="bloco-modo-margem" class="bloco-modo" style="display: none;">
+                            <div class="form-group-custom">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <label for="inp-margem-desejada" style="font-size: 1.05rem; font-weight: bold; color: var(--grafite-titanio);">
+                                        Margem Líquida Desejada (%):
+                                    </label>
+                                    <span id="label-margem-valor" style="font-size: 1.1rem; font-weight: bold; color: var(--laranja-brasa);">20,0%</span>
+                                </div>
+                                <div style="display: flex; gap: 15px; align-items: center; margin-top: 5px;">
+                                    <input type="range" id="range-margem" min="5" max="45" step="0.5" value="20" style="flex: 1;" oninput="onMargemSliderChange(this.value)">
+                                    <div class="input-with-unit" style="width: 110px;">
+                                        <input type="number" id="inp-margem-desejada" class="form-input-calc" value="20.0" step="0.1" min="1" max="90" oninput="onMargemDigitada(this.value)">
+                                        <span class="unit-tag">%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Botões Rápidos de Margem -->
+                                <div class="botoes-margem-rapida">
+                                    <button type="button" onclick="setMargemRapida(10)">10%</button>
+                                    <button type="button" onclick="setMargemRapida(15)">15%</button>
+                                    <button type="button" onclick="setMargemRapida(20)">20%</button>
+                                    <button type="button" onclick="setMargemRapida(22.25)">22,25% (Planilha)</button>
+                                    <button type="button" onclick="setMargemRapida(25)">25%</button>
+                                    <button type="button" onclick="setMargemRapida(30)">30%</button>
+                                </div>
+
+                                <!-- Box de Preço Sugerido Calculado Automaticamente -->
+                                <div class="box-sugestao-preco">
+                                    <div class="sugestao-coluna">
+                                        <span class="sugestao-label">Preço Sugerido na CAMPO:</span>
+                                        <strong id="sug-preco-campo" class="sugestao-valor">R$ 0,00/kg</strong>
+                                        <button type="button" class="btn-aplicar-preco" onclick="aplicarPrecoSugerido('campo')">Aplicar este Preço</button>
+                                    </div>
+                                    <div class="sugestao-coluna destaque-sugestao">
+                                        <span class="sugestao-label">Preço Sugerido na J CASSOL:</span>
+                                        <strong id="sug-preco-jcassol" class="sugestao-valor">R$ 0,00/kg</strong>
+                                        <button type="button" class="btn-aplicar-preco btn-aplicar-jcassol" onclick="aplicarPrecoSugerido('jcassol')">Aplicar este Preço (Recomendado)</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Seção 4: Parâmetros Tributários (Colapsável / Customizável) -->
+                <div class="secao-card">
+                    <div class="secao-card-header accordion-toggle" onclick="toggleAccordion('box-parametros-trib')">
+                        <h4><i class="fa-solid fa-sliders"></i> 4. Parâmetros Tributários & Alíquotas</h4>
+                        <span id="icone-accordion"><i class="fa-solid fa-chevron-down"></i></span>
+                    </div>
+                    <div id="box-parametros-trib" class="secao-card-body" style="display: none;">
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">
+                            Estes parâmetros já estão configurados com os valores oficiais da sua contabilidade. Altere apenas caso haja mudanças legais.
+                        </p>
+                        
+                        <div class="form-row-2">
+                            <div class="form-group-custom">
+                                <label for="inp-aliq-simples">Simples Nacional — CAMPO (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-aliq-simples" class="form-input-calc" value="3.5" step="0.01" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="inp-aliq-irpj">IRPJ Lucro Presumido (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-aliq-irpj" class="form-input-calc" value="1.20" step="0.01" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group-custom">
+                                <label for="inp-aliq-csll">CSLL Lucro Presumido (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-aliq-csll" class="form-input-calc" value="1.08" step="0.01" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="inp-reducao-icms">Redução de Base do ICMS (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-reducao-icms" class="form-input-calc" value="60.0" step="0.1" min="0" max="100" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group-custom">
+                                <label for="sel-credito-icms">Crédito de ICMS da Compra Utilizável:</label>
+                                <select id="sel-credito-icms" class="form-select-calc" onchange="recalcular()">
+                                    <option value="1.0" selected>100% (Crédito Integral da Nota)</option>
+                                    <option value="0.40">40% (Manutenção Proporcional à Redução)</option>
+                                </select>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="sel-pis-cofins">Incide PIS/COFINS na CJC?:</label>
+                                <select id="sel-pis-cofins" class="form-select-calc" onchange="recalcular()">
+                                    <option value="nao" selected>NÃO (Isento / Alíquota Zero)</option>
+                                    <option value="sim">SIM (Incidência Normal - 3,65%)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; text-align: right;">
+                            <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; padding: 5px 10px;" onclick="restaurarParametrosPadrao()">
+                                <i class="fa-solid fa-rotate-left"></i> Restaurar Alíquotas Padrão
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Coluna da Direita: Quadro Comparativo Executivo (CAMPO vs J CASSOL) -->
+            <div class="painel-resultados">
+                
+                <div class="secao-card secao-tabela-comparativa">
+                    <div class="secao-card-header" style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                        <h4 style="color: var(--grafite-titanio); font-size: 1.15rem;">
+                            <i class="fa-solid fa-scale-balanced" style="color: var(--laranja-brasa); margin-right: 6px;"></i> Resumo Comparativo: CAMPO vs J CASSOL
+                        </h4>
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Calculado em Tempo Real</span>
+                    </div>
+
+                    <div class="tabela-comparativa-wrapper">
+                        <table class="tabela-decisao">
+                            <thead>
+                                <tr>
+                                    <th class="col-item">Item / Etapa de Cálculo</th>
+                                    <th class="col-campo">CAMPO<br><small style="font-weight: normal;">(Simples Nacional)</small></th>
+                                    <th class="col-jcassol">J CASSOL<br><small style="font-weight: normal;">(Lucro Presumido)</small></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="linha-grupo"><td colspan="3">1. FLUXO FINANCEIRO DA OPERAÇÃO</td></tr>
+                                <tr>
+                                    <td>Valor Total da Compra</td>
+                                    <td id="td-compra-campo">R$ 50.000,00</td>
+                                    <td id="td-compra-jcassol">R$ 50.000,00</td>
+                                </tr>
+                                <tr>
+                                    <td>Valor da Venda (FOB)</td>
+                                    <td id="td-venda-fob-campo">R$ 66.250,00</td>
+                                    <td id="td-venda-fob-jcassol">R$ 66.250,00</td>
+                                </tr>
+                                <tr id="tr-frete-linha" style="display: none;">
+                                    <td>Frete Cobrado do Cliente (c/ impostos)</td>
+                                    <td id="td-frete-campo">R$ 0,00</td>
+                                    <td id="td-frete-jcassol">R$ 0,00</td>
+                                </tr>
+                                <tr class="linha-subtotal">
+                                    <td><strong>Faturamento Total</strong></td>
+                                    <td id="td-faturamento-campo"><strong>R$ 66.250,00</strong></td>
+                                    <td id="td-faturamento-jcassol"><strong>R$ 66.250,00</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Lucro Bruto (Venda - Custos)</strong></td>
+                                    <td id="td-lucro-bruto-campo"><strong>R$ 16.250,00</strong></td>
+                                    <td id="td-lucro-bruto-jcassol"><strong>R$ 16.250,00</strong></td>
+                                </tr>
+
+                                <tr class="linha-grupo"><td colspan="3">2. APURAÇÃO DO ICMS (CRÉDITOS & DÉBITOS)</td></tr>
+                                <tr>
+                                    <td>Alíquota ICMS Compra (Tabela)</td>
+                                    <td>-</td>
+                                    <td id="td-aliq-compra-tab">12,0%</td>
+                                </tr>
+                                <tr>
+                                    <td>ICMS Efetivo Destacado na Compra</td>
+                                    <td>-</td>
+                                    <td id="td-icms-compra-destacado">R$ 2.400,00</td>
+                                </tr>
+                                <tr>
+                                    <td>Crédito de ICMS Utilizável</td>
+                                    <td>R$ 0,00 <small>(Simples não toma crédito)</small></td>
+                                    <td id="td-credito-icms" class="destaque-verde">R$ 2.400,00</td>
+                                </tr>
+                                <tr>
+                                    <td>Alíquota ICMS Venda (Tabela)</td>
+                                    <td>Incluso no Simples</td>
+                                    <td id="td-aliq-venda-tab">7,0%</td>
+                                </tr>
+                                <tr>
+                                    <td>ICMS Efetivo da Venda (Base Reduzida)</td>
+                                    <td>-</td>
+                                    <td id="td-icms-venda-efetivo">R$ 1.855,00</td>
+                                </tr>
+                                <tr class="linha-destaque-tributo">
+                                    <td><strong>ICMS Líquido a Recolher</strong></td>
+                                    <td><strong>R$ 0,00</strong></td>
+                                    <td id="td-icms-recolher-jcassol"><strong>R$ 0,00</strong></td>
+                                </tr>
+                                <tr class="linha-saldo-credor">
+                                    <td><strong>Saldo Credor de ICMS (Sobra p/ próximo período)</strong></td>
+                                    <td>R$ 0,00</td>
+                                    <td id="td-saldo-credor-icms" class="destaque-saldo-td"><strong>R$ 545,00</strong></td>
+                                </tr>
+
+                                <tr class="linha-grupo"><td colspan="3">3. DEMAIS IMPOSTOS FEDERAIS</td></tr>
+                                <tr>
+                                    <td>Simples Nacional (<span id="txt-simples-pct-td">3,50%</span>)</td>
+                                    <td id="td-simples-campo">R$ 2.318,75</td>
+                                    <td>Não aplicável</td>
+                                </tr>
+                                <tr>
+                                    <td>IRPJ (<span id="txt-irpj-pct-td">1,20%</span>)</td>
+                                    <td>Incluso no Simples</td>
+                                    <td id="td-irpj-jcassol">R$ 795,00</td>
+                                </tr>
+                                <tr>
+                                    <td>CSLL (<span id="txt-csll-pct-td">1,08%</span>)</td>
+                                    <td>Incluso no Simples</td>
+                                    <td id="td-csll-jcassol">R$ 715,50</td>
+                                </tr>
+                                <tr>
+                                    <td>PIS / COFINS</td>
+                                    <td>Incluso no Simples</td>
+                                    <td id="td-piscofins-jcassol">R$ 0,00</td>
+                                </tr>
+                                <tr class="linha-total-impostos">
+                                    <td><strong>Total de Impostos da Operação</strong></td>
+                                    <td id="td-total-impostos-campo" class="alerta-imposto"><strong>R$ 2.318,75</strong></td>
+                                    <td id="td-total-impostos-jcassol" class="alerta-imposto"><strong>R$ 1.510,50</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Custo Tributário Efetivo (% do faturamento)</td>
+                                    <td id="td-custo-trib-campo">3,50%</td>
+                                    <td id="td-custo-trib-jcassol">2,28%</td>
+                                </tr>
+
+                                <tr class="linha-resultado-final">
+                                    <td>
+                                        <div style="font-size: 1.1rem; font-weight: bold;">RESULTADO LÍQUIDO FINAL</div>
+                                        <small style="font-weight: normal; color: #475569;">Lucro limpo no bolso da empresa</small>
+                                    </td>
+                                    <td id="td-resultado-liquido-campo" class="val-liquido-campo">
+                                        <strong>R$ 13.931,25</strong>
+                                        <div class="sub-margem" id="sub-margem-campo">21,03% de margem</div>
+                                    </td>
+                                    <td id="td-resultado-liquido-jcassol" class="val-liquido-jcassol">
+                                        <strong>R$ 14.739,50</strong>
+                                        <div class="sub-margem" id="sub-margem-jcassol">22,25% de margem</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Rodapé do Quadro Comparativo -->
+                    <div class="rodape-comparativo">
+                        <div class="vantagem-box" id="box-vantagem-rodape">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <div>
+                                <strong>Vantagem de Faturar pela J CASSOL:</strong>
+                                <span>Economia tributária de <strong id="txt-eco-reais">R$ 808,25</strong> (+<span id="txt-eco-pct">1,22%</span> da venda), além de acumular <strong id="txt-eco-icms">R$ 545,00</strong> em saldo credor de ICMS para abater de impostos futuros.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal para Consulta da Tabela Completa de ICMS 2026 -->
+<div id="modal-icms" class="modal-calc-overlay" style="display: none;">
+    <div class="modal-calc-content">
+        <div class="modal-calc-header">
+            <h4><i class="fa-solid fa-table"></i> Tabela Interestadual de ICMS 2026 (27 Estados)</h4>
+            <button type="button" class="btn-fechar-modal" onclick="fecharModalIcms()">&times;</button>
+        </div>
+        <div class="modal-calc-body">
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">
+                Linhas = Origem &bull; Colunas = Destino. As alíquotas internas (mesmo estado) estão na diagonal principal.
+            </p>
+            <div id="container-tabela-icms-grid" style="overflow-x: auto; max-height: 400px;"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos Customizados da Calculadora de Decisão & Precificação */
+:root {
+    --verde-jcassol: #15803d;
+    --verde-jcassol-bg: #f0fdf4;
+    --verde-jcassol-border: #86efac;
+    --azul-campo: #1d4ed8;
+    --azul-campo-bg: #eff6ff;
+    --azul-campo-border: #bfdbfe;
+    --amarelo-planilha: #fef08a;
+    --amarelo-planilha-borda: #facc15;
+}
+
+.precificacao-wrapper {
+    background-color: #f8fafc;
+    min-height: 85vh;
+}
+
+.precificacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.badge-seguranca {
+    display: inline-block;
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.header-titles h2 {
+    font-size: 1.7rem;
+    color: var(--grafite-titanio);
+    margin: 0 0 4px 0;
+}
+
+.header-titles p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.header-actions-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-exemplo {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-exemplo:hover { background-color: #2563eb; }
+
+.btn-whatsapp {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-whatsapp:hover { background-color: #15803d; }
+
+.btn-imprimir {
+    background-color: #0284c7;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-imprimir:hover { background-color: #0369a1; }
+
+.btn-voltar {
+    background-color: #e2e8f0;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.btn-voltar:hover { background-color: #cbd5e1; }
+
+/* Card de Veredito Superior (Ouro) */
+.veredito-card {
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.veredito-jcassol {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px solid #86efac;
+}
+
+.veredito-campo {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #93c5fd;
+}
+
+.veredito-icone {
+    font-size: 2.8rem;
+    color: #15803d;
+    background: white;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    flex-shrink: 0;
+}
+.veredito-campo .veredito-icone { color: #1d4ed8; }
+
+.veredito-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    color: #166534;
+}
+.veredito-campo .veredito-tag { color: #1e40af; }
+
+.veredito-conteudo h3 {
+    margin: 4px 0 10px 0;
+    font-size: 1.45rem;
+    color: var(--grafite-titanio);
+}
+
+.veredito-metricas {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.metrica-item {
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+.metrica-val {
+    font-size: 1.15rem;
+    color: #15803d;
+    font-weight: 800;
+    margin-left: 4px;
+}
+.veredito-campo .metrica-val { color: #1d4ed8; }
+
+.destaque-saldo {
+    color: #b45309;
+}
+
+/* Grade Principal */
+.precificacao-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.35fr;
+    gap: 25px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .precificacao-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cards de Seção */
+.secao-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.secao-card-header {
+    padding: 14px 18px;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.secao-card-header h4 {
+    margin: 0;
+    font-size: 1.02rem;
+    color: var(--grafite-titanio);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-amarela {
+    background-color: var(--amarelo-planilha);
+    color: #854d0e;
+    border: 1px solid var(--amarelo-planilha-borda);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: bold;
+}
+
+.secao-card-body {
+    padding: 18px;
+}
+
+/* Formulários */
+.form-group-custom {
+    margin-bottom: 15px;
+}
+
+.form-group-custom label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 5px;
+}
+
+.form-input-calc, .form-select-calc {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: var(--grafite-titanio);
+    background-color: white;
+    box-sizing: border-box;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.form-input-calc:focus, .form-select-calc:focus {
+    border-color: var(--laranja-brasa);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.15);
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 10px;
+}
+
+.input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-unit input {
+    padding-right: 48px;
+}
+
+.unit-tag {
+    position: absolute;
+    right: 10px;
+    font-size: 0.8rem;
+    color: #64748b;
+    pointer-events: none;
+    font-weight: bold;
+}
+
+.dica-campo {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 4px;
+    display: block;
+}
+
+.info-tributos-rapida {
+    background-color: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: #334155;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+/* Seletor de Frete Pills */
+.pill-selector {
+    display: flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.pill-option {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+}
+
+.pill-option input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.pill-option span {
+    display: block;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.pill-option input:checked + span {
+    background-color: var(--laranja-brasa);
+    color: white;
+}
+
+.box-repasse-cif {
+    background-color: #fff7ed;
+    border: 1px solid #fdba74;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.repasse-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.repasse-title {
+    font-size: 0.8rem;
+    color: #9a3412;
+    display: block;
+}
+
+.repasse-destaque {
+    font-size: 1.15rem;
+    color: #c2410c;
+}
+
+.repasse-nota {
+    font-size: 0.75rem;
+    color: #7c2d12;
+    margin: 6px 0 0 0;
+}
+
+/* Alternador de Modo de Precificação */
+.modo-toggle-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.btn-modo {
+    background: transparent;
+    border: none;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: bold;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.btn-modo.active {
+    background: white;
+    color: var(--laranja-brasa);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.input-destaque-venda input {
+    font-size: 1.35rem;
+    font-weight: bold;
+    color: #1e293b;
+    border: 2px solid #f97316;
+    background-color: #fffaf5;
+}
+
+.botoes-margem-rapida {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0 16px 0;
+    flex-wrap: wrap;
+}
+
+.botoes-margem-rapida button {
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.botoes-margem-rapida button:hover {
+    background-color: var(--laranja-brasa);
+    color: white;
+    border-color: var(--laranja-brasa);
+}
+
+.box-sugestao-preco {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.sugestao-coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.destaque-sugestao {
+    border-left: 2px solid #86efac;
+    padding-left: 12px;
+}
+
+.sugestao-label {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.sugestao-valor {
+    font-size: 1.25rem;
+    color: #1e293b;
+}
+
+.destaque-sugestao .sugestao-valor {
+    color: #15803d;
+}
+
+.btn-aplicar-preco {
+    background-color: #e2e8f0;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #334155;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: all 0.2s;
+}
+.btn-aplicar-preco:hover { background-color: #cbd5e1; }
+
+.btn-aplicar-jcassol {
+    background-color: #dcfce7;
+    color: #166534;
+}
+.btn-aplicar-jcassol:hover { background-color: #bbf7d0; }
+
+/* Tabela Comparativa Executiva */
+.tabela-comparativa-wrapper {
+    overflow-x: auto;
+}
+
+.tabela-decisao {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.tabela-decisao th {
+    padding: 12px 14px;
+    text-align: right;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+.tabela-decisao th.col-item {
+    text-align: left;
+    width: 44%;
+}
+
+.tabela-decisao th.col-campo {
+    background-color: var(--azul-campo-bg);
+    color: var(--azul-campo);
+    border-left: 1px solid #e2e8f0;
+    width: 28%;
+}
+
+.tabela-decisao th.col-jcassol {
+    background-color: var(--verde-jcassol-bg);
+    color: var(--verde-jcassol);
+    border-left: 1px solid #e2e8f0;
+    width: 28%;
+}
+
+.tabela-decisao td {
+    padding: 9px 14px;
+    text-align: right;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.tabela-decisao td:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+.tabela-decisao td:nth-child(2) {
+    background-color: #fafcff;
+    border-left: 1px solid #f1f5f9;
+}
+
+.tabela-decisao td:nth-child(3) {
+    background-color: #fafffb;
+    border-left: 1px solid #f1f5f9;
+}
+
+.linha-grupo td {
+    background-color: #f8fafc !important;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #64748b !important;
+    padding: 7px 14px !important;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.linha-subtotal td {
+    background-color: #f1f5f9 !important;
+    font-size: 0.95rem;
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.destaque-verde {
+    color: #15803d !important;
+    font-weight: bold;
+}
+
+.destaque-saldo-td {
+    color: #b45309 !important;
+    font-weight: 800;
+    background-color: #fefce8 !important;
+}
+
+.linha-destaque-tributo td {
+    background-color: #f8fafc !important;
+    font-weight: bold;
+}
+
+.linha-total-impostos td {
+    background-color: #fee2e2 !important;
+    font-weight: 800;
+    color: #991b1b !important;
+    font-size: 0.95rem;
+}
+
+.linha-resultado-final td {
+    padding: 16px 14px !important;
+    border-top: 2px solid #cbd5e1;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+.val-liquido-campo {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+    font-size: 1.25rem;
+}
+
+.val-liquido-jcassol {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+    font-size: 1.35rem;
+    border-left: 2px solid #22c55e !important;
+}
+
+.sub-margem {
+    font-size: 0.8rem;
+    font-weight: normal;
+    margin-top: 2px;
+}
+
+.rodape-comparativo {
+    padding: 16px 18px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.vantagem-box {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: white;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: #1e293b;
+}
+
+.vantagem-box i {
+    font-size: 1.4rem;
+    color: #15803d;
+    flex-shrink: 0;
+}
+
+/* Acordeão de Parâmetros */
+.accordion-toggle {
+    cursor: pointer;
+}
+
+/* Modal da Tabela ICMS */
+.modal-calc-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal-calc-content {
+    background: white;
+    border-radius: 10px;
+    max-width: 900px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-calc-header {
+    background: #f8fafc;
+    padding: 14px 18px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-calc-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--grafite-titanio);
+}
+
+.btn-fechar-modal {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.modal-calc-body {
+    padding: 18px;
+}
+
+/* Estilos de Impressão (PDF Executivo) */
+@media print {
+    .header-actions-group, .modo-toggle-container, .btn-aplicar-preco, .botoes-margem-rapida, header, footer, .alert-container {
+        display: none !important;
+    }
+    .precificacao-wrapper {
+        background: white !important;
+    }
+    .precificacao-grid {
+        display: block !important;
+    }
+    .secao-card {
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+<script>
+// Dados oficiais carregados do Backend (Python)
+const TABELA_ICMS = {{ tabela_icms_json|safe }};
+let modoAtual = 'preco'; // 'preco' ou 'margem'
+
+function formatarMoeda(val) {
+    if (isNaN(val) || val === null) val = 0.0;
+    return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatarPct(val) {
+    if (isNaN(val) || val === null) val = 0.0;
+    return (val * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+}
+
+function getAliquotaIcms(orig, dest) {
+    orig = (orig || '').toUpperCase();
+    dest = (dest || '').toUpperCase();
+    if (TABELA_ICMS[orig] && TABELA_ICMS[orig][dest] !== undefined) {
+        return TABELA_ICMS[orig][dest];
+    }
+    return (orig === dest) ? 0.18 : 0.12;
+}
+
+function setModoCalculo(modo) {
+    modoAtual = modo;
+    const btnPreco = document.getElementById('btn-modo-preco');
+    const btnMargem = document.getElementById('btn-modo-margem');
+    const blocoPreco = document.getElementById('bloco-modo-preco');
+    const blocoMargem = document.getElementById('bloco-modo-margem');
+
+    if (modo === 'preco') {
+        btnPreco.classList.add('active');
+        btnMargem.classList.remove('active');
+        blocoPreco.style.display = 'block';
+        blocoMargem.style.display = 'none';
+    } else {
+        btnPreco.classList.remove('active');
+        btnMargem.classList.add('active');
+        blocoPreco.style.display = 'none';
+        blocoMargem.style.display = 'block';
+    }
+    recalcular();
+}
+
+function onMargemSliderChange(val) {
+    document.getElementById('inp-margem-desejada').value = val;
+    document.getElementById('label-margem-valor').innerText = parseFloat(val).toLocaleString('pt-BR', { minimumFractionDigits: 1 }) + '%';
+    recalcular();
+}
+
+function onMargemDigitada(val) {
+    val = parseFloat(val) || 0;
+    document.getElementById('range-margem').value = Math.min(45, Math.max(5, val));
+    document.getElementById('label-margem-valor').innerText = val.toLocaleString('pt-BR', { minimumFractionDigits: 1 }) + '%';
+    recalcular();
+}
+
+function setMargemRapida(val) {
+    document.getElementById('inp-margem-desejada').value = val;
+    onMargemDigitada(val);
+}
+
+function onPrecoVendaDigitado() {
+    recalcular();
+}
+
+function aplicarPrecoSugerido(empresa) {
+    const sugCampo = parseFloat(document.getElementById('sug-preco-campo').getAttribute('data-raw')) || 0;
+    const sugJcassol = parseFloat(document.getElementById('sug-preco-jcassol').getAttribute('data-raw')) || 0;
+    const precoEscolhido = (empresa === 'campo') ? sugCampo : sugJcassol;
+    
+    document.getElementById('inp-preco-venda').value = precoEscolhido.toFixed(4);
+    setModoCalculo('preco');
+}
+
+function toggleAccordion(id) {
+    const el = document.getElementById(id);
+    const icone = document.getElementById('icone-accordion');
+    if (el.style.display === 'none' || el.style.display === '') {
+        el.style.display = 'block';
+        icone.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
+    } else {
+        el.style.display = 'none';
+        icone.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+    }
+}
+
+// Motor de Cálculo Reativo (Fiel à Planilha de Decisão Tributária)
+function recalcular() {
+    const produto = document.getElementById('inp-produto').value || 'Produto';
+    const quantidade = parseFloat(document.getElementById('inp-quantidade').value) || 0;
+    const precoCompraKg = parseFloat(document.getElementById('inp-preco-compra').value) || 0;
+    const ufCompra = document.getElementById('sel-uf-compra').value;
+    const ufVend = document.getElementById('sel-uf-vendedora').value;
+    const ufDest = document.getElementById('sel-uf-destino').value;
+
+    const tipoFrete = document.querySelector('input[name="rad-tipo-frete"]:checked').value;
+    const valorFrete = parseFloat(document.getElementById('inp-valor-frete').value) || 0;
+
+    // Alíquotas e Parâmetros
+    const simplesPct = (parseFloat(document.getElementById('inp-aliq-simples').value) || 0) / 100.0;
+    const irpjPct = (parseFloat(document.getElementById('inp-aliq-irpj').value) || 0) / 100.0;
+    const csllPct = (parseFloat(document.getElementById('inp-aliq-csll').value) || 0) / 100.0;
+    const reducaoIcmsPct = (parseFloat(document.getElementById('inp-reducao-icms').value) || 0) / 100.0;
+    const creditoUtilizavelPct = parseFloat(document.getElementById('sel-credito-icms').value) || 1.0;
+    const pisCofinsIncide = document.getElementById('sel-pis-cofins').value === 'sim';
+    const pisCofinsPct = pisCofinsIncide ? 0.0365 : 0.0;
+
+    // Atualiza tags de UF
+    document.getElementById('tag-uf-compra').innerText = ufCompra;
+    document.getElementById('tag-uf-vend').innerText = ufVend;
+    document.getElementById('tag-uf-vend2').innerText = ufVend;
+    document.getElementById('tag-uf-dest').innerText = ufDest;
+
+    // Alíquotas ICMS
+    const aliqIcmsCompra = getAliquotaIcms(ufCompra, ufVend);
+    const aliqIcmsVenda = getAliquotaIcms(ufVend, ufDest);
+    const baseEfetiva = Math.max(0, 1.0 - reducaoIcmsPct);
+    const aliqIcmsCompraEfet = aliqIcmsCompra * baseEfetiva;
+    const aliqIcmsVendaEfet = aliqIcmsVenda * baseEfetiva;
+
+    document.getElementById('txt-aliq-compra').innerText = (aliqIcmsCompra * 100).toFixed(1) + '%';
+    document.getElementById('txt-aliq-compra-efet').innerText = (aliqIcmsCompraEfet * 100).toFixed(1) + '%';
+    document.getElementById('txt-aliq-venda').innerText = (aliqIcmsVenda * 100).toFixed(1) + '%';
+    document.getElementById('txt-aliq-venda-efet').innerText = (aliqIcmsVendaEfet * 100).toFixed(1) + '%';
+
+    // Divisor de Markup do Frete
+    const impostosFretePct = aliqIcmsVendaEfet + irpjPct + csllPct + pisCofinsPct;
+    const divisorFrete = Math.max(0.01, 1.0 - impostosFretePct);
+    document.getElementById('txt-divisor-frete').innerText = divisorFrete.toFixed(4);
+
+    let freteCobrado = 0.0;
+    const boxRepasse = document.getElementById('box-repasse-frete');
+    const trFreteLinha = document.getElementById('tr-frete-linha');
+    if (tipoFrete === 'CIF' && valorFrete > 0) {
+        freteCobrado = valorFrete / divisorFrete;
+        boxRepasse.style.display = 'block';
+        trFreteLinha.style.display = 'table-row';
+        document.getElementById('txt-frete-cobrado').innerText = formatarMoeda(freteCobrado);
+    } else {
+        boxRepasse.style.display = 'none';
+        trFreteLinha.style.display = 'none';
+    }
+
+    // 1. Custo de Compra
+    const valorCompra = quantidade * precoCompraKg;
+    const icmsCompraDestacado = valorCompra * aliqIcmsCompraEfet;
+    const creditoIcmsUtilizavel = icmsCompraDestacado * creditoUtilizavelPct;
+
+    // 2. Preço de Venda
+    let precoVendaKg = 0;
+    if (modoAtual === 'preco') {
+        precoVendaKg = parseFloat(document.getElementById('inp-preco-venda').value) || 0;
+    } else {
+        // Modo Margem: calcula preço sugerido
+        const margemDesejadaPct = (parseFloat(document.getElementById('inp-margem-desejada').value) || 0) / 100.0;
+        const freteKg = (tipoFrete === 'CIF' && quantidade > 0) ? (valorFrete / quantidade) : 0.0;
+        const custoBaseKg = precoCompraKg + freteKg;
+
+        // Sugestão CAMPO
+        const divCampo = 1.0 - simplesPct - margemDesejadaPct;
+        const sugCampo = divCampo > 0 ? (custoBaseKg / divCampo) : 0;
+
+        // Sugestão J CASSOL
+        const creditoKg = precoCompraKg * aliqIcmsCompraEfet * creditoUtilizavelPct;
+        const federais = irpjPct + csllPct + pisCofinsPct;
+        const divSemIcms = 1.0 - federais - margemDesejadaPct;
+        const sugHipA = divSemIcms > 0 ? (custoBaseKg / divSemIcms) : 0;
+        let sugJcassol = 0;
+
+        if (creditoKg >= (sugHipA * aliqIcmsVendaEfet)) {
+            sugJcassol = sugHipA;
+        } else {
+            const divComIcms = 1.0 - federais - aliqIcmsVendaEfet - margemDesejadaPct;
+            sugJcassol = divComIcms > 0 ? ((custoBaseKg - creditoKg) / divComIcms) : 0;
+        }
+
+        document.getElementById('sug-preco-campo').innerText = formatarMoeda(sugCampo) + '/kg';
+        document.getElementById('sug-preco-campo').setAttribute('data-raw', sugCampo);
+        document.getElementById('sug-preco-jcassol').innerText = formatarMoeda(sugJcassol) + '/kg';
+        document.getElementById('sug-preco-jcassol').setAttribute('data-raw', sugJcassol);
+
+        precoVendaKg = sugJcassol;
+        document.getElementById('inp-preco-venda').value = sugJcassol.toFixed(4);
+    }
+
+    const valorVendaFob = quantidade * precoVendaKg;
+    const valorVendaTotal = valorVendaFob + freteCobrado;
+    const custoTotalOperacao = valorCompra + (tipoFrete === 'CIF' ? valorFrete : 0.0);
+    const lucroBruto = valorVendaTotal - custoTotalOperacao;
+
+    // 3. J CASSOL
+    const icmsVendaEfetivo = valorVendaTotal * aliqIcmsVendaEfet;
+    const icmsLiquidoRecolher = Math.max(0, icmsVendaEfetivo - creditoIcmsUtilizavel);
+    const saldoCredorIcms = Math.max(0, creditoIcmsUtilizavel - icmsVendaEfetivo);
+
+    const irpjCjc = valorVendaTotal * irpjPct;
+    const csllCjc = valorVendaTotal * csllPct;
+    const pisCofinsCjc = valorVendaTotal * pisCofinsPct;
+    const totalImpostosJcassol = icmsLiquidoRecolher + irpjCjc + csllCjc + pisCofinsCjc;
+    const resultadoLiquidoJcassol = lucroBruto - totalImpostosJcassol;
+    const custoTribJcassolPct = valorVendaTotal > 0 ? (totalImpostosJcassol / valorVendaTotal) : 0;
+    const margemLiqJcassolPct = valorVendaTotal > 0 ? (resultadoLiquidoJcassol / valorVendaTotal) : 0;
+
+    // 4. CAMPO
+    const totalImpostosCampo = valorVendaTotal * simplesPct;
+    const resultadoLiquidoCampo = lucroBruto - totalImpostosCampo;
+    const custoTribCampoPct = simplesPct;
+    const margemLiqCampoPct = valorVendaTotal > 0 ? (resultadoLiquidoCampo / valorVendaTotal) : 0;
+
+    // 5. Preenchimento da Tabela Comparativa
+    document.getElementById('td-compra-campo').innerText = formatarMoeda(valorCompra);
+    document.getElementById('td-compra-jcassol').innerText = formatarMoeda(valorCompra);
+    document.getElementById('td-venda-fob-campo').innerText = formatarMoeda(valorVendaFob);
+    document.getElementById('td-venda-fob-jcassol').innerText = formatarMoeda(valorVendaFob);
+    document.getElementById('td-frete-campo').innerText = formatarMoeda(freteCobrado);
+    document.getElementById('td-frete-jcassol').innerText = formatarMoeda(freteCobrado);
+    document.getElementById('td-faturamento-campo').innerText = formatarMoeda(valorVendaTotal);
+    document.getElementById('td-faturamento-jcassol').innerText = formatarMoeda(valorVendaTotal);
+    document.getElementById('td-lucro-bruto-campo').innerText = formatarMoeda(lucroBruto);
+    document.getElementById('td-lucro-bruto-jcassol').innerText = formatarMoeda(lucroBruto);
+
+    document.getElementById('td-aliq-compra-tab').innerText = (aliqIcmsCompra * 100).toFixed(1) + '%';
+    document.getElementById('td-icms-compra-destacado').innerText = formatarMoeda(icmsCompraDestacado);
+    document.getElementById('td-credito-icms').innerText = formatarMoeda(creditoIcmsUtilizavel);
+    document.getElementById('td-aliq-venda-tab').innerText = (aliqIcmsVenda * 100).toFixed(1) + '%';
+    document.getElementById('td-icms-venda-efetivo').innerText = formatarMoeda(icmsVendaEfetivo);
+    document.getElementById('td-icms-recolher-jcassol').innerText = formatarMoeda(icmsLiquidoRecolher);
+    document.getElementById('td-saldo-credor-icms').innerText = formatarMoeda(saldoCredorIcms);
+
+    document.getElementById('txt-simples-pct-td').innerText = (simplesPct * 100).toFixed(2) + '%';
+    document.getElementById('txt-irpj-pct-td').innerText = (irpjPct * 100).toFixed(2) + '%';
+    document.getElementById('txt-csll-pct-td').innerText = (csllPct * 100).toFixed(2) + '%';
+    document.getElementById('td-simples-campo').innerText = formatarMoeda(totalImpostosCampo);
+    document.getElementById('td-irpj-jcassol').innerText = formatarMoeda(irpjCjc);
+    document.getElementById('td-csll-jcassol').innerText = formatarMoeda(csllCjc);
+    document.getElementById('td-piscofins-jcassol').innerText = formatarMoeda(pisCofinsCjc);
+
+    document.getElementById('td-total-impostos-campo').innerText = formatarMoeda(totalImpostosCampo);
+    document.getElementById('td-total-impostos-jcassol').innerText = formatarMoeda(totalImpostosJcassol);
+    document.getElementById('td-custo-trib-campo').innerText = formatarPct(custoTribCampoPct);
+    document.getElementById('td-custo-trib-jcassol').innerText = formatarPct(custoTribJcassolPct);
+
+    document.getElementById('td-resultado-liquido-campo').querySelector('strong').innerText = formatarMoeda(resultadoLiquidoCampo);
+    document.getElementById('sub-margem-campo').innerText = formatarPct(margemLiqCampoPct) + ' de margem';
+    document.getElementById('td-resultado-liquido-jcassol').querySelector('strong').innerText = formatarMoeda(resultadoLiquidoJcassol);
+    document.getElementById('sub-margem-jcassol').innerText = formatarPct(margemLiqJcassolPct) + ' de margem';
+
+    // 6. Atualiza o Card de Veredito
+    const cardVeredito = document.getElementById('card-veredito');
+    const txtEmpresa = document.getElementById('ver-empresa-vencedora');
+    const txtVantagem = document.getElementById('ver-vantagem-reais');
+    const txtPct = document.getElementById('ver-vantagem-pct');
+    const txtSaldoIcms = document.getElementById('ver-saldo-icms');
+    const boxVantagem = document.getElementById('box-vantagem-rodape');
+
+    const diff = resultadoLiquidoJcassol - resultadoLiquidoCampo;
+    const diffAbs = Math.abs(diff);
+    const diffPct = valorVendaTotal > 0 ? (diffAbs / valorVendaTotal) : 0;
+
+    txtSaldoIcms.innerText = formatarMoeda(saldoCredorIcms);
+
+    if (diff > 0.01) {
+        cardVeredito.className = 'veredito-card veredito-jcassol';
+        txtEmpresa.innerText = 'Faturar pela J CASSOL (Lucro Presumido)';
+        txtVantagem.innerText = formatarMoeda(diffAbs);
+        txtPct.innerText = '+' + formatarPct(diffPct);
+        boxVantagem.innerHTML = `
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+                <strong>Vantagem de Faturar pela J CASSOL:</strong>
+                <span>Economia líquida de <strong>${formatarMoeda(diffAbs)}</strong> (+${formatarPct(diffPct)} da venda), além de acumular <strong>${formatarMoeda(saldoCredorIcms)}</strong> em crédito de ICMS para abater de impostos futuros.</span>
+            </div>
+        `;
+    } else if (diff < -0.01) {
+        cardVeredito.className = 'veredito-card veredito-campo';
+        txtEmpresa.innerText = 'Faturar pela CAMPO (Simples Nacional)';
+        txtVantagem.innerText = formatarMoeda(diffAbs);
+        txtPct.innerText = '+' + formatarPct(diffPct);
+        boxVantagem.innerHTML = `
+            <i class="fa-solid fa-circle-check" style="color: #1d4ed8;"></i>
+            <div>
+                <strong>Vantagem de Faturar pela CAMPO:</strong>
+                <span>Economia líquida de <strong>${formatarMoeda(diffAbs)}</strong> (+${formatarPct(diffPct)} da venda) comparado ao Lucro Presumido.</span>
+            </div>
+        `;
+    } else {
+        cardVeredito.className = 'veredito-card veredito-jcassol';
+        txtEmpresa.innerText = 'Empate Tributário (Indiferente)';
+        txtVantagem.innerText = 'R$ 0,00';
+        txtPct.innerText = '0,00%';
+        boxVantagem.innerHTML = `
+            <i class="fa-solid fa-scale-balanced"></i>
+            <div><strong>Empate Tributário:</strong> Ambas as empresas proporcionam o mesmo resultado líquido para esta operação.</div>
+        `;
+    }
+}
+
+function carregarExemploPlanilha() {
+    document.getElementById('inp-produto').value = 'Trigo Mourisco';
+    document.getElementById('inp-quantidade').value = '25000';
+    document.getElementById('inp-preco-compra').value = '2.00';
+    document.getElementById('sel-uf-compra').value = 'MG';
+    document.getElementById('sel-uf-vendedora').value = 'PR';
+    document.getElementById('sel-uf-destino').value = 'MS';
+    document.querySelector('input[name="rad-tipo-frete"][value="FOB"]').checked = true;
+    document.getElementById('inp-valor-frete').value = '0.00';
+    document.getElementById('inp-preco-venda').value = '2.65';
+    
+    // Alíquotas padrão
+    document.getElementById('inp-aliq-simples').value = '3.5';
+    document.getElementById('inp-aliq-irpj').value = '1.20';
+    document.getElementById('inp-aliq-csll').value = '1.08';
+    document.getElementById('inp-reducao-icms').value = '60.0';
+    document.getElementById('sel-credito-icms').value = '1.0';
+    document.getElementById('sel-pis-cofins').value = 'nao';
+
+    setModoCalculo('preco');
+    recalcular();
+}
+
+function restaurarParametrosPadrao() {
+    document.getElementById('inp-aliq-simples').value = '3.5';
+    document.getElementById('inp-aliq-irpj').value = '1.20';
+    document.getElementById('inp-aliq-csll').value = '1.08';
+    document.getElementById('inp-reducao-icms').value = '60.0';
+    document.getElementById('sel-credito-icms').value = '1.0';
+    document.getElementById('sel-pis-cofins').value = 'nao';
+    recalcular();
+}
+
+function copiarPropostaWhatsApp() {
+    const prod = document.getElementById('inp-produto').value || 'Sementes';
+    const qtd = parseFloat(document.getElementById('inp-quantidade').value) || 0;
+    const precoKg = parseFloat(document.getElementById('inp-preco-venda').value) || 0;
+    const ufDest = document.getElementById('sel-uf-destino').value;
+    const tipoFrete = document.querySelector('input[name="rad-tipo-frete"]:checked').value;
+    const freteCobrado = document.getElementById('txt-frete-cobrado').innerText;
+    const totalFob = qtd * precoKg;
+
+    let msg = `*PROPOSTA COMERCIAL — CJC SEMENTES*\n`;
+    msg += `🌱 *Produto:* ${prod}\n`;
+    msg += `⚖️ *Quantidade:* ${qtd.toLocaleString('pt-BR')} kg\n`;
+    msg += `💲 *Preço Unitário:* ${formatarMoeda(precoKg)}/kg\n`;
+    msg += `📍 *Destino:* ${ufDest}\n`;
+    msg += `🚚 *Frete:* ${tipoFrete} ${tipoFrete === 'CIF' ? '(' + freteCobrado + ' incluso)' : '(Por conta do comprador)'}\n`;
+    msg += `💰 *VALOR TOTAL:* ${formatarMoeda(totalFob)}\n\n`;
+    msg += `_Condição sujeita a confirmação de lote e disponibilidade de estoque._\n`;
+    msg += `*CJC Sementes / J Cassol Sementes Ltda*`;
+
+    navigator.clipboard.writeText(msg).then(() => {
+        alert('✅ Proposta comercial copiada com sucesso! Cole diretamente no WhatsApp do cliente.');
+    }).catch(() => {
+        prompt('Copie o texto da proposta abaixo:', msg);
+    });
+}
+
+// Inicialização imediata ao abrir a página
+document.addEventListener('DOMContentLoaded', () => {
+    recalcular();
+});
+</script>
+{% endblock %}

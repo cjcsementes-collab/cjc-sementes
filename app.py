@@ -161,6 +161,94 @@ def index():
         banners_mobile=banners_mobile
     )
 
+# ----------------- CALCULADORA DE PRECIFICAÇÃO E DECISÃO TRIBUTÁRIA (ADMIN) -----------------
+
+@app.route('/admin/precificacao')
+@login_required
+def admin_precificacao():
+    import json
+    from pricing_service import calcular_decisao_tributaria
+    from icms_data import UFS_BRASIL, TABELA_ICMS
+    
+    produtos = Produto.query.order_by(Produto.nome.asc()).all()
+    
+    # Exemplo padrão inicial fiel à planilha
+    exemplo_inicial = calcular_decisao_tributaria(
+        produto="Trigo Mourisco",
+        quantidade=25000.0,
+        preco_compra_kg=2.00,
+        uf_origem_compra="MG",
+        uf_empresa_vendedora="PR",
+        uf_destino_venda="MS",
+        preco_venda_kg=2.65,
+        frete_total=0.0,
+        tipo_frete="FOB"
+    )
+    
+    return render_template(
+        'admin/precificacao.html',
+        produtos=produtos,
+        ufs=UFS_BRASIL,
+        tabela_icms_json=json.dumps(TABELA_ICMS),
+        dados_iniciais=exemplo_inicial
+    )
+
+@app.route('/admin/api/calcular-precificacao', methods=['POST'])
+@login_required
+def admin_api_calcular_precificacao():
+    from pricing_service import calcular_decisao_tributaria
+    data = request.get_json(silent=True) or request.form.to_dict()
+    
+    try:
+        produto = str(data.get('produto', 'Produto')).strip()
+        quantidade = float(data.get('quantidade', 1000.0))
+        preco_compra_kg = float(data.get('preco_compra_kg', 0.0))
+        uf_origem_compra = str(data.get('uf_origem_compra', 'PR')).strip().upper()
+        uf_empresa_vendedora = str(data.get('uf_empresa_vendedora', 'PR')).strip().upper()
+        uf_destino_venda = str(data.get('uf_destino_venda', 'PR')).strip().upper()
+        preco_venda_kg = float(data.get('preco_venda_kg', 0.0))
+        frete_total = float(data.get('frete_total', 0.0))
+        tipo_frete = str(data.get('tipo_frete', 'FOB')).strip().upper()
+        
+        simples_pct = float(data.get('simples_pct', 0.035))
+        irpj_pct = float(data.get('irpj_pct', 0.012))
+        csll_pct = float(data.get('csll_pct', 0.0108))
+        reducao_base_icms_pct = float(data.get('reducao_base_icms_pct', 0.60))
+        credito_icms_utilizavel_pct = float(data.get('credito_icms_utilizavel_pct', 1.0))
+        pis_cofins_incide = str(data.get('pis_cofins_incide', 'false')).lower() in ['true', '1', 'sim']
+        pis_cofins_pct = float(data.get('pis_cofins_pct', 0.0365))
+        
+        margem_desejada_pct = data.get('margem_desejada_pct')
+        if margem_desejada_pct is not None and str(margem_desejada_pct).strip() != '':
+            margem_desejada_pct = float(margem_desejada_pct)
+        else:
+            margem_desejada_pct = None
+            
+        resultado = calcular_decisao_tributaria(
+            produto=produto,
+            quantidade=quantidade,
+            preco_compra_kg=preco_compra_kg,
+            uf_origem_compra=uf_origem_compra,
+            uf_empresa_vendedora=uf_empresa_vendedora,
+            uf_destino_venda=uf_destino_venda,
+            preco_venda_kg=preco_venda_kg,
+            frete_total=frete_total,
+            tipo_frete=tipo_frete,
+            simples_pct=simples_pct,
+            irpj_pct=irpj_pct,
+            csll_pct=csll_pct,
+            reducao_base_icms_pct=reducao_base_icms_pct,
+            credito_icms_utilizavel_pct=credito_icms_utilizavel_pct,
+            pis_cofins_incide=pis_cofins_incide,
+            pis_cofins_pct=pis_cofins_pct,
+            margem_desejada_pct=margem_desejada_pct
+        )
+        return jsonify({'status': 'ok', 'resultado': resultado}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+
+
 @app.route('/banner/imagem/<int:banner_id>')
 def banner_imagem(banner_id):
     banner = Banner.query.get_or_404(banner_id)
