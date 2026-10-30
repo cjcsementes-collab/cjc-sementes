@@ -4,20 +4,29 @@
 
 {% block content %}
 <div class="precificacao-wrapper">
-    <div class="container" style="padding: 30px 15px;">
+    <div class="container" style="padding: 25px 15px;">
         
         <!-- Cabeçalho Executivo -->
         <div class="precificacao-header">
             <div class="header-titles">
                 <div class="badge-seguranca">
-                    <i class="fa-solid fa-shield-halved"></i> Painel Restrito — Apenas Vendedores & Diretoria
+                    <i class="fa-solid fa-shield-halved"></i> Painel Restrito — Apenas Vendedores & Diretoria CJC Sementes
                 </div>
-                <h2>Calculadora de Decisão & Precificação</h2>
-                <p>Simulação tributária e precificação de vendas comparando <strong>CAMPO (Simples Nacional)</strong> vs <strong>J CASSOL (Lucro Presumido)</strong>.</p>
+                <h2>Calculadora de Decisão Tributária & Precificação</h2>
+                <p>Simulação e precificação precisa para sementes faturadas do <strong>Paraná (PR)</strong> comparando <strong>CAMPO (Simples Nacional)</strong> vs <strong>J CASSOL (Lucro Presumido)</strong>.</p>
             </div>
             <div class="header-actions-group">
-                <button type="button" class="btn btn-exemplo" onclick="carregarExemploPlanilha()">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Exemplo da Planilha (Trigo Mourisco)
+                <button type="button" class="btn btn-preset btn-preset-interna" onclick="carregarExemploVendaInternaPR()" title="Exemplo: Compra em SC a R$ 8 e Venda no PR a R$ 11 com 100% de Diferimento">
+                    <i class="fa-solid fa-wheat-awn"></i> 1. Venda Interna no PR (0% ICMS)
+                </button>
+                <button type="button" class="btn btn-preset btn-preset-sp" onclick="carregarExemploVendaSP()" title="Exemplo do Paraná para São Paulo (12% ICMS com 60% redução = 7,445% total)">
+                    <i class="fa-solid fa-truck-arrow-right"></i> 2. Venda p/ SP (12% &rarr; 7,445%)
+                </button>
+                <button type="button" class="btn btn-preset btn-preset-to" onclick="carregarExemploVendaTO()" title="Exemplo do Paraná para Tocantins (7% ICMS com 60% redução = 5,445% total)">
+                    <i class="fa-solid fa-truck-fast"></i> 3. Venda p/ TO (7% &rarr; 5,445%)
+                </button>
+                <button type="button" class="btn btn-exemplo" onclick="carregarExemploPlanilhaOriginal()" title="Exemplo clássico da planilha: Trigo Mourisco 25.000 kg (MG &rarr; PR &rarr; MS)">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Trigo Mourisco (MS)
                 </button>
                 <button type="button" class="btn btn-whatsapp" onclick="copiarPropostaWhatsApp()">
                     <i class="fa-brands fa-whatsapp"></i> Copiar Proposta
@@ -42,16 +51,39 @@
                 <div class="veredito-metricas">
                     <div class="metrica-item">
                         <span class="metrica-label">Vantagem Financeira:</span>
-                        <strong class="metrica-val" id="ver-vantagem-reais">R$ 808,25</strong>
+                        <strong class="metrica-val" id="ver-vantagem-reais">R$ 0,00</strong>
                     </div>
                     <div class="metrica-item">
                         <span class="metrica-label">Ganho sobre a Venda:</span>
-                        <strong class="metrica-val" id="ver-vantagem-pct">+1,22%</strong>
+                        <strong class="metrica-val" id="ver-vantagem-pct">+0,00%</strong>
                     </div>
                     <div class="metrica-item">
-                        <span class="metrica-label">Saldo Credor ICMS (p/ próximas vendas):</span>
-                        <strong class="metrica-val destaque-saldo" id="ver-saldo-icms">R$ 545,00</strong>
+                        <span class="metrica-label">Saldo Credor de ICMS (Guardado p/ próximas notas):</span>
+                        <strong class="metrica-val destaque-saldo" id="ver-saldo-icms">R$ 0,00</strong>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerta Didático das Regras Tributárias de Sementes da CJC -->
+        <div class="regras-tributarias-box">
+            <div class="regras-tributarias-title">
+                <i class="fa-solid fa-circle-info"></i> Resumo Oficial das Regras Tributárias de Sementes da CJC (Origem Paraná - PR):
+            </div>
+            <div class="regras-tributarias-grid">
+                <div class="regra-item">
+                    <strong>1. Vendas Internas (PR &rarr; PR):</strong>
+                    <span>DIFERIMENTO DE 100% no ICMS (0,0%). Paga apenas impostos federais: CSLL 1,08% + IRPJ 1,20% + PIS 0,065% + COFINS 0,30% = <strong>2,645% sobre a venda</strong>.</span>
+                </div>
+                <div class="regra-item">
+                    <strong>2. Vendas Interestaduais:</strong>
+                    <span>REDUÇÃO DE 60% na base do ICMS (base tributável 40%).<br>
+                    &bull; Sul/Sudeste (SP, SC, RS, RJ, MG): 12% &times; 40% = 4,8% ICMS + 2,645% Federais = <strong>7,445% total</strong>.<br>
+                    &bull; Norte/Nordeste/CO/ES: 7% &times; 40% = 2,8% ICMS + 2,645% Federais = <strong>5,445% total</strong>.</span>
+                </div>
+                <div class="regra-item">
+                    <strong>3. O Pulo do Gato (Crédito de ICMS na Compra):</strong>
+                    <span>No Simples Nacional (CAMPO) é <strong>3,5% fixo e ZERO crédito</strong>. Na J CASSOL (Presumido) geramos <strong>4,80% de crédito de ICMS</strong> sobre compras interestaduais para o PR (12% com 60% de redução), que abate o ICMS da venda ou acumula como Saldo Credor!</span>
                 </div>
             </div>
         </div>
@@ -62,11 +94,11 @@
             <!-- Coluna da Esquerda: Entradas de Dados (Células Amarelas da Planilha) -->
             <div class="painel-entradas">
                 
-                <!-- Seção 1: Dados da Mercadoria e Operação -->
+                <!-- Seção 1: Dados da Mercadoria e Compra -->
                 <div class="secao-card">
                     <div class="secao-card-header">
                         <h4><i class="fa-solid fa-seedling"></i> 1. Dados da Mercadoria & Compra</h4>
-                        <span class="badge-amarela">Entradas Manuais</span>
+                        <span class="badge-amarela">Entradas da Negociação</span>
                     </div>
                     <div class="secao-card-body">
                         
@@ -74,14 +106,14 @@
                         <div class="form-group-custom">
                             <label for="inp-produto">Produto / Semente:</label>
                             <div class="input-select-group">
-                                <input type="text" id="inp-produto" class="form-input-calc" value="Trigo Mourisco" list="lista-produtos-site" placeholder="Digite ou selecione do catálogo">
+                                <input type="text" id="inp-produto" class="form-input-calc" value="SEMENTE DE FEIJÃO CULTIVAR IPR URUTAU CATEGORIA S1" list="lista-produtos-site" placeholder="Digite ou selecione do catálogo">
                                 <datalist id="lista-produtos-site">
                                     {% for p in produtos %}
                                         <option value="{{ p.nome }}"></option>
                                     {% endfor %}
                                 </datalist>
                             </div>
-                            <span class="dica-campo">Você pode escolher do catálogo cadastrado ou digitar livremente.</span>
+                            <span class="dica-campo">Escolha uma semente cadastrada no catálogo ou digite livremente.</span>
                         </div>
 
                         <!-- Quantidade e Preço de Compra -->
@@ -89,14 +121,14 @@
                             <div class="form-group-custom">
                                 <label for="inp-quantidade">Quantidade Total (kg):</label>
                                 <div class="input-with-unit">
-                                    <input type="number" id="inp-quantidade" class="form-input-calc" value="25000" step="any" min="1" oninput="recalcular()">
+                                    <input type="number" id="inp-quantidade" class="form-input-calc" value="100" step="any" min="1" oninput="recalcular()">
                                     <span class="unit-tag">kg</span>
                                 </div>
                             </div>
                             <div class="form-group-custom">
                                 <label for="inp-preco-compra">Preço de Compra (R$/kg):</label>
                                 <div class="input-with-unit">
-                                    <input type="number" id="inp-preco-compra" class="form-input-calc" value="2.00" step="0.0001" min="0" oninput="recalcular()">
+                                    <input type="number" id="inp-preco-compra" class="form-input-calc" value="8.00" step="0.0001" min="0" oninput="recalcular()">
                                     <span class="unit-tag">R$/kg</span>
                                 </div>
                             </div>
@@ -105,15 +137,15 @@
                         <!-- UFs: Origem da Compra, Empresa Vendedora e Destino da Venda -->
                         <div class="form-row-3">
                             <div class="form-group-custom">
-                                <label for="sel-uf-compra" title="Onde você comprou a semente do produtor ou fornecedor">UF Origem Compra:</label>
-                                <select id="sel-uf-compra" class="form-select-calc" onchange="recalcular()">
+                                <label for="sel-uf-compra" title="Estado de onde a mercadoria foi comprada do produtor ou fornecedor">UF Origem Compra:</label>
+                                <select id="sel-uf-compra" class="form-select-calc" onchange="onUfCompraChange()">
                                     {% for uf in ufs %}
-                                        <option value="{{ uf }}" {% if uf == 'MG' %}selected{% endif %}>{{ uf }}</option>
+                                        <option value="{{ uf }}" {% if uf == 'SC' %}selected{% endif %}>{{ uf }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="form-group-custom">
-                                <label for="sel-uf-vendedora" title="UF da filial/empresa que emite a nota de venda (J Cassol = PR)">UF Vendedora:</label>
+                                <label for="sel-uf-vendedora" title="Filial da CJC que emite a nota de venda (J Cassol = Paraná)">UF Vendedora:</label>
                                 <select id="sel-uf-vendedora" class="form-select-calc" onchange="recalcular()">
                                     {% for uf in ufs %}
                                         <option value="{{ uf }}" {% if uf == 'PR' %}selected{% endif %}>{{ uf }} (J Cassol)</option>
@@ -122,17 +154,30 @@
                             </div>
                             <div class="form-group-custom">
                                 <label for="sel-uf-destino" title="Estado onde o seu cliente vai receber a mercadoria">UF Destino Venda:</label>
-                                <select id="sel-uf-destino" class="form-select-calc" onchange="recalcular()">
+                                <select id="sel-uf-destino" class="form-select-calc" onchange="onUfDestinoChange()">
                                     {% for uf in ufs %}
-                                        <option value="{{ uf }}" {% if uf == 'MS' %}selected{% endif %}>{{ uf }}</option>
+                                        <option value="{{ uf }}" {% if uf == 'PR' %}selected{% endif %}>{{ uf }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
 
-                        <div class="info-tributos-rapida">
-                            <span><i class="fa-solid fa-arrow-right-arrow-left"></i> ICMS Compra (<strong id="tag-uf-compra">MG</strong> &rarr; <strong id="tag-uf-vend">PR</strong>): <strong id="txt-aliq-compra">12.0%</strong> (Efetivo: <strong id="txt-aliq-compra-efet">4.8%</strong>)</span>
-                            <span><i class="fa-solid fa-truck-fast"></i> ICMS Venda (<strong id="tag-uf-vend2">PR</strong> &rarr; <strong id="tag-uf-dest">MS</strong>): <strong id="txt-aliq-venda">7.0%</strong> (Efetivo: <strong id="txt-aliq-venda-efet">2.8%</strong>)</span>
+                        <!-- Quadro Dinâmico de Alíquotas e Tributos Efetivos -->
+                        <div class="info-tributos-rapida" id="box-info-tributos">
+                            <div class="tributo-info-linha">
+                                <span class="tributo-icone compra"><i class="fa-solid fa-arrow-right-to-bracket"></i></span>
+                                <div>
+                                    <strong>Crédito de ICMS na Compra (<span id="tag-uf-compra">SC</span> &rarr; <span id="tag-uf-vend">PR</span>):</strong>
+                                    <span id="txt-info-compra-detalhe">Alíquota interestadual 12,0% com 60% de redução = <strong>4,80% de crédito efetivo</strong> sobre a compra (<span id="txt-val-credito-resumo" class="destaque-verde">R$ 38,40</span>).</span>
+                                </div>
+                            </div>
+                            <div class="tributo-info-linha">
+                                <span class="tributo-icone venda"><i class="fa-solid fa-truck-fast"></i></span>
+                                <div>
+                                    <strong>ICMS na Venda (<span id="tag-uf-vend2">PR</span> &rarr; <span id="tag-uf-dest">PR</span>):</strong>
+                                    <span id="txt-info-venda-detalhe" class="destaque-venda-info">Venda Interna no PR: <strong>0,0% ICMS (100% DIFERIDO)</strong> • Impostos Totais da Venda: <strong>2,645%</strong>.</span>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -172,14 +217,14 @@
                             <div class="repasse-flex">
                                 <div>
                                     <span class="repasse-title">Divisor de Markup do Frete:</span>
-                                    <strong id="txt-divisor-frete">0.9492</strong>
+                                    <strong id="txt-divisor-frete">0.9735</strong>
                                 </div>
                                 <div>
-                                    <span class="repasse-title">Valor a Cobrar do Cliente (c/ impostos):</span>
+                                    <span class="repasse-title">Valor a Cobrar do Cliente (c/ impostos embutidos):</span>
                                     <strong id="txt-frete-cobrado" class="repasse-destaque">R$ 0,00</strong>
                                 </div>
                             </div>
-                            <p class="repasse-nota">Cobre exatamente este valor do cliente para que os tributos sobre o frete não reduzam a sua margem de lucro.</p>
+                            <p class="repasse-nota">Cobre exatamente este valor do cliente na nota para que os impostos do frete não reduzam a margem líquida da empresa.</p>
                         </div>
                     </div>
                 </div>
@@ -208,10 +253,10 @@
                                     Preço de Venda Praticado (R$/kg):
                                 </label>
                                 <div class="input-with-unit input-destaque-venda">
-                                    <input type="number" id="inp-preco-venda" class="form-input-calc" value="2.65" step="0.0001" min="0.01" oninput="onPrecoVendaDigitado()">
+                                    <input type="number" id="inp-preco-venda" class="form-input-calc" value="11.00" step="0.0001" min="0.01" oninput="onPrecoVendaDigitado()">
                                     <span class="unit-tag">R$/kg</span>
                                 </div>
-                                <span class="dica-campo">Exemplo da planilha: R$ 2,65/kg para 25.000 kg resulta em Faturamento FOB de R$ 66.250,00.</span>
+                                <span class="dica-campo">Altere o preço de venda para recalcular a margem real de cada empresa.</span>
                             </div>
                         </div>
 
@@ -261,15 +306,15 @@
                     </div>
                 </div>
 
-                <!-- Seção 4: Parâmetros Tributários (Colapsável / Customizável) -->
+                <!-- Seção 4: Parâmetros Tributários Detalhados (Customizável) -->
                 <div class="secao-card">
                     <div class="secao-card-header accordion-toggle" onclick="toggleAccordion('box-parametros-trib')">
-                        <h4><i class="fa-solid fa-sliders"></i> 4. Parâmetros Tributários & Alíquotas</h4>
+                        <h4><i class="fa-solid fa-sliders"></i> 4. Parâmetros Tributários & Alíquotas Exatas</h4>
                         <span id="icone-accordion"><i class="fa-solid fa-chevron-down"></i></span>
                     </div>
                     <div id="box-parametros-trib" class="secao-card-body" style="display: none;">
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">
-                            Estes parâmetros já estão configurados com os valores oficiais da sua contabilidade. Altere apenas caso haja mudanças legais.
+                            Alíquotas configuradas de acordo com as regras exatas informadas para a <strong>CJC Sementes</strong>:
                         </p>
                         
                         <div class="form-row-2">
@@ -298,6 +343,23 @@
                                 </div>
                             </div>
                             <div class="form-group-custom">
+                                <label for="inp-aliq-pis">PIS Lucro Presumido (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-aliq-pis" class="form-input-calc" value="0.065" step="0.001" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group-custom">
+                                <label for="inp-aliq-cofins">COFINS Lucro Presumido (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-aliq-cofins" class="form-input-calc" value="0.30" step="0.01" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                            </div>
+                            <div class="form-group-custom">
                                 <label for="inp-reducao-icms">Redução de Base do ICMS (%):</label>
                                 <div class="input-with-unit">
                                     <input type="number" id="inp-reducao-icms" class="form-input-calc" value="60.0" step="0.1" min="0" max="100" oninput="recalcular()">
@@ -308,24 +370,25 @@
 
                         <div class="form-row-2">
                             <div class="form-group-custom">
-                                <label for="sel-credito-icms">Crédito de ICMS da Compra Utilizável:</label>
-                                <select id="sel-credito-icms" class="form-select-calc" onchange="recalcular()">
-                                    <option value="1.0" selected>100% (Crédito Integral da Nota)</option>
-                                    <option value="0.40">40% (Manutenção Proporcional à Redução)</option>
-                                </select>
+                                <label for="inp-aliq-credito-compra">Alíquota Efetiva de Crédito na Compra (%):</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="inp-aliq-credito-compra" class="form-input-calc" value="4.80" step="0.01" min="0" oninput="recalcular()">
+                                    <span class="unit-tag">%</span>
+                                </div>
+                                <span class="dica-campo">Padrão: 4,80% nas compras interestaduais para o PR (12% com 60% de redução).</span>
                             </div>
                             <div class="form-group-custom">
-                                <label for="sel-pis-cofins">Incide PIS/COFINS na CJC?:</label>
-                                <select id="sel-pis-cofins" class="form-select-calc" onchange="recalcular()">
-                                    <option value="nao" selected>NÃO (Isento / Alíquota Zero)</option>
-                                    <option value="sim">SIM (Incidência Normal - 3,65%)</option>
+                                <label for="sel-diferimento-interno">Diferimento nas Vendas Internas PR:</label>
+                                <select id="sel-diferimento-interno" class="form-select-calc" onchange="recalcular()">
+                                    <option value="sim" selected>SIM (100% Diferido - 0% ICMS)</option>
+                                    <option value="nao">NÃO (Tributação Integral)</option>
                                 </select>
                             </div>
                         </div>
 
                         <div style="margin-top: 15px; text-align: right;">
                             <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; padding: 5px 10px;" onclick="restaurarParametrosPadrao()">
-                                <i class="fa-solid fa-rotate-left"></i> Restaurar Alíquotas Padrão
+                                <i class="fa-solid fa-rotate-left"></i> Restaurar Alíquotas Oficiais CJC
                             </button>
                         </div>
                     </div>
@@ -341,7 +404,7 @@
                         <h4 style="color: var(--grafite-titanio); font-size: 1.15rem;">
                             <i class="fa-solid fa-scale-balanced" style="color: var(--laranja-brasa); margin-right: 6px;"></i> Resumo Comparativo: CAMPO vs J CASSOL
                         </h4>
-                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Calculado em Tempo Real</span>
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">Cálculo Instantâneo</span>
                     </div>
 
                     <div class="tabela-comparativa-wrapper">
@@ -357,111 +420,121 @@
                                 <tr class="linha-grupo"><td colspan="3">1. FLUXO FINANCEIRO DA OPERAÇÃO</td></tr>
                                 <tr>
                                     <td>Valor Total da Compra</td>
-                                    <td id="td-compra-campo">R$ 50.000,00</td>
-                                    <td id="td-compra-jcassol">R$ 50.000,00</td>
+                                    <td id="td-compra-campo">R$ 800,00</td>
+                                    <td id="td-compra-jcassol">R$ 800,00</td>
                                 </tr>
                                 <tr>
                                     <td>Valor da Venda (FOB)</td>
-                                    <td id="td-venda-fob-campo">R$ 66.250,00</td>
-                                    <td id="td-venda-fob-jcassol">R$ 66.250,00</td>
+                                    <td id="td-venda-fob-campo">R$ 1.100,00</td>
+                                    <td id="td-venda-fob-jcassol">R$ 1.100,00</td>
                                 </tr>
                                 <tr id="tr-frete-linha" style="display: none;">
-                                    <td>Frete Cobrado do Cliente (c/ impostos)</td>
+                                    <td>Frete Cobrado do Cliente (c/ impostos embutidos)</td>
                                     <td id="td-frete-campo">R$ 0,00</td>
                                     <td id="td-frete-jcassol">R$ 0,00</td>
                                 </tr>
                                 <tr class="linha-subtotal">
                                     <td><strong>Faturamento Total</strong></td>
-                                    <td id="td-faturamento-campo"><strong>R$ 66.250,00</strong></td>
-                                    <td id="td-faturamento-jcassol"><strong>R$ 66.250,00</strong></td>
+                                    <td id="td-faturamento-campo"><strong>R$ 1.100,00</strong></td>
+                                    <td id="td-faturamento-jcassol"><strong>R$ 1.100,00</strong></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Lucro Bruto (Venda - Custos)</strong></td>
-                                    <td id="td-lucro-bruto-campo"><strong>R$ 16.250,00</strong></td>
-                                    <td id="td-lucro-bruto-jcassol"><strong>R$ 16.250,00</strong></td>
+                                    <td id="td-lucro-bruto-campo"><strong>R$ 300,00</strong></td>
+                                    <td id="td-lucro-bruto-jcassol"><strong>R$ 300,00</strong></td>
                                 </tr>
 
-                                <tr class="linha-grupo"><td colspan="3">2. APURAÇÃO DO ICMS (CRÉDITOS & DÉBITOS)</td></tr>
+                                <tr class="linha-grupo"><td colspan="3">2. APURAÇÃO DO ICMS (O PULO DO GATO — CRÉDITO DA COMPRA)</td></tr>
                                 <tr>
                                     <td>Alíquota ICMS Compra (Tabela)</td>
                                     <td>-</td>
                                     <td id="td-aliq-compra-tab">12,0%</td>
                                 </tr>
                                 <tr>
-                                    <td>ICMS Efetivo Destacado na Compra</td>
-                                    <td>-</td>
-                                    <td id="td-icms-compra-destacado">R$ 2.400,00</td>
-                                </tr>
-                                <tr>
-                                    <td>Crédito de ICMS Utilizável</td>
+                                    <td><strong>Crédito de ICMS Utilizável da Compra</strong></td>
                                     <td>R$ 0,00 <small>(Simples não toma crédito)</small></td>
-                                    <td id="td-credito-icms" class="destaque-verde">R$ 2.400,00</td>
+                                    <td id="td-credito-icms" class="destaque-verde"><strong>R$ 38,40</strong> <small>(4,80% efetivo)</small></td>
                                 </tr>
                                 <tr>
                                     <td>Alíquota ICMS Venda (Tabela)</td>
                                     <td>Incluso no Simples</td>
-                                    <td id="td-aliq-venda-tab">7,0%</td>
+                                    <td id="td-aliq-venda-tab">19,5% (Interna PR)</td>
                                 </tr>
                                 <tr>
-                                    <td>ICMS Efetivo da Venda (Base Reduzida)</td>
+                                    <td>Alíquota ICMS Efetiva da Venda</td>
                                     <td>-</td>
-                                    <td id="td-icms-venda-efetivo">R$ 1.855,00</td>
+                                    <td id="td-aliq-venda-efetiva">0,00% (100% Diferido)</td>
+                                </tr>
+                                <tr>
+                                    <td>Débito de ICMS da Venda</td>
+                                    <td>-</td>
+                                    <td id="td-icms-venda-debito">R$ 0,00</td>
                                 </tr>
                                 <tr class="linha-destaque-tributo">
-                                    <td><strong>ICMS Líquido a Recolher</strong></td>
+                                    <td><strong>ICMS Líquido a Recolher em Dinheiro</strong></td>
                                     <td><strong>R$ 0,00</strong></td>
                                     <td id="td-icms-recolher-jcassol"><strong>R$ 0,00</strong></td>
                                 </tr>
                                 <tr class="linha-saldo-credor">
-                                    <td><strong>Saldo Credor de ICMS (Sobra p/ próximo período)</strong></td>
+                                    <td><strong>Saldo Credor de ICMS (Sobra p/ abater de próximas vendas)</strong></td>
                                     <td>R$ 0,00</td>
-                                    <td id="td-saldo-credor-icms" class="destaque-saldo-td"><strong>R$ 545,00</strong></td>
+                                    <td id="td-saldo-credor-icms" class="destaque-saldo-td"><strong>R$ 38,40</strong></td>
                                 </tr>
 
                                 <tr class="linha-grupo"><td colspan="3">3. DEMAIS IMPOSTOS FEDERAIS</td></tr>
                                 <tr>
                                     <td>Simples Nacional (<span id="txt-simples-pct-td">3,50%</span>)</td>
-                                    <td id="td-simples-campo">R$ 2.318,75</td>
+                                    <td id="td-simples-campo">R$ 38,50</td>
                                     <td>Não aplicável</td>
                                 </tr>
                                 <tr>
                                     <td>IRPJ (<span id="txt-irpj-pct-td">1,20%</span>)</td>
                                     <td>Incluso no Simples</td>
-                                    <td id="td-irpj-jcassol">R$ 795,00</td>
+                                    <td id="td-irpj-jcassol">R$ 13,20</td>
                                 </tr>
                                 <tr>
                                     <td>CSLL (<span id="txt-csll-pct-td">1,08%</span>)</td>
                                     <td>Incluso no Simples</td>
-                                    <td id="td-csll-jcassol">R$ 715,50</td>
+                                    <td id="td-csll-jcassol">R$ 11,88</td>
                                 </tr>
                                 <tr>
-                                    <td>PIS / COFINS</td>
+                                    <td>PIS (<span id="txt-pis-pct-td">0,065%</span>)</td>
                                     <td>Incluso no Simples</td>
-                                    <td id="td-piscofins-jcassol">R$ 0,00</td>
+                                    <td id="td-pis-jcassol">R$ 0,72</td>
+                                </tr>
+                                <tr>
+                                    <td>COFINS (<span id="txt-cofins-pct-td">0,300%</span>)</td>
+                                    <td>Incluso no Simples</td>
+                                    <td id="td-cofins-jcassol">R$ 3,30</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Tributos Federais J CASSOL (<span id="txt-federais-tot-td">2,645%</span>)</td>
+                                    <td>-</td>
+                                    <td id="td-federais-tot-jcassol">R$ 29,10</td>
                                 </tr>
                                 <tr class="linha-total-impostos">
-                                    <td><strong>Total de Impostos da Operação</strong></td>
-                                    <td id="td-total-impostos-campo" class="alerta-imposto"><strong>R$ 2.318,75</strong></td>
-                                    <td id="td-total-impostos-jcassol" class="alerta-imposto"><strong>R$ 1.510,50</strong></td>
+                                    <td><strong>Total de Impostos Pagos em Dinheiro na Operação</strong></td>
+                                    <td id="td-total-impostos-campo" class="alerta-imposto"><strong>R$ 38,50</strong></td>
+                                    <td id="td-total-impostos-jcassol" class="alerta-imposto"><strong>R$ 29,10</strong></td>
                                 </tr>
                                 <tr>
                                     <td>Custo Tributário Efetivo (% do faturamento)</td>
                                     <td id="td-custo-trib-campo">3,50%</td>
-                                    <td id="td-custo-trib-jcassol">2,28%</td>
+                                    <td id="td-custo-trib-jcassol">2,65%</td>
                                 </tr>
 
                                 <tr class="linha-resultado-final">
                                     <td>
                                         <div style="font-size: 1.1rem; font-weight: bold;">RESULTADO LÍQUIDO FINAL</div>
-                                        <small style="font-weight: normal; color: #475569;">Lucro limpo no bolso da empresa</small>
+                                        <small style="font-weight: normal; color: #475569;">Lucro limpo que sobra no bolso da empresa</small>
                                     </td>
                                     <td id="td-resultado-liquido-campo" class="val-liquido-campo">
-                                        <strong>R$ 13.931,25</strong>
-                                        <div class="sub-margem" id="sub-margem-campo">21,03% de margem</div>
+                                        <strong>R$ 261,50</strong>
+                                        <div class="sub-margem" id="sub-margem-campo">23,77% de margem</div>
                                     </td>
                                     <td id="td-resultado-liquido-jcassol" class="val-liquido-jcassol">
-                                        <strong>R$ 14.739,50</strong>
-                                        <div class="sub-margem" id="sub-margem-jcassol">22,25% de margem</div>
+                                        <strong>R$ 270,90</strong>
+                                        <div class="sub-margem" id="sub-margem-jcassol">24,63% de margem</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -474,7 +547,7 @@
                             <i class="fa-solid fa-circle-check"></i>
                             <div>
                                 <strong>Vantagem de Faturar pela J CASSOL:</strong>
-                                <span>Economia tributária de <strong id="txt-eco-reais">R$ 808,25</strong> (+<span id="txt-eco-pct">1,22%</span> da venda), além de acumular <strong id="txt-eco-icms">R$ 545,00</strong> em saldo credor de ICMS para abater de impostos futuros.</span>
+                                <span>Economia líquida de <strong id="txt-eco-reais">R$ 9,40</strong> (+<span id="txt-eco-pct">0,85%</span> da venda), além de guardar <strong id="txt-eco-icms">R$ 38,40</strong> em crédito de ICMS acumulado.</span>
                             </div>
                         </div>
                     </div>
@@ -492,7 +565,7 @@
 <div id="modal-icms" class="modal-calc-overlay" style="display: none;">
     <div class="modal-calc-content">
         <div class="modal-calc-header">
-            <h4><i class="fa-solid fa-table"></i> Tabela Interestadual de ICMS 2026 (27 Estados)</h4>
+            <h4><i class="fa-solid fa-table"></i> Tabela Interestadual de ICMS 2026 (Taxgroup Oficial)</h4>
             <button type="button" class="btn-fechar-modal" onclick="fecharModalIcms()">&times;</button>
         </div>
         <div class="modal-calc-body">
@@ -528,8 +601,8 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
-    margin-bottom: 25px;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
     border-bottom: 2px solid #e2e8f0;
 }
 
@@ -546,42 +619,61 @@
 }
 
 .header-titles h2 {
-    font-size: 1.7rem;
+    font-size: 1.65rem;
     color: var(--grafite-titanio);
     margin: 0 0 4px 0;
 }
 
 .header-titles p {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     color: var(--text-muted);
     margin: 0;
 }
 
 .header-actions-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
+.btn-preset {
+    border: none;
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+.btn-preset-interna { background-color: #059669; }
+.btn-preset-interna:hover { background-color: #047857; }
+
+.btn-preset-sp { background-color: #2563eb; }
+.btn-preset-sp:hover { background-color: #1d4ed8; }
+
+.btn-preset-to { background-color: #d97706; }
+.btn-preset-to:hover { background-color: #b45309; }
+
 .btn-exemplo {
-    background-color: #3b82f6;
+    background-color: #475569;
     color: white;
     border: none;
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    padding: 7px 12px;
+    font-size: 0.82rem;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-exemplo:hover { background-color: #2563eb; }
+.btn-exemplo:hover { background-color: #334155; }
 
 .btn-whatsapp {
     background-color: #16a34a;
     color: white;
     border: none;
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    padding: 7px 12px;
+    font-size: 0.82rem;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
@@ -593,8 +685,8 @@
     background-color: #0284c7;
     color: white;
     border: none;
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    padding: 7px 12px;
+    font-size: 0.82rem;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
@@ -606,8 +698,8 @@
     background-color: #e2e8f0;
     color: #334155;
     border: 1px solid #cbd5e1;
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    padding: 7px 12px;
+    font-size: 0.82rem;
     border-radius: 6px;
     font-weight: bold;
     text-decoration: none;
@@ -618,11 +710,11 @@
 /* Card de Veredito Superior (Ouro) */
 .veredito-card {
     border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 25px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 20px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
@@ -638,11 +730,11 @@
 }
 
 .veredito-icone {
-    font-size: 2.8rem;
+    font-size: 2.6rem;
     color: #15803d;
     background: white;
-    width: 70px;
-    height: 70px;
+    width: 65px;
+    height: 65px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -653,7 +745,7 @@
 .veredito-campo .veredito-icone { color: #1d4ed8; }
 
 .veredito-tag {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
     font-weight: bold;
     letter-spacing: 0.5px;
@@ -662,19 +754,19 @@
 .veredito-campo .veredito-tag { color: #1e40af; }
 
 .veredito-conteudo h3 {
-    margin: 4px 0 10px 0;
-    font-size: 1.45rem;
+    margin: 3px 0 8px 0;
+    font-size: 1.4rem;
     color: var(--grafite-titanio);
 }
 
 .veredito-metricas {
     display: flex;
-    gap: 25px;
+    gap: 22px;
     flex-wrap: wrap;
 }
 
 .metrica-item {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #334155;
 }
 
@@ -690,11 +782,42 @@
     color: #b45309;
 }
 
+/* Caixa Didática de Regras */
+.regras-tributarias-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid var(--laranja-brasa);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+}
+
+.regras-tributarias-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--grafite-titanio);
+    margin-bottom: 8px;
+}
+
+.regras-tributarias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    font-size: 0.82rem;
+    color: #475569;
+}
+
+.regra-item strong {
+    display: block;
+    color: #1e293b;
+    margin-bottom: 2px;
+}
+
 /* Grade Principal */
 .precificacao-grid {
     display: grid;
     grid-template-columns: 1.05fr 1.35fr;
-    gap: 25px;
+    gap: 22px;
     align-items: start;
 }
 
@@ -715,7 +838,7 @@
 }
 
 .secao-card-header {
-    padding: 14px 18px;
+    padding: 13px 18px;
     background-color: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
@@ -748,7 +871,7 @@
 
 /* Formulários */
 .form-group-custom {
-    margin-bottom: 15px;
+    margin-bottom: 14px;
 }
 
 .form-group-custom label {
@@ -815,17 +938,40 @@
     display: block;
 }
 
+/* Card de Alíquotas e Tributos Efetivos */
 .info-tributos-rapida {
-    background-color: #f1f5f9;
-    border: 1px dashed #cbd5e1;
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-size: 0.82rem;
-    color: #334155;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.84rem;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 5px;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.tributo-info-linha {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.tributo-icone {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+}
+.tributo-icone.compra { background-color: #dbeafe; color: #1d4ed8; }
+.tributo-icone.venda { background-color: #dcfce7; color: #15803d; }
+
+.destaque-venda-info {
+    color: #166534;
 }
 
 /* Seletor de Frete Pills */
@@ -1250,7 +1396,7 @@ function formatarMoeda(val) {
 
 function formatarPct(val) {
     if (isNaN(val) || val === null) val = 0.0;
-    return (val * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+    return (val * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '%';
 }
 
 function getAliquotaIcms(orig, dest) {
@@ -1260,6 +1406,22 @@ function getAliquotaIcms(orig, dest) {
         return TABELA_ICMS[orig][dest];
     }
     return (orig === dest) ? 0.18 : 0.12;
+}
+
+function onUfCompraChange() {
+    const ufCompra = document.getElementById('sel-uf-compra').value;
+    const inpCredito = document.getElementById('inp-aliq-credito-compra');
+    // Se a compra veio de outro estado para o PR: nota vem a 12% com 60% redução = 4,8% de crédito utilizável
+    if (ufCompra !== 'PR') {
+        inpCredito.value = '4.80';
+    } else {
+        inpCredito.value = '0.00'; // Compra interna no PR comum com diferimento
+    }
+    recalcular();
+}
+
+function onUfDestinoChange() {
+    recalcular();
 }
 
 function setModoCalculo(modo) {
@@ -1326,9 +1488,9 @@ function toggleAccordion(id) {
     }
 }
 
-// Motor de Cálculo Reativo (Fiel à Planilha de Decisão Tributária)
+// Motor de Cálculo Reativo Inteligente (Fiel às Regras da CJC Sementes)
 function recalcular() {
-    const produto = document.getElementById('inp-produto').value || 'Produto';
+    const produto = document.getElementById('inp-produto').value || 'Sementes';
     const quantidade = parseFloat(document.getElementById('inp-quantidade').value) || 0;
     const precoCompraKg = parseFloat(document.getElementById('inp-preco-compra').value) || 0;
     const ufCompra = document.getElementById('sel-uf-compra').value;
@@ -1338,14 +1500,17 @@ function recalcular() {
     const tipoFrete = document.querySelector('input[name="rad-tipo-frete"]:checked').value;
     const valorFrete = parseFloat(document.getElementById('inp-valor-frete').value) || 0;
 
-    // Alíquotas e Parâmetros
+    // Alíquotas e Parâmetros Tributários Exatos
     const simplesPct = (parseFloat(document.getElementById('inp-aliq-simples').value) || 0) / 100.0;
-    const irpjPct = (parseFloat(document.getElementById('inp-aliq-irpj').value) || 0) / 100.0;
-    const csllPct = (parseFloat(document.getElementById('inp-aliq-csll').value) || 0) / 100.0;
+    const irpjPct = (parseFloat(document.getElementById('inp-aliq-irpj').value) || 0) / 100.0;       // 1,20%
+    const csllPct = (parseFloat(document.getElementById('inp-aliq-csll').value) || 0) / 100.0;       // 1,08%
+    const pisPct = (parseFloat(document.getElementById('inp-aliq-pis').value) || 0) / 100.0;        // 0,065%
+    const cofinsPct = (parseFloat(document.getElementById('inp-aliq-cofins').value) || 0) / 100.0;    // 0,300%
     const reducaoIcmsPct = (parseFloat(document.getElementById('inp-reducao-icms').value) || 0) / 100.0;
-    const creditoUtilizavelPct = parseFloat(document.getElementById('sel-credito-icms').value) || 1.0;
-    const pisCofinsIncide = document.getElementById('sel-pis-cofins').value === 'sim';
-    const pisCofinsPct = pisCofinsIncide ? 0.0365 : 0.0;
+    const diferimentoInterno = document.getElementById('sel-diferimento-interno').value === 'sim';
+    const aliqCreditoCompraEfetiva = (parseFloat(document.getElementById('inp-aliq-credito-compra').value) || 0) / 100.0;
+
+    const federaisTotPct = irpjPct + csllPct + pisPct + cofinsPct; // 2,645%
 
     // Atualiza tags de UF
     document.getElementById('tag-uf-compra').innerText = ufCompra;
@@ -1353,21 +1518,40 @@ function recalcular() {
     document.getElementById('tag-uf-vend2').innerText = ufVend;
     document.getElementById('tag-uf-dest').innerText = ufDest;
 
-    // Alíquotas ICMS
-    const aliqIcmsCompra = getAliquotaIcms(ufCompra, ufVend);
-    const aliqIcmsVenda = getAliquotaIcms(ufVend, ufDest);
-    const baseEfetiva = Math.max(0, 1.0 - reducaoIcmsPct);
-    const aliqIcmsCompraEfet = aliqIcmsCompra * baseEfetiva;
-    const aliqIcmsVendaEfet = aliqIcmsVenda * baseEfetiva;
+    // 1. Apuração da Venda (ICMS Sementes)
+    const isVendaInternaPr = (ufVend === 'PR' && ufDest === 'PR');
+    const aliqIcmsVendaTabela = getAliquotaIcms(ufVend, ufDest);
+    let aliqIcmsVendaEfetiva = 0.0;
+    let descVendaInfo = '';
 
-    document.getElementById('txt-aliq-compra').innerText = (aliqIcmsCompra * 100).toFixed(1) + '%';
-    document.getElementById('txt-aliq-compra-efet').innerText = (aliqIcmsCompraEfet * 100).toFixed(1) + '%';
-    document.getElementById('txt-aliq-venda').innerText = (aliqIcmsVenda * 100).toFixed(1) + '%';
-    document.getElementById('txt-aliq-venda-efet').innerText = (aliqIcmsVendaEfet * 100).toFixed(1) + '%';
+    if (isVendaInternaPr && diferimentoInterno) {
+        aliqIcmsVendaEfetiva = 0.0;
+        descVendaInfo = 'Venda Interna no PR: <strong>0,0% ICMS (100% DIFERIDO PARA SEMENTES)</strong> • Impostos Totais: <strong>2,645%</strong>.';
+    } else {
+        const baseEfetivaVenda = Math.max(0, 1.0 - reducaoIcmsPct);
+        aliqIcmsVendaEfetiva = aliqIcmsVendaTabela * baseEfetivaVenda;
+        const totalVendaPct = (aliqIcmsVendaEfetiva + federaisTotPct) * 100.0;
+        descVendaInfo = `Venda Interestadual (PR &rarr; ${ufDest}): Tabela <strong>${(aliqIcmsVendaTabela*100).toFixed(1)}%</strong> com 60% Redução = <strong>${(aliqIcmsVendaEfetiva*100).toFixed(2)}% ICMS efetivo</strong> • Impostos Totais: <strong>${totalVendaPct.toFixed(3)}%</strong>.`;
+    }
 
-    // Divisor de Markup do Frete
-    const impostosFretePct = aliqIcmsVendaEfet + irpjPct + csllPct + pisCofinsPct;
-    const divisorFrete = Math.max(0.01, 1.0 - impostosFretePct);
+    document.getElementById('txt-info-venda-detalhe').innerHTML = descVendaInfo;
+
+    // 2. Apuração da Compra (Crédito de ICMS)
+    const aliqIcmsCompraTabela = getAliquotaIcms(ufCompra, ufVend);
+    const valorCompra = quantidade * precoCompraKg;
+    const creditoIcmsUtilizavel = valorCompra * aliqCreditoCompraEfetiva;
+
+    let descCompraInfo = '';
+    if (ufCompra !== 'PR') {
+        descCompraInfo = `Alíquota interestadual ${(aliqIcmsCompraTabela*100).toFixed(1)}% com 60% de redução = <strong>${(aliqCreditoCompraEfetiva*100).toFixed(2)}% de crédito efetivo</strong> sobre a compra (<strong>${formatarMoeda(creditoIcmsUtilizavel)}</strong>).`;
+    } else {
+        descCompraInfo = `Compra interna no PR: <strong>${(aliqCreditoCompraEfetiva*100).toFixed(2)}%</strong> (Diferimento de 100% ou conf. nota: <strong>${formatarMoeda(creditoIcmsUtilizavel)}</strong>).`;
+    }
+    document.getElementById('txt-info-compra-detalhe').innerHTML = descCompraInfo;
+
+    // 3. Frete CIF / FOB & Divisor de Markup
+    const impostosTotaisVendaPct = aliqIcmsVendaEfetiva + federaisTotPct;
+    const divisorFrete = Math.max(0.01, 1.0 - impostosTotaisVendaPct);
     document.getElementById('txt-divisor-frete').innerText = divisorFrete.toFixed(4);
 
     let freteCobrado = 0.0;
@@ -1383,36 +1567,30 @@ function recalcular() {
         trFreteLinha.style.display = 'none';
     }
 
-    // 1. Custo de Compra
-    const valorCompra = quantidade * precoCompraKg;
-    const icmsCompraDestacado = valorCompra * aliqIcmsCompraEfet;
-    const creditoIcmsUtilizavel = icmsCompraDestacado * creditoUtilizavelPct;
-
-    // 2. Preço de Venda
+    // 4. Preço de Venda
     let precoVendaKg = 0;
     if (modoAtual === 'preco') {
         precoVendaKg = parseFloat(document.getElementById('inp-preco-venda').value) || 0;
     } else {
-        // Modo Margem: calcula preço sugerido
+        // Modo Margem: calcula preço sugerido reverso
         const margemDesejadaPct = (parseFloat(document.getElementById('inp-margem-desejada').value) || 0) / 100.0;
         const freteKg = (tipoFrete === 'CIF' && quantidade > 0) ? (valorFrete / quantidade) : 0.0;
         const custoBaseKg = precoCompraKg + freteKg;
 
-        // Sugestão CAMPO
+        // Sugestão CAMPO (Simples)
         const divCampo = 1.0 - simplesPct - margemDesejadaPct;
         const sugCampo = divCampo > 0 ? (custoBaseKg / divCampo) : 0;
 
         // Sugestão J CASSOL
-        const creditoKg = precoCompraKg * aliqIcmsCompraEfet * creditoUtilizavelPct;
-        const federais = irpjPct + csllPct + pisCofinsPct;
-        const divSemIcms = 1.0 - federais - margemDesejadaPct;
+        const creditoKg = precoCompraKg * aliqCreditoCompraEfetiva;
+        const divSemIcms = 1.0 - federaisTotPct - margemDesejadaPct;
         const sugHipA = divSemIcms > 0 ? (custoBaseKg / divSemIcms) : 0;
         let sugJcassol = 0;
 
-        if (creditoKg >= (sugHipA * aliqIcmsVendaEfet)) {
+        if (creditoKg >= (sugHipA * aliqIcmsVendaEfetiva)) {
             sugJcassol = sugHipA;
         } else {
-            const divComIcms = 1.0 - federais - aliqIcmsVendaEfet - margemDesejadaPct;
+            const divComIcms = 1.0 - federaisTotPct - aliqIcmsVendaEfetiva - margemDesejadaPct;
             sugJcassol = divComIcms > 0 ? ((custoBaseKg - creditoKg) / divComIcms) : 0;
         }
 
@@ -1430,26 +1608,29 @@ function recalcular() {
     const custoTotalOperacao = valorCompra + (tipoFrete === 'CIF' ? valorFrete : 0.0);
     const lucroBruto = valorVendaTotal - custoTotalOperacao;
 
-    // 3. J CASSOL
-    const icmsVendaEfetivo = valorVendaTotal * aliqIcmsVendaEfet;
-    const icmsLiquidoRecolher = Math.max(0, icmsVendaEfetivo - creditoIcmsUtilizavel);
-    const saldoCredorIcms = Math.max(0, creditoIcmsUtilizavel - icmsVendaEfetivo);
+    // 5. Apuração J CASSOL (Lucro Presumido)
+    const icmsVendaDebito = valorVendaTotal * aliqIcmsVendaEfetiva;
+    const icmsLiquidoRecolher = Math.max(0, icmsVendaDebito - creditoIcmsUtilizavel);
+    const saldoCredorIcms = Math.max(0, creditoIcmsUtilizavel - icmsVendaDebito);
 
     const irpjCjc = valorVendaTotal * irpjPct;
     const csllCjc = valorVendaTotal * csllPct;
-    const pisCofinsCjc = valorVendaTotal * pisCofinsPct;
-    const totalImpostosJcassol = icmsLiquidoRecolher + irpjCjc + csllCjc + pisCofinsCjc;
+    const pisCjc = valorVendaTotal * pisPct;
+    const cofinsCjc = valorVendaTotal * cofinsPct;
+    const totalFederaisCjc = irpjCjc + csllCjc + pisCjc + cofinsCjc;
+
+    const totalImpostosJcassol = icmsLiquidoRecolher + totalFederaisCjc;
     const resultadoLiquidoJcassol = lucroBruto - totalImpostosJcassol;
     const custoTribJcassolPct = valorVendaTotal > 0 ? (totalImpostosJcassol / valorVendaTotal) : 0;
     const margemLiqJcassolPct = valorVendaTotal > 0 ? (resultadoLiquidoJcassol / valorVendaTotal) : 0;
 
-    // 4. CAMPO
+    // 6. Apuração CAMPO (Simples Nacional)
     const totalImpostosCampo = valorVendaTotal * simplesPct;
     const resultadoLiquidoCampo = lucroBruto - totalImpostosCampo;
     const custoTribCampoPct = simplesPct;
     const margemLiqCampoPct = valorVendaTotal > 0 ? (resultadoLiquidoCampo / valorVendaTotal) : 0;
 
-    // 5. Preenchimento da Tabela Comparativa
+    // 7. Preenchimento da Tabela Comparativa
     document.getElementById('td-compra-campo').innerText = formatarMoeda(valorCompra);
     document.getElementById('td-compra-jcassol').innerText = formatarMoeda(valorCompra);
     document.getElementById('td-venda-fob-campo').innerText = formatarMoeda(valorVendaFob);
@@ -1461,33 +1642,43 @@ function recalcular() {
     document.getElementById('td-lucro-bruto-campo').innerText = formatarMoeda(lucroBruto);
     document.getElementById('td-lucro-bruto-jcassol').innerText = formatarMoeda(lucroBruto);
 
-    document.getElementById('td-aliq-compra-tab').innerText = (aliqIcmsCompra * 100).toFixed(1) + '%';
-    document.getElementById('td-icms-compra-destacado').innerText = formatarMoeda(icmsCompraDestacado);
-    document.getElementById('td-credito-icms').innerText = formatarMoeda(creditoIcmsUtilizavel);
-    document.getElementById('td-aliq-venda-tab').innerText = (aliqIcmsVenda * 100).toFixed(1) + '%';
-    document.getElementById('td-icms-venda-efetivo').innerText = formatarMoeda(icmsVendaEfetivo);
+    // ICMS
+    document.getElementById('td-aliq-compra-tab').innerText = (aliqIcmsCompraTabela * 100).toFixed(1) + '%';
+    document.getElementById('td-credito-icms').innerHTML = `<strong>${formatarMoeda(creditoIcmsUtilizavel)}</strong> <small>(${(aliqCreditoCompraEfetiva*100).toFixed(2)}%)</small>`;
+    document.getElementById('td-aliq-venda-tab').innerText = isVendaInternaPr ? '19,5% (Interna PR)' : (aliqIcmsVendaTabela * 100).toFixed(1) + '%';
+    document.getElementById('td-aliq-venda-efetiva').innerText = isVendaInternaPr && diferimentoInterno ? '0,00% (100% Diferido)' : (aliqIcmsVendaEfetiva * 100).toFixed(2) + '%';
+    document.getElementById('td-icms-venda-debito').innerText = formatarMoeda(icmsVendaDebito);
     document.getElementById('td-icms-recolher-jcassol').innerText = formatarMoeda(icmsLiquidoRecolher);
     document.getElementById('td-saldo-credor-icms').innerText = formatarMoeda(saldoCredorIcms);
 
+    // Federais
     document.getElementById('txt-simples-pct-td').innerText = (simplesPct * 100).toFixed(2) + '%';
     document.getElementById('txt-irpj-pct-td').innerText = (irpjPct * 100).toFixed(2) + '%';
     document.getElementById('txt-csll-pct-td').innerText = (csllPct * 100).toFixed(2) + '%';
+    document.getElementById('txt-pis-pct-td').innerText = (pisPct * 100).toFixed(3) + '%';
+    document.getElementById('txt-cofins-pct-td').innerText = (cofinsPct * 100).toFixed(2) + '%';
+    document.getElementById('txt-federais-tot-td').innerText = (federaisTotPct * 100).toFixed(3) + '%';
+
     document.getElementById('td-simples-campo').innerText = formatarMoeda(totalImpostosCampo);
     document.getElementById('td-irpj-jcassol').innerText = formatarMoeda(irpjCjc);
     document.getElementById('td-csll-jcassol').innerText = formatarMoeda(csllCjc);
-    document.getElementById('td-piscofins-jcassol').innerText = formatarMoeda(pisCofinsCjc);
+    document.getElementById('td-pis-jcassol').innerText = formatarMoeda(pisCjc);
+    document.getElementById('td-cofins-jcassol').innerText = formatarMoeda(cofinsCjc);
+    document.getElementById('td-federais-tot-jcassol').innerText = formatarMoeda(totalFederaisCjc);
 
+    // Totais
     document.getElementById('td-total-impostos-campo').innerText = formatarMoeda(totalImpostosCampo);
     document.getElementById('td-total-impostos-jcassol').innerText = formatarMoeda(totalImpostosJcassol);
     document.getElementById('td-custo-trib-campo').innerText = formatarPct(custoTribCampoPct);
     document.getElementById('td-custo-trib-jcassol').innerText = formatarPct(custoTribJcassolPct);
 
+    // Resultado Líquido
     document.getElementById('td-resultado-liquido-campo').querySelector('strong').innerText = formatarMoeda(resultadoLiquidoCampo);
     document.getElementById('sub-margem-campo').innerText = formatarPct(margemLiqCampoPct) + ' de margem';
     document.getElementById('td-resultado-liquido-jcassol').querySelector('strong').innerText = formatarMoeda(resultadoLiquidoJcassol);
     document.getElementById('sub-margem-jcassol').innerText = formatarPct(margemLiqJcassolPct) + ' de margem';
 
-    // 6. Atualiza o Card de Veredito
+    // 8. Atualiza o Card de Veredito Superior
     const cardVeredito = document.getElementById('card-veredito');
     const txtEmpresa = document.getElementById('ver-empresa-vencedora');
     const txtVantagem = document.getElementById('ver-vantagem-reais');
@@ -1510,7 +1701,7 @@ function recalcular() {
             <i class="fa-solid fa-circle-check"></i>
             <div>
                 <strong>Vantagem de Faturar pela J CASSOL:</strong>
-                <span>Economia líquida de <strong>${formatarMoeda(diffAbs)}</strong> (+${formatarPct(diffPct)} da venda), além de acumular <strong>${formatarMoeda(saldoCredorIcms)}</strong> em crédito de ICMS para abater de impostos futuros.</span>
+                <span>Economia líquida de <strong>${formatarMoeda(diffAbs)}</strong> (+${formatarPct(diffPct)} da venda em dinheiro limpo), além de acumular <strong>${formatarMoeda(saldoCredorIcms)}</strong> em crédito de ICMS para abater de impostos futuros.</span>
             </div>
         `;
     } else if (diff < -0.01) {
@@ -1522,7 +1713,7 @@ function recalcular() {
             <i class="fa-solid fa-circle-check" style="color: #1d4ed8;"></i>
             <div>
                 <strong>Vantagem de Faturar pela CAMPO:</strong>
-                <span>Economia líquida de <strong>${formatarMoeda(diffAbs)}</strong> (+${formatarPct(diffPct)} da venda) comparado ao Lucro Presumido.</span>
+                <span>Economia líquida de <strong>${formatarMoeda(diffAbs)}</strong> (+${formatarPct(diffPct)} da venda) comparado ao Lucro Presumido para esta operação.</span>
             </div>
         `;
     } else {
@@ -1537,7 +1728,54 @@ function recalcular() {
     }
 }
 
-function carregarExemploPlanilha() {
+// Presets Práticos
+function carregarExemploVendaInternaPR() {
+    document.getElementById('inp-produto').value = 'SEMENTE DE FEIJÃO CULTIVAR IPR URUTAU CATEGORIA S1';
+    document.getElementById('inp-quantidade').value = '100';
+    document.getElementById('inp-preco-compra').value = '8.00';
+    document.getElementById('sel-uf-compra').value = 'SC';
+    document.getElementById('sel-uf-vendedora').value = 'PR';
+    document.getElementById('sel-uf-destino').value = 'PR';
+    document.querySelector('input[name="rad-tipo-frete"][value="FOB"]').checked = true;
+    document.getElementById('inp-valor-frete').value = '0.00';
+    document.getElementById('inp-preco-venda').value = '11.00';
+    document.getElementById('inp-aliq-credito-compra').value = '4.80';
+    document.getElementById('sel-diferimento-interno').value = 'sim';
+    setModoCalculo('preco');
+    recalcular();
+}
+
+function carregarExemploVendaSP() {
+    document.getElementById('inp-produto').value = 'Sementes de Cobertura';
+    document.getElementById('inp-quantidade').value = '10000';
+    document.getElementById('inp-preco-compra').value = '3.00';
+    document.getElementById('sel-uf-compra').value = 'SC';
+    document.getElementById('sel-uf-vendedora').value = 'PR';
+    document.getElementById('sel-uf-destino').value = 'SP';
+    document.querySelector('input[name="rad-tipo-frete"][value="FOB"]').checked = true;
+    document.getElementById('inp-valor-frete').value = '0.00';
+    document.getElementById('inp-preco-venda').value = '4.20';
+    document.getElementById('inp-aliq-credito-compra').value = '4.80';
+    setModoCalculo('preco');
+    recalcular();
+}
+
+function carregarExemploVendaTO() {
+    document.getElementById('inp-produto').value = 'Sementes Forrageiras';
+    document.getElementById('inp-quantidade').value = '10000';
+    document.getElementById('inp-preco-compra').value = '3.00';
+    document.getElementById('sel-uf-compra').value = 'SC';
+    document.getElementById('sel-uf-vendedora').value = 'PR';
+    document.getElementById('sel-uf-destino').value = 'TO';
+    document.querySelector('input[name="rad-tipo-frete"][value="FOB"]').checked = true;
+    document.getElementById('inp-valor-frete').value = '0.00';
+    document.getElementById('inp-preco-venda').value = '4.20';
+    document.getElementById('inp-aliq-credito-compra').value = '4.80';
+    setModoCalculo('preco');
+    recalcular();
+}
+
+function carregarExemploPlanilhaOriginal() {
     document.getElementById('inp-produto').value = 'Trigo Mourisco';
     document.getElementById('inp-quantidade').value = '25000';
     document.getElementById('inp-preco-compra').value = '2.00';
@@ -1547,15 +1785,7 @@ function carregarExemploPlanilha() {
     document.querySelector('input[name="rad-tipo-frete"][value="FOB"]').checked = true;
     document.getElementById('inp-valor-frete').value = '0.00';
     document.getElementById('inp-preco-venda').value = '2.65';
-    
-    // Alíquotas padrão
-    document.getElementById('inp-aliq-simples').value = '3.5';
-    document.getElementById('inp-aliq-irpj').value = '1.20';
-    document.getElementById('inp-aliq-csll').value = '1.08';
-    document.getElementById('inp-reducao-icms').value = '60.0';
-    document.getElementById('sel-credito-icms').value = '1.0';
-    document.getElementById('sel-pis-cofins').value = 'nao';
-
+    document.getElementById('inp-aliq-credito-compra').value = '4.80';
     setModoCalculo('preco');
     recalcular();
 }
@@ -1564,9 +1794,11 @@ function restaurarParametrosPadrao() {
     document.getElementById('inp-aliq-simples').value = '3.5';
     document.getElementById('inp-aliq-irpj').value = '1.20';
     document.getElementById('inp-aliq-csll').value = '1.08';
+    document.getElementById('inp-aliq-pis').value = '0.065';
+    document.getElementById('inp-aliq-cofins').value = '0.30';
     document.getElementById('inp-reducao-icms').value = '60.0';
-    document.getElementById('sel-credito-icms').value = '1.0';
-    document.getElementById('sel-pis-cofins').value = 'nao';
+    document.getElementById('inp-aliq-credito-compra').value = '4.80';
+    document.getElementById('sel-diferimento-interno').value = 'sim';
     recalcular();
 }
 

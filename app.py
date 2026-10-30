@@ -172,15 +172,15 @@ def admin_precificacao():
     
     produtos = Produto.query.order_by(Produto.nome.asc()).all()
     
-    # Exemplo padrão inicial fiel à planilha
+    # Exemplo padrão inicial: semente de feijão vendida no PR com 100% de diferimento
     exemplo_inicial = calcular_decisao_tributaria(
-        produto="Trigo Mourisco",
-        quantidade=25000.0,
-        preco_compra_kg=2.00,
-        uf_origem_compra="MG",
+        produto="SEMENTE DE FEIJÃO CULTIVAR IPR URUTAU CATEGORIA S1",
+        quantidade=100.0,
+        preco_compra_kg=8.00,
+        uf_origem_compra="SC",
         uf_empresa_vendedora="PR",
-        uf_destino_venda="MS",
-        preco_venda_kg=2.65,
+        uf_destino_venda="PR",
+        preco_venda_kg=11.00,
         frete_total=0.0,
         tipo_frete="FOB"
     )
@@ -200,10 +200,10 @@ def admin_api_calcular_precificacao():
     data = request.get_json(silent=True) or request.form.to_dict()
     
     try:
-        produto = str(data.get('produto', 'Produto')).strip()
+        produto = str(data.get('produto', 'Sementes')).strip()
         quantidade = float(data.get('quantidade', 1000.0))
         preco_compra_kg = float(data.get('preco_compra_kg', 0.0))
-        uf_origem_compra = str(data.get('uf_origem_compra', 'PR')).strip().upper()
+        uf_origem_compra = str(data.get('uf_origem_compra', 'SC')).strip().upper()
         uf_empresa_vendedora = str(data.get('uf_empresa_vendedora', 'PR')).strip().upper()
         uf_destino_venda = str(data.get('uf_destino_venda', 'PR')).strip().upper()
         preco_venda_kg = float(data.get('preco_venda_kg', 0.0))
@@ -213,10 +213,16 @@ def admin_api_calcular_precificacao():
         simples_pct = float(data.get('simples_pct', 0.035))
         irpj_pct = float(data.get('irpj_pct', 0.012))
         csll_pct = float(data.get('csll_pct', 0.0108))
+        pis_pct = float(data.get('pis_pct', 0.00065))
+        cofins_pct = float(data.get('cofins_pct', 0.0030))
         reducao_base_icms_pct = float(data.get('reducao_base_icms_pct', 0.60))
-        credito_icms_utilizavel_pct = float(data.get('credito_icms_utilizavel_pct', 1.0))
-        pis_cofins_incide = str(data.get('pis_cofins_incide', 'false')).lower() in ['true', '1', 'sim']
-        pis_cofins_pct = float(data.get('pis_cofins_pct', 0.0365))
+        diferimento_interno = str(data.get('diferimento_interno', 'true')).lower() in ['true', '1', 'sim']
+        
+        credito_icms_compra_pct = data.get('credito_icms_compra_pct')
+        if credito_icms_compra_pct is not None and str(credito_icms_compra_pct).strip() != '':
+            credito_icms_compra_pct = float(credito_icms_compra_pct)
+        else:
+            credito_icms_compra_pct = None
         
         margem_desejada_pct = data.get('margem_desejada_pct')
         if margem_desejada_pct is not None and str(margem_desejada_pct).strip() != '':
@@ -237,10 +243,11 @@ def admin_api_calcular_precificacao():
             simples_pct=simples_pct,
             irpj_pct=irpj_pct,
             csll_pct=csll_pct,
+            pis_pct=pis_pct,
+            cofins_pct=cofins_pct,
             reducao_base_icms_pct=reducao_base_icms_pct,
-            credito_icms_utilizavel_pct=credito_icms_utilizavel_pct,
-            pis_cofins_incide=pis_cofins_incide,
-            pis_cofins_pct=pis_cofins_pct,
+            diferimento_interno=diferimento_interno,
+            credito_icms_compra_pct=credito_icms_compra_pct,
             margem_desejada_pct=margem_desejada_pct
         )
         return jsonify({'status': 'ok', 'resultado': resultado}), 200
