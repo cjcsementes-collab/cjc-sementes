@@ -206,7 +206,7 @@
         <div class="products-grid">
             {% for produto in produtos %}
                 <div class="product-card">
-                    <div class="product-card-img-wrapper">
+                    <a href="{{ url_for('product_detail', produto_id=produto.id) }}" class="product-card-img-wrapper" title="Ver detalhes e comprar {{ produto.nome }}" aria-label="Comprar {{ produto.nome }}">
                         <!-- Badges de Categoria -->
                         <span class="product-card-badge">
                             {% if produto.categoria == 'MIX CUSTOMIZADO' %}
@@ -259,10 +259,14 @@
                                 <path d="M32,24 C28,30 28,36 32,46 C36,36 36,30 32,24 Z" fill="#2E7D32"/>
                             </svg>
                         {% endif %}
-                    </div>
+                    </a>
                     
                     <div class="product-card-content">
-                        <h3 class="product-card-title">{{ produto.nome }}</h3>
+                        <h3 class="product-card-title">
+                            <a href="{{ url_for('product_detail', produto_id=produto.id) }}" class="product-title-link">
+                                {{ produto.nome }}
+                            </a>
+                        </h3>
                         
                         <div class="product-card-footer">
                             <div class="product-card-price">

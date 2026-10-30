@@ -164,7 +164,7 @@
             <div class="products-grid">
                 {% for rec in recomendados %}
                     <div class="product-card">
-                        <div class="product-card-img-wrapper">
+                        <a href="{{ url_for('product_detail', produto_id=rec.id) }}" class="product-card-img-wrapper" title="Ver detalhes e comprar {{ rec.nome }}" aria-label="Comprar {{ rec.nome }}">
                             {% if rec.imagem_url %}
                                 <img src="{{ url_for('imagem_produto', produto_id=rec.id) }}" alt="{{ rec.nome }}" class="product-real-img">
                             {% elif 'Gramíneas' in rec.categoria %}
@@ -178,9 +178,13 @@
                                     <path d="M32,24 C28,30 28,36 32,46 C36,36 36,30 32,24 Z" fill="#2E7D32"/>
                                 </svg>
                             {% endif %}
-                        </div>
+                        </a>
                         <div class="product-card-content" style="padding: 15px;">
-                            <h4 class="product-card-title" style="font-size: 0.95rem;">{{ rec.nome }}</h4>
+                            <h4 class="product-card-title" style="font-size: 0.95rem;">
+                                <a href="{{ url_for('product_detail', produto_id=rec.id) }}" class="product-title-link">
+                                    {{ rec.nome }}
+                                </a>
+                            </h4>
                             <div class="product-card-footer" style="padding-top: 10px; margin-top: 10px;">
                                 <span class="price-value" style="font-size: 1.05rem;">R$ {{ rec.preco_kg|round(2)|string|replace('.', ',') }}</span>
                                 <a href="{{ url_for('product_detail', produto_id=rec.id) }}" class="btn btn-outline btn-card" style="padding: 5px 10px; font-size: 0.75rem;">Ver</a>
